@@ -1,0 +1,24 @@
+﻿@model IEnumerable<Font>
+
+<h1 class="mb-4">Список шрифтов</h1>
+
+<div class="row">
+    @foreach (var font in Model)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">@font.Name</h5>
+                    <p class="card-text">Семейство: @font.FontFamily</p>
+
+                    <link href="@font.Link" rel="stylesheet" />
+
+                    <p style="font-family: '@font.FontFamily'; font-size: 18px;">
+                        Это пример текста, отображённого с использованием шрифта "@font.Name".
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

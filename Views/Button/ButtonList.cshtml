@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "ButtonList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model IEnumerable<Button>
+
+<h1 class="mb-4">Список кнопок</h1>
+
+<div class="row">
+    @foreach (var button in Model)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">@button.Name</h5>
+                    <p class="card-text">
+                        <strong>Код кнопки:</strong>
+                    </p>
+                    <pre class="bg-light p-2 rounded" style="white-space: pre-wrap;">@button.ButtonCode</pre>
+
+                    <div class="mt-3 text-center">
+                        <h6>Превью кнопки:</h6>
+                        <div>
+                            @Html.Raw(button.ButtonCode)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

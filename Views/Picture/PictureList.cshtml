@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "PictureList";
+    Layout = "~/Views/Shared/_Layout.cshtml"; ;
+}
+
+@model IEnumerable<Picture>
+
+<h1 class="mb-4">Список картинок</h1>
+
+<div class="row">
+    @foreach (var picture in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="@picture.Img" class="card-img-top" alt="@picture.Name" style="height: 200px; object-fit: contain;">
+                <div class="card-body">
+                    <h5 class="card-title">@picture.Name</h5>
+                    <p class="card-text text-muted">Категория: @picture.Topic</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
