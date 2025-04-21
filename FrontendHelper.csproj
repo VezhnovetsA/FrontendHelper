@@ -7,16 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Data\images\**" />
-    <Content Remove="Data\images\**" />
-    <EmbeddedResource Remove="Data\images\**" />
-    <None Remove="Data\images\**" />
-  </ItemGroup>
-
-  <ItemGroup>
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -25,7 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <ProjectReference Include="..\FHDatabase\FHDatabase.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\AnimatedElement\" />
+    <Folder Include="Views\Button\" />
+    <Folder Include="Views\Font\" />
+    <Folder Include="wwwroot\images\icons\countries\" />
+    <Folder Include="wwwroot\images\pictures\" />
   </ItemGroup>
 
 </Project>
