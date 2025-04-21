@@ -1,67 +1,83 @@
-﻿//using FrontendHelper.interfaces;
-//using Microsoft.AspNetCore.Mvc;
-
-//namespace FrontendHelper.Controllers
-//{
-//    public class IconController : Controller
-//    {
-//        private readonly IAllIcons _iconRepository;
-
-//        public IconController(IAllIcons iconRepository)
-//        {
-//            _iconRepository = iconRepository;
-//        }
-
-//        public IActionResult IconList()
-//        {
-//            var icons = _iconRepository.Icons;
-//            return View(icons);
-//        }
-
-//    }
-//}
-
-using FrontendHelper.interfaces;
+﻿using FHDatabase.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using FrontendHelper.Models;
+using Microsoft.EntityFrameworkCore;
 
-public class IconController : Controller
+namespace FrontendHelper.Controllers
 {
-    private readonly IAllIcons _iconRepository;
-
-    public IconController(IAllIcons iconRepository)
+    public class IconController : Controller
     {
-        _iconRepository = iconRepository;
-    }
+        private IconRepository _iconRepository;
 
-    public IActionResult IconList()
-    {
-        var icons = _iconRepository.Icons;
-        return View(icons);
-    }
-
-    // Новый экшн для скачивания иконки
-    public IActionResult DownloadIcon(int id)
-    {
-        var icon = _iconRepository.GetIcon(id);
-
-        if (icon == null)
+        public IconController(IconRepository iconRepository)
         {
-            return NotFound();
+            _iconRepository = iconRepository;
         }
 
-        var relativePath = icon.Img;
-        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.TrimStart('/'));
 
-        // проверка существования файла
-        if (!System.IO.File.Exists(filePath))
+
+        // показ всех иконок (без фильтра)
+        public IActionResult ShowAllIcons()
         {
-            return NotFound("Файл не найден.");
+            var iconDatas = _iconRepository.GetAssets();
+            var viewModels = iconDatas.Select(PassDataToViewModel).ToList();
+            return View(viewModels);
         }
 
-        // чтение
-        var fileBytes = System.IO.File.ReadAllBytes(filePath);
-        var fileName = Path.GetFileName(filePath);
 
-        return File(fileBytes, "application/octet-stream", fileName);
+
+        // показ всех иконок по определенной теме
+        public IActionResult ShowAllIconsOnTheTopic(string topic)
+        {
+            var viewModels = _iconRepository
+                .GetAllIconsByTopic(topic)
+                .Select(PassDataToViewModel)
+                .ToList();              
+
+            ViewBag.Topic = topic;   // для вывода темы во вьюшке, ПОТОМ УБЕРУ
+            return View(viewModels);
+        }
+
+
+
+        // показ групп иконок по всем темам
+        public IActionResult ShowGroupsOfIconsOnTheTopic(int numberOfIcons = 6)
+        {
+            var iconTopics = _iconRepository.GetIconTopics();
+
+            var viewModels = iconTopics.Select(topic => new IconGroupViewModel
+            {
+                Topic = topic,
+                Icons = _iconRepository
+                .GetIconGroupByTopic(topic, numberOfIcons)
+                .Select(PassDataToViewModel)
+                .ToList()
+            });
+
+            return View(viewModels);
+        }
+
+
+
+        // показ иконок по введенному запросу
+        public IActionResult ShowFoundIconsForRequest(string request)
+        {
+            return View();
+        }
+
+
+
+        // передача данных во ViewModel (return)
+        private IconViewModel PassDataToViewModel(IconData iconData)
+        {
+            return new IconViewModel
+            {
+                Id = iconData.Id,
+                Name = iconData.Name,
+                Img = iconData.Img,
+                Topic = iconData.Topic
+            };
+        }
+
     }
 }

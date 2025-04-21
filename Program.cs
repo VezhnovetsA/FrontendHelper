@@ -1,29 +1,31 @@
-using FrontendHelper.Data;
-using FrontendHelper.interfaces;
-using FrontendHelper.mocks;
-using FrontendHelper.Repository;
+using FHDatabase;
+using FHDatabase.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// подключение к бд
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+////подключение к бд
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<FhDbContext>(options =>
+    options.UseSqlServer(FhDbContext.CONNECTION_STRING));
 
 // службы мвс
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IAllIcons, IconRepository>();
-builder.Services.AddScoped<IAllPictures, PictureRepository>();
-builder.Services.AddScoped<IAllAnimatedElements, AnimatedElementRepository>();
-builder.Services.AddScoped<IAllButtons, ButtonRepository>();
-builder.Services.AddScoped<IAllFonts, FontRepository>();
+
+// регистрация репозиториев
+builder.Services.AddScoped<IconRepository>();
+builder.Services.AddScoped<PictureRepository>();
+builder.Services.AddScoped<AnimatedElementRepository>();
+builder.Services.AddScoped<ButtonRepository>();
+builder.Services.AddScoped<FontRepository>();
 
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+//builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+//    .AddEntityFrameworkStores<ApplicationDbContext>()
+//    .AddDefaultTokenProviders();
+
 
 // рейзор для интерфейса авторизации
 builder.Services.AddRazorPages();
@@ -31,12 +33,12 @@ builder.Services.AddRazorPages();
 var app = builder.Build();
 
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    DbInitializer.Initialize(context);
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    var context = services.GetRequiredService<ApplicationDbContext>();
+//    DbInitializer.Initialize(context);
+//}
 
 
 if (!app.Environment.IsDevelopment())

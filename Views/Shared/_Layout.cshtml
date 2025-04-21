@@ -1,63 +1,72 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FrontendHelper</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/layoutStyle.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FrontendHelper.styles.css" asp-append-version="true" />
+   @*  <link rel="stylesheet" href="~/FrontendHelper.styles.css" asp-append-version="true" /> *@
 </head>
+
+
 <body>
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3" style="height: 100px; padding: 0 20px; display: flex; align-items: center; box-sizing: border-box;">
+        <nav class="custom-navbar navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+
             <div class="container-fluid d-flex align-items-center">
+
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/images/category.png" alt="FRONTENDHELPER" class="mainicon" style="margin-left: 60px;" />
-                    <span style="margin-left: 100px; font-size: 1.50rem; font-weight: 600;">FRONTENDHELPER</span>
+                    <img src="~/images/category.png" alt="FRONTENDHELPER" class="mainicon" />
+                    <span class="logo-text">FRONTENDHELPER</span>
                 </a>
+
                 <div class="ms-auto d-flex align-items-center">
-                    @* <a href="#" class="me-3"><img src="~/images/icons/catalog.svg" alt="Catalog" title="Catalog" /></a> *@
                     <div class="dropdown me-3">
                         <a href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="~/images/call.png" alt="Contacts" class="mainicon" title="Contacts" style="margin-right: 70px; cursor: pointer;" />
+                            <img src="~/images/call.png" alt="Contacts" class="mainicon contact-icon" title="Contacts" />
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="tel:+123456789">+1 234 567 89</a></li>
-                            <li><a class="dropdown-item" href="mailto:info@tafra.com">info@frontendhelper.com</a></li>
+                            <li><a class="dropdown-item" href="mailto:info@frontendhelper.com">info@frontendhelper.com</a></li>
                         </ul>
                     </div>
-
-                    <a href="#"><img src="~/images/user.png" alt="Profile" class="mainicon" title="Profile" style="margin-right: 60px;/"></a>
+                    <a href="#"><img src="~/images/user.png" alt="Profile" class="mainicon profile-icon" title="Profile" /></a>
                 </div>
+
             </div>
         </nav>
     </header>
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <aside class="bg-light border-end p-3" style="width: 400px;">
-            <ul class="nav flex-column" style="text-align: right; font-size: 1.25rem; font-weight: 600;">
 
-                <li class="nav-item"><a class="nav-link" asp-controller="Icon" asp-action="IconList">Иконки</a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="Picture" asp-action="PictureList">Фотографии</a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="AnimatedElement" asp-action="AnimatedElementList">Анимированные элементы</a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="Button" asp-action="ButtonList">Кнопки</a></li>
-                <li class="nav-item"><a class="nav-link" asp-controller="Font" asp-action="FontList">Шрифты</a></li>
+
+    <div class="d-flex">
+        <aside class="custom-sidebar bg-light border-end p-3">
+            <ul class="nav flex-column custom-sidebar-nav">
+                <li class="nav-item"><a class="nav-link" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Picture" asp-action="ShowPreviewPictureOnTheTopic">Фотографии</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="AnimatedElement" asp-action="???????????">Анимированные элементы</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Button" asp-action="???????????">Кнопки</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Font" asp-action="???????????">Шрифты</a></li>
                 <li class="nav-item"><a class="nav-link text-dark" href="#">Формы</a></li>
                 <li class="nav-item"><a class="nav-link text-dark" href="#">Шаблоны</a></li>
                 <li class="nav-item"><a class="nav-link text-dark" href="#">Палитры</a></li>
                 <li class="nav-item"><a class="nav-link text-dark" href="#">Генератор QR-кода</a></li>
-
             </ul>
         </aside>
-        <!-- Main content -->
+
+
         <div class="container-fluid p-4">
-            <!-- Search bar -->
             <div class="d-flex mb-4 align-items-center">
                 <div class="dropdown me-2">
+
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Все категории
                     </button>
+
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="#">Иконки</a></li>
                         <li><a class="dropdown-item" href="#">Шрифты</a></li>
@@ -66,24 +75,31 @@
                         <li><a class="dropdown-item" href="#">Анимации</a></li>
                         <li><a class="dropdown-item" href="#">Формы</a></li>
                         <li><a class="dropdown-item" href="#">Шаблоны</a></li>
-                        <!-- Add more categories as needed -->
                     </ul>
                 </div>
+
                 <input type="text" class="form-control me-2" placeholder="Поиск..." />
                 <button class="btn btn-primary">Найти</button>
             </div>
+
             @RenderBody()
         </div>
     </div>
-    <!-- Footer -->
+
+
     <footer class="bg-light border-top mt-5 p-3 text-center">
         <div class="container">
             <p class="mb-0">&copy; 2025 FrontendHelper | <a href="#">О нас</a> | <a href="#">Помощь</a> | <a href="#">Контакты</a></p>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+
     @await RenderSectionAsync("Scripts", required: false)
+
+
 </body>
 </html>

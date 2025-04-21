@@ -1,0 +1,48 @@
+﻿@model IEnumerable<PictureViewModel>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@{
+    var topic = (string)ViewBag.Topic;
+    ViewData["Title"] = $"Картинки по теме: «{topic}»";
+}
+
+<div class="container-fluid py-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <div class="row">
+        @foreach (var picture in Model)
+        {
+            <div class="col-6 col-md-4 col-lg-3 mb-4">
+
+                <div class="card h-100 shadow-sm">
+                    <img src="@Url.Content($"~/images/pictures/{picture.Img}")"
+                         class="card-img-top"
+                         alt="@picture.Name"
+                         title="@picture.Name" />
+
+                    <div class="card-body text-center d-flex flex-column">
+                        <h5 class="card-title mb-2">@picture.Name</h5>
+                        <p class="card-text small text-truncate">@picture.Topic</p>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="ShowPreviewPictureOnTheTopic"
+           class="btn btn-secondary">
+            ← Назад к превью тем
+        </a>
+    </div>
+</div>
