@@ -1,0 +1,57 @@
+﻿@using FrontendHelper.Models
+@model IEnumerable<AnimatedElementGroupViewModel>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+
+
+@{
+    ViewData["Title"] = "Анимированные элементы";
+}
+
+<div class="container-fluid">
+    @foreach (var group in Model)
+    {
+        <div class="card mb-4 shadow-sm">
+
+            <div class="card-header bg-white">
+                <h5 class="mb-0">@group.Topic</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    @foreach (var element in group.AnimatedElements)
+                    {
+                        <div class="col-2 text-center mb-3">
+                            <img src="@Url.Content($"~/images/animated-elements/{element.Img}")"
+                                 class="img-fluid"
+                                 alt="@element.Name"
+                                 title="@element.Name" />
+                            <div class="small mt-1">@element.Name</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="text-end">
+                    <a class="btn btn-link p-0"
+                       asp-action="ShowAllAnimatedElementsOnTheTopic"
+                       asp-route-topic="@group.Topic">
+                        Показать все →
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
