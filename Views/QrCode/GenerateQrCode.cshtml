@@ -1,0 +1,23 @@
+﻿@model QrCodeViewModel
+
+<h2>Генератор QR-кода</h2>
+
+<form asp-action="GenerateQrCode" method="post" class="mb-3">
+    <div class="input-group">
+        <input asp-for="Resource" class="form-control" placeholder="Вставьте URL или текст" />
+        <button class="btn btn-primary">Сгенерировать</button>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.QrCodeImage))
+{
+    <div class="mb-3">
+        <img src="@Model.QrCodeImage" alt="QR Code" class="img-fluid" style="max-width:200px; height:auto;"/>
+    </div>
+    <a href="@Model.QrCodeImage" download="qrcode.png" class="btn btn-outline-success me-2">
+        Скачать
+    </a>
+    <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText('@Model.QrCodeImage')">
+        Копировать в буфер
+    </button>
+}

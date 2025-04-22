@@ -21,6 +21,8 @@ builder.Services.AddScoped<AnimatedElementRepository>();
 builder.Services.AddScoped<ButtonRepository>();
 builder.Services.AddScoped<FontRepository>();
 
+//регистрация сервисов
+builder.Services.AddSingleton<QrCodeService>();
 
 //builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 //    .AddEntityFrameworkStores<ApplicationDbContext>()
