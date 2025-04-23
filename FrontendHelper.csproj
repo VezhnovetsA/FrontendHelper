@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Button\" />
     <Folder Include="Views\Font\" />
     <Folder Include="wwwroot\images\icons\countries\" />
     <Folder Include="wwwroot\images\pictures\" />
