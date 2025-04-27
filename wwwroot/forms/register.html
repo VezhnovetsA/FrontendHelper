@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Регистрация</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet" integrity="sha384-…" crossorigin="anonymous">
+  <style>
+    .btn-primary { border-radius: 50px; }
+    .card { border-radius: 1rem; }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="card mx-auto shadow" style="max-width:600px;">
+      <div class="card-body p-4">
+        <h3 class="mb-4 text-center">Регистрация</h3>
+        <form action="/account/register" method="post">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6 form-floating">
+              <input type="text" class="form-control" id="reg-firstname"
+                     name="firstName" placeholder="Имя" required>
+              <label for="reg-firstname">Имя</label>
+            </div>
+            <div class="col-md-6 form-floating">
+              <input type="text" class="form-control" id="reg-lastname"
+                     name="lastName" placeholder="Фамилия" required>
+              <label for="reg-lastname">Фамилия</label>
+            </div>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="reg-email"
+                   name="email" placeholder="email@example.com" required>
+            <label for="reg-email">Email</label>
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6 form-floating">
+              <input type="password" class="form-control" id="reg-password"
+                     name="password" placeholder="Пароль" required>
+              <label for="reg-password">Пароль</label>
+            </div>
+            <div class="col-md-6 form-floating">
+              <input type="password" class="form-control" id="reg-confirm"
+                     name="confirmPassword" placeholder="Повторите пароль" required>
+              <label for="reg-confirm">Повторите пароль</label>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            Зарегистрироваться
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
