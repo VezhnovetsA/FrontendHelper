@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Поиск</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet" integrity="sha384-…" crossorigin="anonymous">
+  <style>
+    .search-box {
+      position: relative; max-width:600px; margin:auto;
+    }
+    .search-box input {
+      padding-right: 3rem; 
+    }
+    .search-box button {
+      position: absolute; right: .75rem; top: 50%;
+      transform: translateY(-50%); border:none; background:none;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="d-flex align-items-center justify-content-center vh-100">
+    <div class="search-box">
+      <form action="/search/results" method="get">
+        <input type="text" name="q"
+               class="form-control form-control-lg"
+               placeholder="Поиск..." required>
+        <button type="submit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+               fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+            <path d="M11.742 10.344…"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

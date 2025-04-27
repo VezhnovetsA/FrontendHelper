@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Отзыв</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet" integrity="sha384-…" crossorigin="anonymous">
+  <style>
+    .card { border-radius: 1rem; }
+    .rating {
+      display: flex; flex-direction: row-reverse; justify-content: center;
+    }
+    .rating input { display: none; }
+    .rating label {
+      font-size: 2.5rem; color: #ddd; cursor: pointer; 
+      transition: color .2s;
+    }
+    .rating label:hover,
+    .rating label:hover ~ label,
+    .rating input:checked ~ label {
+      color: gold;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="card mx-auto shadow-sm p-4" style="max-width:600px;">
+      <h4 class="mb-3 text-center">Оставьте отзыв</h4>
+      <form action="/feedback/send" method="post">
+        <div class="mb-4 text-center">
+          <div class="rating">
+            <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+            <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+            <input type="radio" id="star3" name="rating" value="3" checked><label for="star3">★</label>
+            <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+            <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+          </div>
+        </div>
+        <div class="form-floating mb-4">
+          <textarea class="form-control" id="feedback-message"
+                    name="comment" placeholder="Ваш комментарий..."
+                    style="height:100px"></textarea>
+          <label for="feedback-message">Комментарий</label>
+        </div>
+        <button type="submit" class="btn btn-success w-100"
+                style="border-radius:50px;">
+          Отправить отзыв
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
