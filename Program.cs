@@ -21,6 +21,8 @@ builder.Services.AddScoped<AnimatedElementRepository>();
 builder.Services.AddScoped<ButtonRepository>();
 builder.Services.AddScoped<FontRepository>();
 builder.Services.AddScoped<FormRepository>();
+builder.Services.AddScoped<ColorRepository>();
+builder.Services.AddScoped<PaletteRepository>();
 
 //регистрация сервисов
 builder.Services.AddSingleton<QrCodeService>();

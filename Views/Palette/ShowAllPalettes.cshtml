@@ -1,0 +1,30 @@
+﻿@model IEnumerable<PaletteViewModel>
+
+<div class="container py-4">
+    <h2 class="mb-4">Палитры</h2>
+    <div class="row g-4">
+        @foreach (var palette in Model)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@palette.Title</h5>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            @foreach (var c in palette.Colors)
+                            {
+                                <div title="@c.Name (@c.Hex)"
+                                     style="width:30px; height:30px; border:1px solid #ddd; background:@c.Hex; border-radius:4px;">
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a asp-action="ShowOnePalette" asp-route-id="@palette.Id" class="btn btn-link p-0">
+                            Подробнее →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

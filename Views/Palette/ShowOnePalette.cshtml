@@ -1,0 +1,23 @@
+﻿@model FrontendHelper.Models.PaletteViewModel
+
+<div class="container py-4">
+    <h2 class="mb-4">Палитра «@Model.Title»</h2>
+    <div class="row g-4">
+        @foreach (var color in Model.Colors)
+        {
+            <div class="col-6 col-md-4 col-lg-3 text-center">
+                <div style="width:100%; padding-top:100%; position:relative; border:1px solid #ccc; border-radius:4px; background:@color.Hex;">
+                </div>
+                <div class="mt-2">
+                    <strong>@color.Name</strong><br />
+                    <small class="text-muted">@color.Hex</small>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="mt-4">
+        <a asp-action="ShowAllPalettes" class="btn btn-secondary">
+            ← Все палитры
+        </a>
+    </div>
+</div>
