@@ -1,0 +1,30 @@
+﻿@model IEnumerable<TemplateViewModel>
+
+<div class="container py-4">
+    <h2 class="mb-4">Шаблоны страниц</h2>
+    <div class="row g-4">
+        @foreach (var template in Model)
+        {
+            <div class="col-12">
+                <div class="card shadow-sm p-4 mb-3">
+                    <h5>@template.Name</h5>
+
+                    @Html.Raw(template.PreviewHtml)
+
+                    <div class="mt-3 d-flex justify-content-between">
+                        @* <a asp-action="ShowTemplate"
+                           asp-route-id="@template.Id"
+                           class="btn btn-outline-secondary">
+                            Подробнее →
+                        </a> *@
+                        <a href="@Url.Content($"~/templates/{template.TemplateCode}")"
+                           download="@template.TemplateCode"
+                           class="btn btn-primary">
+                            Скачать HTML
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

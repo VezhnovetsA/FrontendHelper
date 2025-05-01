@@ -1,9 +1,18 @@
 using FHDatabase;
 using FHDatabase.Repositories;
+using FrontendHelper.Services;
+using FrontendHelper.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddAuthentication(AuthService.AUTH_TYPE)
+    .AddCookie(AuthService.AUTH_TYPE, config =>
+    {
+        config.LoginPath = "/Authentication/Login";
+    });
 
 ////подключение к бд
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -23,9 +32,16 @@ builder.Services.AddScoped<FontRepository>();
 builder.Services.AddScoped<FormRepository>();
 builder.Services.AddScoped<ColorRepository>();
 builder.Services.AddScoped<PaletteRepository>();
+builder.Services.AddScoped<TemplateRepository>();
+builder.Services.AddScoped<UserRepository>();
 
 //регистрация сервисов
 builder.Services.AddSingleton<QrCodeService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ITemplateConverter, TemplateConverter>();
+
+builder.Services.AddHttpContextAccessor();
+
 
 //builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 //    .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -37,14 +53,7 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
-//    var context = services.GetRequiredService<ApplicationDbContext>();
-//    DbInitializer.Initialize(context);
-//}
-
+// middleware
 
 if (!app.Environment.IsDevelopment())
 {
@@ -52,18 +61,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-
-//void ConfigureServices(IServiceCollection services)
-//{
-//    services.AddTransient<IAllIcons, MockIcons>();
-//    services.AddTransient<IAllPictures, MockPictures>();
-//    services.AddMvc();
-//}
-
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 //app.MapControllerRoute(

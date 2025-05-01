@@ -13,13 +13,11 @@
 }
 
 
-
 @{
     ViewData["Title"] = "Иконки";
 }
 
 <div class="container-fluid">
-    @* Перебираем каждую тему *@
     @foreach (var group in Model)
     {
         <div class="card mb-4 shadow-sm">
@@ -31,7 +29,6 @@
             <div class="card-body">
 
                 <div class="row">
-                    @* Выводим первые 6 иконок *@
                     @foreach (var icon in group.Icons)
                     {
                         <div class="col-2 text-center mb-3">
@@ -57,3 +54,4 @@
         </div>
     }
 </div>
+

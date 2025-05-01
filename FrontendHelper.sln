@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendHelper", "FrontendH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FHDatabase", "..\FHDatabase\FHDatabase.csproj", "{81D9152B-1315-4FD5-AAFC-D9B7228CA651}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhEnums", "..\FhEnums\FhEnums.csproj", "{897383A5-2CF4-45D6-B096-7BD531A09915}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{81D9152B-1315-4FD5-AAFC-D9B7228CA651}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81D9152B-1315-4FD5-AAFC-D9B7228CA651}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81D9152B-1315-4FD5-AAFC-D9B7228CA651}.Release|Any CPU.Build.0 = Release|Any CPU
+		{897383A5-2CF4-45D6-B096-7BD531A09915}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{897383A5-2CF4-45D6-B096-7BD531A09915}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{897383A5-2CF4-45D6-B096-7BD531A09915}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{897383A5-2CF4-45D6-B096-7BD531A09915}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

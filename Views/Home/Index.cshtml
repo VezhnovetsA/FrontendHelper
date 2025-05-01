@@ -1,6 +1,12 @@
-﻿@{
+﻿@model IndexViewModel
+
+@{
     ViewData["Title"] = "Home Page";
 }
+
+<div>
+    Привет, @Model.UserName !
+</div>
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
