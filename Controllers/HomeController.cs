@@ -1,4 +1,5 @@
 using FrontendHelper.Models;
+using FrontendHelper.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,16 +7,24 @@ namespace FrontendHelper.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly ILogger<HomeController> _logger; //?
+        private AuthService _authService;
+        public HomeController(ILogger<HomeController> logger, AuthService authService)
         {
-            _logger = logger;
+            _logger = logger; //?
+            _authService = authService;
         }
 
         public IActionResult Index()
         {
-            return View();
+            var username = _authService.GetUserName();
+
+            var indexViewModel = new IndexViewModel
+            {
+                UserName = username
+            };
+
+            return View(indexViewModel);
         }
 
         public IActionResult Privacy()

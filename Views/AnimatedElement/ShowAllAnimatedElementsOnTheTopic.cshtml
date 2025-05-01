@@ -1,27 +1,25 @@
 ﻿@model IEnumerable<AnimatedElementViewModel>
 
-@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-
-@{
-    ViewData["Title"] = $"Анимированные элементы темы «{ViewBag.Topic}»";
-    var topic = (string)ViewBag.Topic;
-}
 
 <div class="container-fluid">
     <h2 class="mb-4">@ViewData["Title"]</h2>
-
     <div class="row">
-        @foreach (var element in Model)
+        @foreach (var elem in Model)
         {
             <div class="col-2 text-center mb-4">
-                <img src="@Url.Content($"~/images/animated-elements/{element.Img}")"
-                     class="img-fluid"
-                     alt="@element.Name"
-                     title="@element.Name" />
-                <div class="small mt-2">@element.Name</div>
+                <div class="anim-wrapper position-relative" data-url="@Url.Content($"~/images/animated-elements/{elem.Img}")" style="cursor:pointer;">
+                    <img src="@Url.Content($"~/images/animated-elements/{elem.Img}")"
+                         class="img-fluid"
+                         alt="@elem.Name"/>
+                </div>
+
+                <div class="small mt-2">@elem.Name</div>
+
+                <a href="@Url.Content($"~/images/animated-elements/{elem.Img}")"
+                   download="@elem.Img"
+                   class="btn btn-sm btn-outline-secondary mt-2">
+                    Скачать
+                </a>
             </div>
         }
     </div>
@@ -32,3 +30,4 @@
         </a>
     </div>
 </div>
+

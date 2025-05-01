@@ -1,27 +1,24 @@
 ﻿@model IEnumerable<FrontendHelper.Models.IconViewModel>
 
-@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-
-@{
-    ViewData["Title"] = $"Иконки темы «{ViewBag.Topic}»";
-    var topic = (string)ViewBag.Topic;
-}
-
 <div class="container-fluid">
     <h2 class="mb-4">@ViewData["Title"]</h2>
-
     <div class="row">
         @foreach (var icon in Model)
         {
             <div class="col-2 text-center mb-4">
-                <img src="@Url.Content($"~/images/icons/{icon.Img}")"
-                     class="img-fluid"
-                     alt="@icon.Name"
-                     title="@icon.Name" />
+                <div class="icon-wrapper position-relative" data-url="@Url.Content($"~/images/icons/{icon.Img}")" style="cursor:pointer;">
+                    <img src="@Url.Content($"~/images/icons/{icon.Img}")"
+                         class="img-fluid"
+                         alt="@icon.Name"/>
+                </div>
+
                 <div class="small mt-2">@icon.Name</div>
+
+                <a href="@Url.Content($"~/images/icons/{icon.Img}")"
+                   download="@icon.Img"
+                   class="btn btn-sm btn-outline-secondary mt-2">
+                    Скачать
+                </a>
             </div>
         }
     </div>
@@ -32,3 +29,4 @@
         </a>
     </div>
 </div>
+

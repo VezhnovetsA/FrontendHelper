@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using FrontendHelper.Services
+@inject AuthService authService
+
+<!DOCTYPE html>
 <html lang="en">
 
 
@@ -53,8 +56,19 @@
                 <li class="nav-item"><a class="nav-link" asp-controller="Font" asp-action="???????????">Шрифты</a></li>
                 <li class="nav-item"><a class="nav-link" asp-controller="Form" asp-action="ShowAllForms">Формы</a></li>
                 <li class="nav-item"><a class="nav-link" asp-controller="Palette" asp-action="ShowAllPalettes">Палитры</a></li>
-                <li class="nav-item"><a class="nav-link text-dark" href="#">Шаблоны</a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Template" asp-action="ShowAllTemplates">Шаблоны</a></li>
                 <li class="nav-item"><a class="nav-link" asp-controller="QrCode" asp-action="GenerateQrCode">Генератор QR-кода</a></li>
+                @if (authService.IsAuthenticated())
+                {
+                    <li class="nav-item"><a class="nav-link" asp-controller="Authentication" asp-action="Logout">Выйти из системы</a></li>
+                }
+                else
+                {
+                    <li class="nav-item"><a class="nav-link" asp-controller="Authentication" asp-action="Login">Вход в систему</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Authentication" asp-action="Registration">Зарегистрироваться</a></li>
+                }
+                
+                
             </ul>
         </aside>
 

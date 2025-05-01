@@ -2,22 +2,44 @@
 
 <div class="container py-4">
     <h2 class="mb-4">Палитра «@Model.Title»</h2>
-    <div class="row g-4">
-        @foreach (var color in Model.Colors)
+
+    <div class="d-flex flex-wrap gap-3">
+        @foreach (var c in Model.Colors)
         {
-            <div class="col-6 col-md-4 col-lg-3 text-center">
-                <div style="width:100%; padding-top:100%; position:relative; border:1px solid #ccc; border-radius:4px; background:@color.Hex;">
-                </div>
-                <div class="mt-2">
-                    <strong>@color.Name</strong><br />
-                    <small class="text-muted">@color.Hex</small>
-                </div>
+            <div class="color-swatch text-center position-relative"
+                 data-hex="@c.Hex"
+                 style="cursor:pointer; width: 100px;">
+                <div style="width:64px; height:64px; border:1px solid #ccc; background:@c.Hex; border-radius:4px; margin:auto"></div>
+                <div class="mt-2">@c.Name</div>
+                <div class="text-muted small">@c.Hex</div>
+
+                <span class="copy-tooltip position-absolute top-50 start-50 translate-middle
+                             bg-dark text-white small px-2 py-1 rounded d-none">
+                    Скопировано!
+                </span>
             </div>
         }
     </div>
+
     <div class="mt-4">
-        <a asp-action="ShowAllPalettes" class="btn btn-secondary">
-            ← Все палитры
-        </a>
+        <a asp-action="ShowAllPalettes" class="btn btn-secondary">← Все палитры</a>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+          swatch.addEventListener('click', async () => {
+            const hex = swatch.dataset.hex;
+            try {
+              await navigator.clipboard.writeText(hex);
+              const tip = swatch.querySelector('.copy-tooltip');
+              tip.classList.remove('d-none');
+              setTimeout(() => tip.classList.add('d-none'), 1000);
+            } catch (err) {
+              console.error('Не удалось скопировать:', err);
+            }
+          });
+        });
+    </script>
+}

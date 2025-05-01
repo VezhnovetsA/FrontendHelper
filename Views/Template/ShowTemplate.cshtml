@@ -1,0 +1,21 @@
+﻿@model TemplateViewModel
+
+<div class="container py-4">
+    <h2 class="mb-4">@Model.Name</h2>
+
+    <div class="card shadow-sm p-4 mb-4">
+        @Html.Raw(Model.FullHtml)
+    </div>
+
+    <div class="mb-4">
+        <a href="@Url.Content($"~/templates/{Model.TemplateCode}")"
+           download="@Model.TemplateCode"
+           class="btn btn-primary">
+            Скачать HTML
+        </a>
+    </div>
+
+    <a asp-action="ShowAllTemplates" class="btn btn-secondary">
+        ← Назад к списку шаблонов
+    </a>
+</div>
