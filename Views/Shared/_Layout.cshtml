@@ -67,7 +67,11 @@
                     <li class="nav-item"><a class="nav-link" asp-controller="Authentication" asp-action="Login">Вход в систему</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Authentication" asp-action="Registration">Зарегистрироваться</a></li>
                 }
-                
+                @if (authService.IsAuthenticated())
+                {
+                    <li class="nav-item"><a class="nav-link" asp-controller="User" asp-action="Index">Пользователи</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="User" asp-action="ShowRoles">Роли пользователей</a></li>
+                }
                 
             </ul>
         </aside>

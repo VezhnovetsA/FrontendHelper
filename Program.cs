@@ -34,6 +34,8 @@ builder.Services.AddScoped<ColorRepository>();
 builder.Services.AddScoped<PaletteRepository>();
 builder.Services.AddScoped<TemplateRepository>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<RoleRepository>();
+
 
 //регистрация сервисов
 builder.Services.AddSingleton<QrCodeService>();

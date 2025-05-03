@@ -47,6 +47,7 @@ namespace FrontendHelper.Controllers
             {
                 new Claim(AuthService.CLAIM_KEY_ID, user.Id.ToString()),
                 new Claim(AuthService.CLAIM_KEY_NAME, user.UserName.ToString()),
+                new Claim(AuthService.CLAIM_KEY_PERMISSION, ((int?)user.Role?.Permission ?? -1).ToString()),
                 new Claim(ClaimTypes.AuthenticationMethod, AuthService.AUTH_TYPE)
             };
 

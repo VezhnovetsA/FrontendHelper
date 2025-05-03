@@ -1,0 +1,37 @@
+﻿@model RolesViewModel
+
+<div class="roles">
+	@foreach (var role in Model.Roles)
+	{
+		<div class="role">
+			<h2>@role.Name</h2>
+			<form method="post" action="/User/UpdateRole">
+				<input type="hidden" value="@role.Id" name="id"/>
+				@foreach (var permission in Model.Permissions)
+				{
+					<label>
+						@permission.PermissionName
+						<input type="checkbox"
+							   name="permissions"
+							   value="@permission.Permission"
+							   checked="@(role.Permissions.Contains(permission.Permission))" />
+					</label>
+				}
+				<button type="submit">Сохранить </button>
+			</form>
+			
+
+			<a href="/User/DeleteRole?id=@role.Id">Удалить роль</a>
+
+		</div>
+	}
+</div>
+
+
+<div class="create-role-container">
+	<form method="post" action="/User/CreateRole">
+		<input name="roleName" placeholder="Введите название новой роли" />
+		<button type="submit">Создать роль</button>
+	</form>
+
+</div>
