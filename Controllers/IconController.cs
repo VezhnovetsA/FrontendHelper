@@ -2,18 +2,20 @@
 using Microsoft.AspNetCore.Mvc;
 using FrontendHelper.Models;
 using Microsoft.EntityFrameworkCore;
+using FrontendHelper.Services.Interfaces;
 
 namespace FrontendHelper.Controllers
 {
     public class IconController : Controller
     {
         private IconRepository _iconRepository;
+        private readonly IFileService _fileService;
 
-        public IconController(IconRepository iconRepository)
+        public IconController(IconRepository iconRepository, IFileService fileService)
         {
             _iconRepository = iconRepository;
+            _fileService = fileService;
         }
-
 
 
         // показ всех иконок (без фильтра)
@@ -57,6 +59,36 @@ namespace FrontendHelper.Controllers
             return View(viewModels);
         }
 
+        [HttpGet]
+        public IActionResult AddIcon() => View(new CreateIconViewModel());
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddIcon(CreateIconViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+                return View(viewModel);
+
+            if (_iconRepository.CheckIconDuplicate(viewModel.Name, viewModel.Topic))
+            {
+                ModelState.AddModelError(nameof(viewModel.Name),
+                    "Иконка с таким именем уже существует в этой теме");
+                return View(viewModel);
+            }
+
+            // Сохраняем файл через сервис и получаем новое имя
+            var savedFileName = await _fileService.SaveFileAsync(viewModel.ImgFile, "images/icons");
+
+            // Добавляем запись в БД
+            _iconRepository.AddAsset(new IconData
+            {
+                Name = viewModel.Name,
+                Topic = viewModel.Topic,
+                Img = savedFileName
+            });
+
+            return RedirectToAction(nameof(ShowGroupsOfIconsOnTheTopic));
+        }
 
 
         // показ иконок по введенному запросу

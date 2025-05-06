@@ -1,0 +1,34 @@
+﻿@model CreateIconViewModel
+
+<form asp-action="AddIcon" method="post"
+      enctype="multipart/form-data"
+      class="w-100" style="max-width:500px;">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Название</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Topic" class="form-label">Тема</label>
+        <input asp-for="Topic" class="form-control" />
+        <span asp-validation-for="Topic" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ImgFile" class="form-label">Изображение</label>
+        <input asp-for="ImgFile" type="file" class="form-control" />
+        <span asp-validation-for="ImgFile" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a asp-action="ShowGroupsOfIconsOnTheTopic"
+       class="btn btn-secondary ms-2">← Отмена</a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
