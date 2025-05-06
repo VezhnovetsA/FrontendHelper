@@ -41,6 +41,7 @@ builder.Services.AddScoped<RoleRepository>();
 builder.Services.AddSingleton<QrCodeService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ITemplateConverter, TemplateConverter>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddHttpContextAccessor();
 
