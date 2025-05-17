@@ -63,7 +63,20 @@ namespace FrontendHelper.Controllers
         [HttpPost]
         public IActionResult Registration(AuthenticationViewModel authenticationViewModel)
         {
-           _userRepository.Registration(authenticationViewModel.UserName, authenticationViewModel.Password);
+            var isNameNotUniq = _userRepository.Any(authenticationViewModel.UserName);
+
+            if (isNameNotUniq)
+            {
+                ModelState.AddModelError(nameof(AuthenticationViewModel.UserName), "Введенное имя неуникально");
+            }
+
+
+            if (!ModelState.IsValid)
+            {
+                return View(authenticationViewModel);
+            }
+
+            _userRepository.Registration(authenticationViewModel.UserName, authenticationViewModel.Password);
 
             return RedirectToAction("Login");
         }

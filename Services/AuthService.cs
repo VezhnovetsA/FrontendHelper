@@ -58,5 +58,10 @@ namespace FrontendHelper.Services
                  .FirstOrDefault(x => x.Type == key)
                  ?.Value;
         }
+
+        public bool IsAdmin()
+        {
+            return GetUserName() == "admin";
+        }
     }
 }

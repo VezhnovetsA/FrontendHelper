@@ -10,12 +10,14 @@
         <label asp-for="UserName" class="form-label"></label>
         <input asp-for="UserName" class="form-control" />
         <span asp-validation-for="UserName" class="text-danger"></span>
+        @* @Html.ValidationMessageFor(x => x.UserName) *@
     </div>
 
     <div class="mb-3">
         <label asp-for="Password" class="form-label"></label>
         <input asp-for="Password" type="password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
+       @*  @Html.ValidationMessageFor(x => x.Password) *@
     </div>
 
     <button type="submit" class="btn btn-success w-100">Зарегистрироваться</button>

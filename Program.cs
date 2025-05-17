@@ -12,6 +12,7 @@ builder.Services
     .AddCookie(AuthService.AUTH_TYPE, config =>
     {
         config.LoginPath = "/Authentication/Login";
+        config.AccessDeniedPath = "/Authentication/AccessDeniedPage";
     });
 
 ////подключение к бд
@@ -35,6 +36,7 @@ builder.Services.AddScoped<PaletteRepository>();
 builder.Services.AddScoped<TemplateRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoleRepository>();
+builder.Services.AddScoped<FilterRepository>();
 
 
 //регистрация сервисов
@@ -54,7 +56,16 @@ builder.Services.AddHttpContextAccessor();
 // рейзор для интерфейса авторизации
 builder.Services.AddRazorPages();
 
+
+
+
 var app = builder.Build();
+
+var seed = new Seed();
+seed.CheckAndFillWithDefaultEntytiesDatabase(app.Services);
+
+
+
 
 // middleware
 

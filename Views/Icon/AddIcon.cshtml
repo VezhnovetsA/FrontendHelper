@@ -1,4 +1,5 @@
 ﻿@model CreateIconViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 <form asp-action="AddIcon" method="post"
       enctype="multipart/form-data"
@@ -24,11 +25,34 @@
         <span asp-validation-for="ImgFile" class="text-danger"></span>
     </div>
 
+    <div class="mb-3">
+        <label class="form-label">Фильтры</label>
+        <div class="ms-3">
+            @foreach (var filter in Model.AvailableFilters)
+            {
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="SelectedFilterIds"
+                           value="@filter.Value"
+                           id="filter_@filter.Value"
+                    @(Model.SelectedFilterIds.Contains(int.Parse(filter.Value)) ? "checked" : "") />
+                    <label class="form-check-label" for="filter_@filter.Value">
+                        @filter.Text
+                    </label>
+                </div>
+            }
+        </div>
+        <span asp-validation-for="SelectedFilterIds" class="text-danger"></span>
+    </div>
+
     <button type="submit" class="btn btn-primary">Сохранить</button>
     <a asp-action="ShowGroupsOfIconsOnTheTopic"
        class="btn btn-secondary ms-2">← Отмена</a>
 </form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

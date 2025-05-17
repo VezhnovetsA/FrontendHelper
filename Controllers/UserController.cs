@@ -1,12 +1,14 @@
 ﻿using FHDatabase.Models;
 using FHDatabase.Repositories;
 using FhEnums;
+using FrontendHelper.Controllers.AuthorizationAttributes;
 using FrontendHelper.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Controllers
 {
+    [IsAdmin]
     public class UserController : Controller
     {
         private UserRepository _userRepository;
