@@ -1,5 +1,4 @@
-﻿using FHDatabase.Models;
-using FHDatabase.Repositories;
+﻿using FHDatabase.Repositories;
 using FrontendHelper.Models;
 using FrontendHelper.Services;
 using Microsoft.AspNetCore.Authentication;

@@ -1,0 +1,99 @@
+﻿@model FrontendHelper.Models.FontViewModel
+@using System.IO
+@inject FHDatabase.Repositories.FontRepository fontRepository
+
+@{
+    // Берём все шрифты из репозитория
+    var fonts = fontRepository.GetAssets();
+}
+
+@* ————————————————————————————————————————————— *@
+@* Подключаем внешние шрифты (Google Fonts и т.п.) *@
+@foreach (var f in fonts.Where(x => !string.IsNullOrEmpty(x.Link)))
+{
+    <link rel="stylesheet" href="@f.Link" />
+}
+
+@* ————————————————————————————————————————————— *@
+@* Объявляем локальные шрифты через @font-face *@
+<style>
+@foreach (var f in fonts.Where(x => !string.IsNullOrEmpty(x.LocalFileName)))
+{
+    <text>
+    @@font-face {
+        font-family: '@f.FontFamily';
+        src: url('/fonts/@f.LocalFileName');
+        font-display: swap;
+    }
+    </text>
+}
+</style>
+
+@* ————————————————————————————————————————————— *@
+<div class="container py-4">
+    <h2 class="mb-4">Демонстрация шрифтов</h2>
+
+    <div class="mb-3">
+        <label asp-for="InputText" class="form-label">Введите текст</label>
+        <textarea asp-for="InputText"
+                  id="inputText"
+                  class="form-control"
+                  rows="3"></textarea>
+    </div>
+
+    <div class="d-flex align-items-end mb-3">
+        <div class="flex-grow-1 me-2">
+            <label asp-for="SelectedFont" class="form-label">Выберите шрифт</label>
+            <select asp-for="SelectedFont"
+                    asp-items="Model.AvailableFonts"
+                    id="fontSelect"
+                    class="form-select">
+                <option value="">— По умолчанию —</option>
+            </select>
+        </div>
+        <div>
+            <a asp-action="AddFont" class="btn btn-outline-primary mb-1">
+                + Добавить шрифт
+            </a>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label">Результат</label>
+        <div id="outputText"
+             class="p-3 border"
+             style="min-height:60px; white-space: pre-wrap;">
+            @Model.InputText
+        </div>
+    </div>
+
+   /*  <button id="copyBtn" class="btn btn-outline-secondary">
+        Скопировать
+    </button> */
+</div>
+
+@section Scripts {
+<script>
+    const input   = document.getElementById('inputText');
+    const select  = document.getElementById('fontSelect');
+    const output  = document.getElementById('outputText');
+    const copyBtn = document.getElementById('copyBtn');
+
+    function refreshPreview() {
+        output.textContent       = input.value;
+        output.style.fontFamily  = select.value || '';
+    }
+
+    input.addEventListener('input',   refreshPreview);
+    select.addEventListener('change', refreshPreview);
+
+    copyBtn.addEventListener('click', () =>
+      navigator.clipboard.writeText(output.textContent)
+        .then(() => alert('Скопировано!'))
+        .catch(() => alert('Не удалось скопировать'))
+    );
+
+    // Первичная отрисовка
+    refreshPreview();
+</script>
+}

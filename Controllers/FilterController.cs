@@ -18,7 +18,7 @@ namespace FrontendHelper.Controllers
 
 
 
-        [HttpGet] 
+        [HttpGet]
         public IActionResult Create() => View(new FilterData());
 
 

@@ -1,0 +1,39 @@
+﻿@model CreateFontViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<form asp-action="AddFont" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Название</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="FontFamily" class="form-label">CSS Font-Family</label>
+        <input asp-for="FontFamily" class="form-control" />
+        <span asp-validation-for="FontFamily" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Link" class="form-label">Ссылка на шрифт (URL)</label>
+        <input asp-for="Link" class="form-control" />
+        <span asp-validation-for="Link" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="FontFile" class="form-label">Загрузить локальный файл</label>
+        <input asp-for="FontFile" type="file" class="form-control" />
+        <span asp-validation-for="FontFile" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

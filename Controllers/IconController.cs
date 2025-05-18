@@ -1,12 +1,11 @@
-﻿using FHDatabase.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using FrontendHelper.Models;
-using Microsoft.EntityFrameworkCore;
-using FrontendHelper.Services.Interfaces;
-using FHDatabase.Models;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization;
+﻿using FHDatabase.Models;
+using FHDatabase.Repositories;
 using FrontendHelper.Controllers.AuthorizationAttributes;
+using FrontendHelper.Models;
+using FrontendHelper.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace FrontendHelper.Controllers
 {
@@ -39,7 +38,7 @@ namespace FrontendHelper.Controllers
             var viewModels = _iconRepository
                 .GetAllIconsByTopic(topic)
                 .Select(PassDataToViewModel)
-                .ToList();              
+                .ToList();
 
             ViewBag.Topic = topic;   // для вывода темы во вьюшке, ПОТОМ УБЕРУ
             return View(viewModels);
@@ -104,7 +103,7 @@ namespace FrontendHelper.Controllers
 
         // ---------------------------------------------------------
         // GET: отдаём форму с доступными фильтрами
-       
+
         [HttpGet]
         [Authorize]
         [HasPermission(FhEnums.Permission.CanAddPublicAsset)]

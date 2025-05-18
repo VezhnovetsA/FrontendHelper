@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace FrontendHelper.Models
+﻿namespace FrontendHelper.Models
 {
-    public class PictureViewModel 
+    public class PictureViewModel
     {
         public int Id { get; set; }
         public string Name { get; set; }

@@ -2,7 +2,6 @@ using FHDatabase;
 using FHDatabase.Repositories;
 using FrontendHelper.Services;
 using FrontendHelper.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
