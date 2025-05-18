@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace FrontendHelper.Models
+﻿namespace FrontendHelper.Models
 {
-    public class AnimatedElementViewModel 
+    public class AnimatedElementViewModel
     {
         public int Id { get; set; }
 

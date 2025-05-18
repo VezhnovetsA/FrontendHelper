@@ -8,8 +8,8 @@ namespace FrontendHelper.Controllers
     {
         private ButtonRepository _buttonRepository;
 
-        public ButtonController(ButtonRepository buttonRepository) 
-        { 
+        public ButtonController(ButtonRepository buttonRepository)
+        {
             _buttonRepository = buttonRepository;
         }
 

@@ -10,7 +10,7 @@ namespace FrontendHelper.Controllers
         public FormRepository _formRepository;
 
         public FormController(FormRepository formRepository)
-        { 
+        {
             _formRepository = formRepository;
         }
 

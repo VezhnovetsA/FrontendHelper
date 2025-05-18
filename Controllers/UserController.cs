@@ -4,7 +4,6 @@ using FhEnums;
 using FrontendHelper.Controllers.AuthorizationAttributes;
 using FrontendHelper.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Controllers
 {
@@ -26,12 +25,12 @@ namespace FrontendHelper.Controllers
             viewModel.Users = _userRepository
                 .GetUsersWithRole()
                 .Select(x => new UserViewModel
-            {
-                Id = x.Id,
-                Name = x.UserName,
-                RoleId = x.Role?.Id
+                {
+                    Id = x.Id,
+                    Name = x.UserName,
+                    RoleId = x.Role?.Id
 
-            })
+                })
                 .ToList();
 
             viewModel.Roles = _roleRepository.GetAssets().Select(x => new RoleViewModel()

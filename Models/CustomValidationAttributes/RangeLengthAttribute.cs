@@ -21,7 +21,7 @@ namespace FrontendHelper.Models.CustomValidationAttributes
 
         public override string FormatErrorMessage(string name)
         {
-            return !string.IsNullOrEmpty(ErrorMessage) 
+            return !string.IsNullOrEmpty(ErrorMessage)
                 ? ErrorMessage
                 : $"Поле {name} должно содержать от {_minLength} до {_maxLength} символов.";
         }
@@ -36,7 +36,7 @@ namespace FrontendHelper.Models.CustomValidationAttributes
             }
 
             if (str.Length > _maxLength)
-            { 
+            {
                 return false;
             }
 

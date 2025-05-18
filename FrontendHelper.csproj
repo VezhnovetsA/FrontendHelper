@@ -23,10 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Font\" />
-    <Folder Include="Views\Font\" />
     <Folder Include="wwwroot\images\icons\countries\" />
     <Folder Include="wwwroot\images\pictures\" />
+    <Folder Include="wwwroot\fonts\" />
   </ItemGroup>
 
 </Project>

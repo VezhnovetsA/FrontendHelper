@@ -1,5 +1,4 @@
 ﻿using FhEnums;
-using NuGet.Common;
 
 namespace FrontendHelper.Services
 {
@@ -38,7 +37,7 @@ namespace FrontendHelper.Services
                 .User
                 ?.Identity
                 ?.IsAuthenticated
-                ??false;
+                ?? false;
         }
 
         public bool HasPermission(Permission permission)

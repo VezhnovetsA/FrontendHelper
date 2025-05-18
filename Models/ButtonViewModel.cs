@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace FrontendHelper.Models
+﻿namespace FrontendHelper.Models
 {
     public class ButtonViewModel
     {
