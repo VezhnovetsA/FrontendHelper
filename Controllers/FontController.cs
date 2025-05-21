@@ -19,60 +19,35 @@ namespace FrontendHelper.Controllers
 
 
         [HttpGet]
-        public IActionResult AddFont() => View(new CreateFontViewModel());
-
-
-
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> AddFont(CreateFontViewModel viewModel)
-        //{
-        //    if (!ModelState.IsValid)
-        //        return View(viewModel);
-
-        //    var font = new FontData
-        //    {
-        //        Name = viewModel.Name,
-        //        FontFamily = viewModel.FontFamily,
-        //        Link = viewModel.Link
-        //    };
-
-        //    if (viewModel.FontFile is not null)
-        //    {
-        //        font.LocalFileName = await _fileService.SaveFileAsync(viewModel.FontFile, "fonts");
-        //    }
-
-        //    _fontRepository.AddAsset(font);
-        //    return RedirectToAction(nameof(ShowFonts));
-        //}
+        public IActionResult AddFont()
+        {
+            return View(new CreateFontViewModel());
+        }
 
 
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddFont(CreateFontViewModel vm, IFormFile? FontFile)
+        public async Task<IActionResult> AddFont(CreateFontViewModel viewModel, IFormFile? fontFile)
         {
             if (!ModelState.IsValid)
-                return View(vm);
+                return View(viewModel);
 
-            var entity = new FontData
+            var font = new FontData
             {
-                Name = vm.Name,
-                FontFamily = vm.FontFamily,
-                Link = vm.Link
+                Name = viewModel.Name,
+                FontFamily = viewModel.FontFamily,
+                Link = viewModel.Link
             };
 
-            if (FontFile != null)
+            if (fontFile != null)
             {
-                // сохраним локальный файл в ~/wwwroot/fonts
-                var fileName = await _fileService.SaveFileAsync(FontFile, "fonts");
-                entity.LocalFileName = fileName;
+                var fileName = await _fileService.SaveFileAsync(fontFile, "fonts");
+                font.LocalFileName = fileName;
             }
 
-            _fontRepository.AddAsset(entity);
+            _fontRepository.AddAsset(font);
             return RedirectToAction(nameof(ShowFonts));
         }
-
 
 
 
@@ -86,58 +61,35 @@ namespace FrontendHelper.Controllers
 
 
 
-        //public IActionResult ShowFonts()
-        //{
-        //    // Получаем все шрифты из репозитория
-        //    var fonts = _fontRepository.GetAssets();
-
-        //    // Мапим их в SelectListItem для выпадающего списка
-        //    var items = fonts
-        //        .Select(f => new SelectListItem(f.Name, f.FontFamily))
-        //        .ToList();
-
-        //    // Стартовый текст и пустой выбор шрифта
-        //    var viewModel = new FontViewModel
-        //    {
-        //        InputText = "Пример текста",
-        //        SelectedFont = "",
-        //        AvailableFonts = items
-        //    };
-
-        //    return View(viewModel);
-        //}
         public IActionResult ShowFonts()
         {
             var fonts = _fontRepository.GetAssets();
 
-            var items = fonts.Select(f => {
-                // определяем путь и формат один раз
+            var items = fonts.Select(f =>
+            {
                 var src = !string.IsNullOrEmpty(f.Link)
                     ? f.Link
                     : Url.Content($"~/fonts/{f.LocalFileName}");
 
                 var format = !string.IsNullOrEmpty(f.LocalFileName)
-                    ? Path.GetExtension(f.LocalFileName).TrimStart('.')
-                    : "woff2";  // или другой дефолт для внешних
+                    ? Path.GetExtension(f.LocalFileName).TrimStart('.') : "ttf";
 
                 return new ExtendedSelectListItem
                 {
                     Text = f.Name,
                     Value = f.FontFamily,
-                    // Используем Group.Name для хранения src; можно создать отдельное поле
                     Group = new SelectListGroup { Name = src },
-                    // Добавляем DataAttributes уже готовые
-                    DataAttributes = new Dictionary<string, string> {
-                { "data-format", format }
-            }
+                    DataAttributes = new Dictionary<string, string> { { "data-format", format } }
                 };
+
             }).ToList();
 
-            var vm = new FontViewModel
+            var viewModel = new FontViewModel
             {
                 AvailableFonts = items
             };
-            return View(vm);
+
+            return View(viewModel);
         }
     }
 }

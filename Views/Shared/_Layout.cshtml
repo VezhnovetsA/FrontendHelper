@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FrontendHelper</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/layoutStyle.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
@@ -30,7 +32,7 @@
                             <li><a class="dropdown-item" href="mailto:info@frontendhelper.com">info@frontendhelper.com</a></li>
                         </ul>
                     </div>
-                    <!-- Profile icon triggers offcanvas -->
+
                     <a class="me-2" data-bs-toggle="offcanvas" data-bs-target="#offcanvasProfile" aria-controls="offcanvasProfile">
                         <img src="~/images/user.png" alt="Profile" class="mainicon profile-icon" title="Профиль" />
                     </a>
@@ -39,7 +41,7 @@
         </nav>
     </header>
 
-    <!-- Offcanvas: правая боковая панель профиля -->
+    <!-- правая боковая панель профиля -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasProfile" aria-labelledby="offcanvasProfileLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasProfileLabel">Профиль</h5>
@@ -53,6 +55,7 @@
                     <li><a asp-controller="Authentication" asp-action="Logout" class="btn btn-link">Выйти из системы</a></li>
                     <li><a asp-controller="User" asp-action="Index" class="btn btn-link">Пользователи</a></li>
                     <li><a asp-controller="User" asp-action="ShowRoles" class="btn btn-link">Роли пользователей</a></li>
+                    <li> <a asp-controller="Favorites" asp-action="Index" class="btn btn-link"> Мои избранные</a></li>
                 </ul>
             }
             else

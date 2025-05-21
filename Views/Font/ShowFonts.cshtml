@@ -1,21 +1,20 @@
 ﻿@model FrontendHelper.Models.FontViewModel
 @using System.IO
-@inject FHDatabase.Repositories.FontRepository fontRepository
+@* ужас *@
+@inject FHDatabase.Repositories.FontRepository fontRepository 
 
 @{
     // Берём все шрифты из репозитория
     var fonts = fontRepository.GetAssets();
 }
 
-@* ————————————————————————————————————————————— *@
-@* Подключаем внешние шрифты (Google Fonts и т.п.) *@
+@* подключение внешних шрифтов *@
 @foreach (var f in fonts.Where(x => !string.IsNullOrEmpty(x.Link)))
 {
     <link rel="stylesheet" href="@f.Link" />
 }
 
-@* ————————————————————————————————————————————— *@
-@* Объявляем локальные шрифты через @font-face *@
+@* объявление локальных шрифтов через @font-face *@
 <style>
 @foreach (var f in fonts.Where(x => !string.IsNullOrEmpty(x.LocalFileName)))
 {
@@ -29,17 +28,22 @@
 }
 </style>
 
-@* ————————————————————————————————————————————— *@
+
+
+
+
+
 <div class="container py-4">
   <h2 class="mb-4">Демонстрация шрифтов</h2>
 
-  <!-- Поле ввода текста -->
+
   <div class="mb-3">
     <label asp-for="InputText" class="form-label">Введите текст</label>
     <textarea asp-for="InputText" id="inputText" class="form-control" rows="3"></textarea>
   </div>
 
-  <!-- Селект со шрифтами -->
+
+
   <div class="d-flex align-items-end mb-3">
     <div class="flex-grow-1 me-2">
       <label asp-for="SelectedFont" class="form-label">Выберите шрифт</label>
@@ -49,20 +53,23 @@
         <option value="">— По умолчанию —</option>
         @foreach (var f in fonts)
         {
-            <!-- inline-стиль font-family для каждой опции -->
+
             <option value="@f.FontFamily"
                     style="font-family: '@f.FontFamily', sans-serif;">
                 @f.Name
-            </option>  <!-- turn0search0 -->
+            </option> 
         }
       </select>
+
+
+/*       для админа */
     </div>
     <div>
       <a asp-action="AddFont" class="btn btn-outline-primary mb-1">+ Добавить шрифт</a>
     </div>
   </div>
 
-  <!-- Превью и кнопка копирования -->
+
   <div class="mb-4">
     <label class="form-label">Результат</label>
     <div id="outputText" class="p-3 border" style="min-height:60px; white-space: pre-wrap;">
@@ -71,6 +78,10 @@
   </div>
   <button id="copyBtn" class="btn btn-outline-secondary">Скопировать</button>
 </div>
+
+
+
+
 
 @section Scripts {
 <script>

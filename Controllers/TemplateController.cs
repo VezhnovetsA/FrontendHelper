@@ -12,7 +12,6 @@ namespace FrontendHelper.Controllers
             _converter = converter;
         }
 
-        // GET /Template
         [HttpGet]
         public IActionResult ShowAllTemplates()
         {
@@ -20,7 +19,6 @@ namespace FrontendHelper.Controllers
             return View(viewModels);
         }
 
-        // GET /Template/Details/5
         [HttpGet]
         public IActionResult ShowTemplate(int id)
         {

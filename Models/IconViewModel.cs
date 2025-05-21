@@ -9,5 +9,7 @@
         public string Topic { get; set; }
 
         public string Img { get; set; }
+
+        public bool IsFavorited { get; set; }
     }
 }

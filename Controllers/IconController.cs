@@ -14,11 +14,16 @@ namespace FrontendHelper.Controllers
         private IconRepository _iconRepository;
         private readonly IFileService _fileService;
         private FilterRepository _filterRepository;
-        public IconController(IconRepository iconRepository, IFileService fileService, FilterRepository filterRepository)
+        private FavoriteRepository _favoriteRepository;
+        public IconController(IconRepository iconRepository,
+            IFileService fileService,
+            FilterRepository filterRepository,
+            FavoriteRepository favoriteRepository)
         {
             _iconRepository = iconRepository;
             _fileService = fileService;
             _filterRepository = filterRepository;
+            _favoriteRepository = favoriteRepository;
         }
 
 
@@ -32,18 +37,18 @@ namespace FrontendHelper.Controllers
 
 
 
-        // показ всех иконок по определенной теме
         public IActionResult ShowAllIconsOnTheTopic(string topic)
         {
+            var userId = int.TryParse(User.FindFirst("Id")?.Value, out var uid) ? uid : (int?)null;
+
             var viewModels = _iconRepository
                 .GetAllIconsByTopic(topic)
-                .Select(PassDataToViewModel)
+                .Select(data => PassDataToViewModelForFavorites(data, userId))
                 .ToList();
 
-            ViewBag.Topic = topic;   // для вывода темы во вьюшке, ПОТОМ УБЕРУ
+            ViewBag.Topic = topic;
             return View(viewModels);
         }
-
 
 
         // показ групп иконок по всем темам
@@ -63,46 +68,6 @@ namespace FrontendHelper.Controllers
             return View(viewModels);
         }
 
-
-
-
-        //[HttpGet]
-        //public IActionResult AddIcon() => View(new CreateIconViewModel());
-
-
-
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> AddIcon(CreateIconViewModel viewModel)
-        //{
-        //    if (!ModelState.IsValid)
-        //        return View(viewModel);
-
-        //    if (_iconRepository.CheckIconDuplicate(viewModel.Name, viewModel.Topic))
-        //    {
-        //        ModelState.AddModelError(nameof(viewModel.Name),
-        //            "Иконка с таким именем уже существует в этой теме");
-        //        return View(viewModel);
-        //    }
-
-        //    // Сохраняем файл через сервис и получаем новое имя
-        //    var savedFileName = await _fileService.SaveFileAsync(viewModel.ImgFile, "images/icons");
-
-        //    // Добавляем запись в БД
-        //    _iconRepository.AddAsset(new IconData
-        //    {
-        //        Name = viewModel.Name,
-        //        Topic = viewModel.Topic,
-        //        Img = savedFileName
-        //    });
-
-        //    return RedirectToAction(nameof(ShowGroupsOfIconsOnTheTopic));
-        //}
-
-
-        // ---------------------------------------------------------
-        // GET: отдаём форму с доступными фильтрами
 
         [HttpGet]
         [Authorize]
@@ -128,46 +93,46 @@ namespace FrontendHelper.Controllers
         // POST: сохраняем иконку + связи с фильтрами
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddIcon(CreateIconViewModel vm)
+        public async Task<IActionResult> AddIcon(CreateIconViewModel viewModel)
         {
-            // 1) Если валидация не прошла — вернуть форму с фильтрами
+            //  валидация не прошла —> вернуть форму создания
             if (!ModelState.IsValid)
             {
-                vm.AvailableFilters = _filterRepository.GetAssets()
+                viewModel.AvailableFilters = _filterRepository.GetAssets()
                     .Where(f => f.AssetType == "Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList();
-                return View(vm);
+                return View(viewModel);
             }
 
-            // 2) Проверка дубликата как было
-            if (_iconRepository.CheckIconDuplicate(vm.Name, vm.Topic))
+            //  проверка дубликата иконки (если нет дубликата - создание иконки)
+            if (_iconRepository.CheckIconDuplicate(viewModel.Name, viewModel.Topic))
             {
-                ModelState.AddModelError(nameof(vm.Name),
+                ModelState.AddModelError(nameof(viewModel.Name),
                     "Иконка с таким именем уже существует в этой теме");
 
-                vm.AvailableFilters = _filterRepository.GetAssets()
+                viewModel.AvailableFilters = _filterRepository.GetAssets()
                     .Where(f => f.AssetType == "Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList();
 
-                return View(vm);
+                return View(viewModel);
             }
 
-            // 3) Сохранение файла и создание записи IconData
+            // сохранение картинки и создание записи в таблицу иконок
             var savedFileName = await _fileService
-                .SaveFileAsync(vm.ImgFile, "images/icons");
+                .SaveFileAsync(viewModel.ImgFile, "images/icons");
 
             var icon = new IconData
             {
-                Name = vm.Name,
-                Topic = vm.Topic,
+                Name = viewModel.Name,
+                Topic = viewModel.Topic,
                 Img = savedFileName
             };
             _iconRepository.AddAsset(icon);
 
-            // 4) Связывание фильтров (AssetFilter) для каждого выбранного Id
-            foreach (var filterId in vm.SelectedFilterIds)
+            // связка выбранных фильтров (таблица AssetFilter) с иконкой по их id
+            foreach (var filterId in viewModel.SelectedFilterIds)
             {
                 _filterRepository.AddAssetFilter(new AssetFilter
                 {
@@ -185,7 +150,7 @@ namespace FrontendHelper.Controllers
 
 
 
-        // показ иконок по введенному запросу
+        // показ иконок по введенному запросу (потом создам)
         public IActionResult ShowFoundIconsForRequest(string request)
         {
             return View();
@@ -193,7 +158,7 @@ namespace FrontendHelper.Controllers
 
 
 
-        // передача данных во ViewModel (return)
+        // передача данных во ViewModel (маппер)
         private IconViewModel PassDataToViewModel(IconData iconData)
         {
             return new IconViewModel
@@ -202,6 +167,24 @@ namespace FrontendHelper.Controllers
                 Name = iconData.Name,
                 Img = iconData.Img,
                 Topic = iconData.Topic
+            };
+        }
+
+        // еще один маппер но с работой с избранными
+        private IconViewModel PassDataToViewModelForFavorites(IconData iconData, int? userId)
+        {
+            var isFav = userId.HasValue
+                && _favoriteRepository
+                    .GetByUser(userId.Value)
+                    .Any(f => f.AssetType == "Icon" && f.AssetId == iconData.Id);
+
+            return new IconViewModel
+            {
+                Id = iconData.Id,
+                Name = iconData.Name,
+                Topic = iconData.Topic,
+                Img = iconData.Img,
+                IsFavorited = isFav
             };
         }
 

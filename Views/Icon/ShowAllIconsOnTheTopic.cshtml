@@ -1,4 +1,10 @@
 ﻿@model IEnumerable<FrontendHelper.Models.IconViewModel>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@* пустая форма для включения hidden-токена *@
+<form id="antiforgery-form">
+    @Html.AntiForgeryToken()
+</form>
 
 <div class="container-fluid">
     <h2 class="mb-4">@ViewData["Title"]</h2>
@@ -6,10 +12,14 @@
         @foreach (var icon in Model)
         {
             <div class="col-2 text-center mb-4">
-                <div class="icon-wrapper position-relative" data-url="@Url.Content($"~/images/icons/{icon.Img}")" style="cursor:pointer;">
+                <div class="position-relative">
                     <img src="@Url.Content($"~/images/icons/{icon.Img}")"
-                         class="img-fluid"
-                         alt="@icon.Name"/>
+                         class="img-fluid" alt="@icon.Name" />
+
+                    <button class="btn btn-sm btn-light favorite-toggle position-absolute top-0 end-0 m-1"
+                            data-type="Icon" data-id="@icon.Id" title="Избранное">
+                        <i class="bi @(icon.IsFavorited ? "bi-star-fill" : "bi-star") text-warning"></i>
+                    </button>
                 </div>
 
                 <div class="small mt-2">@icon.Name</div>
@@ -22,7 +32,6 @@
             </div>
         }
     </div>
-
     <div class="mt-3">
         <a asp-action="ShowGroupsOfIconsOnTheTopic" class="btn btn-secondary">
             ← Назад ко всем темам
@@ -30,3 +39,33 @@
     </div>
 </div>
 
+
+@section Scripts {
+    <script>
+        // получение токена
+        const token = document.querySelector('#antiforgery-form input[name="__RequestVerificationToken"]')?.value || '';
+
+        document.querySelectorAll('.favorite-toggle').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            const id   = parseInt(btn.dataset.id, 10);
+
+            fetch('/Favorites/Toggle', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token
+              },
+              body: JSON.stringify({ assetType: type, assetId: id })
+            })
+            .then(res => res.json())
+            .then(data => {
+              const iconEl = btn.querySelector('i');
+              const cls    = data.favorited ? 'bi-star-fill' : 'bi-star';
+              iconEl.className = `bi ${cls} text-warning`;
+            })
+            .catch(console.error);
+          });
+        });
+    </script>
+}

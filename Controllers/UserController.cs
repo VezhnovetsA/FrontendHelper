@@ -110,7 +110,7 @@ namespace FrontendHelper.Controllers
         }
 
 
-        //move
+
         private List<Permission> GetPermissions(Permission rolePermission)
         {
             return Enum
@@ -119,7 +119,7 @@ namespace FrontendHelper.Controllers
                 .ToList();
         }
 
-        //move
+
         private string GetDisplayName(Permission permission)
         {
             return Enum.GetName<Permission>(permission);

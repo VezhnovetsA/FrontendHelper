@@ -6,13 +6,13 @@ namespace FrontendHelper.Models
     [OnlyOneFontResource(nameof(Link), nameof(FontFile), ErrorMessage = "Укажите либо ссылку, либо файл шрифта.")]
     public class CreateFontViewModel
     {
-        [Required] /////???
+        [Required] 
         public string Name { get; set; }
 
-        [Required]   /////???
+        [Required] 
         public string FontFamily { get; set; }
 
-        [Url]  /////???
+        [Url] 
         public string? Link { get; set; }
 
         [FileExtensions(Extensions = "ttf,otf,woff,woff2", ErrorMessage = "Неподдерживаемый формат шрифта.")]
