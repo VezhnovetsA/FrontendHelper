@@ -4,29 +4,30 @@ namespace FrontendHelper.Services
 {
     public class FileService : IFileService
     {
-        private readonly IWebHostEnvironment _env;
+        private readonly IWebHostEnvironment _enviroment;
 
-        public FileService(IWebHostEnvironment env)
+        public FileService(IWebHostEnvironment enviroment)
         {
-            _env = env;
+            _enviroment = enviroment;
         }
 
         public async Task<string> SaveFileAsync(IFormFile file, string subFolder)
         {
             if (file == null || file.Length == 0)
-                //throw new ArgumentException("Файл не выбран", nameof(file));
                 return string.Empty;
 
-            var ext = Path.GetExtension(file.FileName);
-            var fileName = $"{Guid.NewGuid()}{ext}";
+            var extension = Path.GetExtension(file.FileName);
 
-            // путь к папке wwwroot/{subFolder}
-            var uploadDir = Path.Combine(_env.WebRootPath, subFolder);
-            if (!Directory.Exists(uploadDir))
-                Directory.CreateDirectory(uploadDir);
+            // рандом имя для папки
+            var fileName = $"{Guid.NewGuid()}{extension}";
 
-            var filePath = Path.Combine(uploadDir, fileName);
-            using var stream = new FileStream(filePath, FileMode.Create);
+            // строка пути к папке wwwroot/папка_с_ресурсами:
+            var pathToFolder = Path.Combine(_enviroment.WebRootPath, subFolder);
+            if (!Directory.Exists(pathToFolder))
+                Directory.CreateDirectory(pathToFolder);
+
+            var pathToFile = Path.Combine(pathToFolder, fileName);
+            using var stream = new FileStream(pathToFile, FileMode.Create);
             await file.CopyToAsync(stream);
 
             return fileName;

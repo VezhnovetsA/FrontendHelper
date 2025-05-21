@@ -36,6 +36,7 @@ builder.Services.AddScoped<TemplateRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoleRepository>();
 builder.Services.AddScoped<FilterRepository>();
+builder.Services.AddScoped<FavoriteRepository>();
 
 
 //регистрация сервисов

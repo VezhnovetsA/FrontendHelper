@@ -2,9 +2,9 @@
 {
     public interface IFileService
     {
-        /// <summary>
-        /// Сохраняет файл в подкаталог wwwroot/{subFolder} и возвращает новое имя файла.
-        /// </summary>
+
+        /// будет сохранять файл в папку в  wwwroot/папка_ресрсов и возвращать новое имя файла
+
         Task<string> SaveFileAsync(IFormFile file, string subFolder);
     }
 }

@@ -32,6 +32,6 @@ namespace FrontendHelper.Controllers
             _filterRepository.AddAsset(f);
             return RedirectToAction(nameof(Index));
         }
-        // Edit, Delete – стандартный CRUD
+
     }
 }

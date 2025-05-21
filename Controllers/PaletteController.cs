@@ -19,10 +19,7 @@ namespace FrontendHelper.Controllers
 
         public IActionResult ShowAllPalettes()
         {
-            // Получаем все палитры с цветами
             var palettes = _paletteRepository.GetAllPalettes();
-
-            // Мапим каждую PaletteData в PaletteViewModel
             var viewModels = palettes
                 .Select(PassDataToViewModel)
                 .ToList();
