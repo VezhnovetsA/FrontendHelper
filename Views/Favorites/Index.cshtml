@@ -1,4 +1,7 @@
 ﻿@model FrontendHelper.Models.FavoritesViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<form id="antiforgery-form">@Html.AntiForgeryToken()</form>
 
 <div class="container py-4">
     <h2 class="mb-4">Мои избранные</h2>
@@ -36,28 +39,37 @@
     }
 </div>
 
+
+
 @section Scripts {
     <script>
+        // Берём токен из формы
+        const token = document.querySelector('#antiforgery-form input[name="__RequestVerificationToken"]').value;
+
         document.querySelectorAll('.remove-fav').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const type = btn.dataset.type;
-                const id   = btn.dataset.id;
-                fetch('/Favorites/Toggle', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: JSON.stringify({ assetType: type, assetId: parseInt(id) })
-                })
-                .then(() => {
-                    // убрать карточку элемента из списка (не раб)
-                    btn.closest('.col-md-3').remove();
-                    if (!document.querySelector('.col-md-3')) {
-                        document.querySelector('.container').innerHTML = '<p>У вас ещё нет избранных элементов.</p>';
-                    }
-                });
-            });
+          btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            const id   = parseInt(btn.dataset.id, 10);
+
+            fetch('/Favorites/Toggle', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token
+              },
+              body: JSON.stringify({ assetType: type, assetId: id })
+            })
+            .then(res => {
+              if (!res.ok) throw new Error('Ошибка при удалении из избранного');
+              // Удаляем карточку
+              btn.closest('.col-md-3').remove();
+              // Если больше нет элементов
+              if (!document.querySelector('.col-md-3')) {
+                document.querySelector('.container.py-4').innerHTML = '<p>У вас ещё нет избранных элементов.</p>';
+              }
+            })
+            .catch(console.error);
+          });
         });
     </script>
 }
