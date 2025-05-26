@@ -52,10 +52,16 @@
             {
                 <p>Добро пожаловать, <strong>@authService.GetUserName()</strong></p>
                 <ul class="list-unstyled">
-                    <li><a asp-controller="Authentication" asp-action="Logout" class="btn btn-link">Выйти из системы</a></li>
-                    <li><a asp-controller="User" asp-action="Index" class="btn btn-link">Пользователи</a></li>
-                    <li><a asp-controller="User" asp-action="ShowRoles" class="btn btn-link">Роли пользователей</a></li>
                     <li> <a asp-controller="Favorites" asp-action="Index" class="btn btn-link"> Мои избранные</a></li>
+
+                    @if(authService.IsAdmin())
+                    {
+                        <li><a asp-controller="User" asp-action="Index" class="btn btn-link">Пользователи</a></li>
+                        <li><a asp-controller="User" asp-action="ShowRoles" class="btn btn-link">Роли пользователей</a></li>
+                    }
+
+                    <li><a asp-controller="Authentication" asp-action="Logout" class="btn btn-link">Выйти из системы</a></li>
+
                 </ul>
             }
             else

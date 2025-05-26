@@ -1,4 +1,6 @@
-﻿@model IEnumerable<IconGroupViewModel>
+﻿@using FrontendHelper.Services
+@model IEnumerable<IconGroupViewModel>
+@inject AuthService authService
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -8,14 +10,18 @@
 <div class="container-fluid">
     <div class="row g-4">
 
-        <div class="col-2 text-center mb-3">
-            <a asp-action="AddIcon" class="card h-100 shadow-sm d-flex flex-column
+         @if(authService.IsAdmin())
+         {
+            <div class="col-2 text-center mb-3">
+                <a asp-action="AddIcon" class="card h-100 shadow-sm d-flex flex-column
                                 justify-content-center align-items-center
                                 text-decoration-none text-dark">
-                <div class="bi bi-plus fs-1 mb-2"></div>
-                <div class="small">Добавить</div>
-            </a>
-        </div>
+                    <div class="bi bi-plus fs-1 mb-2"></div>
+                    <div class="small">Добавить</div>
+                </a>
+            </div>
+         }
+
 
 
 

@@ -18,7 +18,7 @@ namespace FrontendHelper.Services
 
         internal string GetUserName()
         {
-            var userName = GetClaim(CLAIM_KEY_NAME) ?? "Guest";
+            var userName = GetClaim(CLAIM_KEY_NAME) ?? "Гость";
 
             return userName;
         }
