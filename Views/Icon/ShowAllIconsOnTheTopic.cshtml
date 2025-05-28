@@ -1,5 +1,7 @@
-﻿@model IEnumerable<FrontendHelper.Models.IconViewModel>
+﻿@using FrontendHelper.Services
+@model IEnumerable<FrontendHelper.Models.IconViewModel>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject AuthService authService
 
 @* пустая форма для включения hidden-токена *@
 <form id="antiforgery-form">
@@ -30,6 +32,20 @@
                     Скачать
                 </a>
             </div>
+
+            @if (authService.IsAdmin())
+            {
+                <div class="mt-2">
+                   @*  <a asp-action="EditIcon" asp-route-id="@icon.Id" class="btn btn-sm btn-outline-primary me-1">✏️</a> *@
+                    <form asp-action="DeleteIcon" asp-route-id="@icon.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Удалить эту иконку?');">
+                            🗑️
+                        </button>
+                    </form>
+                </div>
+            }
         }
     </div>
     <div class="mt-3">

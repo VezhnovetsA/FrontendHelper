@@ -1,4 +1,5 @@
 ﻿using FHDatabase.Repositories;
+using FrontendHelper.Controllers.AuthorizationAttributes;
 using FrontendHelper.Models;
 using FrontendHelper.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ namespace FrontendHelper.Controllers
             _fileService = fileService;
         }
 
-
+        [IsAdmin]
         [HttpGet]
         public IActionResult AddFont()
         {

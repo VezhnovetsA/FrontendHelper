@@ -24,19 +24,17 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Toggle([FromBody] FavoriteToggleModel model)
         {
-            if (!User.Identity.IsAuthenticated)
-                return Unauthorized();
 
             var userId = _authService.GetUserId();
 
             var isExists = _favoriteRepository
-                .GetByUser(userId)
+                .GetFavoriteElementByUser(userId)
                 .Any(f => f.AssetType == model.AssetType && f.AssetId == model.AssetId);
 
             if (isExists)
-                _favoriteRepository.Remove(userId, model.AssetType, model.AssetId);
+                _favoriteRepository.RemoveFavoriteElement(userId, model.AssetType, model.AssetId);
             else
-                _favoriteRepository.Add(userId, model.AssetType, model.AssetId);
+                _favoriteRepository.AddFavoriteElement(userId, model.AssetType, model.AssetId);
 
             return Json(new { favorited = !isExists });
         }
@@ -46,11 +44,12 @@ namespace FrontendHelper.Controllers
         public IActionResult Index()
         {
             var userId = _authService.GetUserId();
-            var favs = _favoriteRepository.GetByUser(userId);
+            var favs = _favoriteRepository.GetFavoriteElementByUser(userId);
 
             var viewModel = new FavoritesViewModel
             {
-                Favorites = favs.Select(f => {
+                Favorites = favs.Select(f =>
+                {
 
                     if (f.AssetType == "Icon")
                     {

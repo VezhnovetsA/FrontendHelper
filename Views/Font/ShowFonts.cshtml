@@ -3,8 +3,9 @@
 @* ужас *@
 @inject FHDatabase.Repositories.FontRepository fontRepository 
 
+
 @{
-    // Берём все шрифты из репозитория
+    //все шрифты из репозитория
     var fonts = fontRepository.GetAssets();
 }
 
@@ -61,8 +62,6 @@
         }
       </select>
 
-
-/*       для админа */
     </div>
     <div>
       <a asp-action="AddFont" class="btn btn-outline-primary mb-1">+ Добавить шрифт</a>
@@ -76,7 +75,7 @@
       @Model.InputText
     </div>
   </div>
-  <button id="copyBtn" class="btn btn-outline-secondary">Скопировать</button>
+
 </div>
 
 
