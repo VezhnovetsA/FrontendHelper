@@ -4,12 +4,15 @@ namespace FrontendHelper.Services
 {
     public class FileService : IFileService
     {
-        private readonly IWebHostEnvironment _enviroment;
+        private readonly IWebHostEnvironment _environment;
 
         public FileService(IWebHostEnvironment enviroment)
         {
-            _enviroment = enviroment;
+            _environment = enviroment;
         }
+
+
+
 
         public async Task<string> SaveFileAsync(IFormFile file, string subFolder)
         {
@@ -22,7 +25,7 @@ namespace FrontendHelper.Services
             var fileName = $"{Guid.NewGuid()}{extension}";
 
             // строка пути к папке wwwroot/папка_с_ресурсами:
-            var pathToFolder = Path.Combine(_enviroment.WebRootPath, subFolder);
+            var pathToFolder = Path.Combine(_environment.WebRootPath, subFolder);
             if (!Directory.Exists(pathToFolder))
                 Directory.CreateDirectory(pathToFolder);
 
@@ -31,6 +34,28 @@ namespace FrontendHelper.Services
             await file.CopyToAsync(stream);
 
             return fileName;
+        }
+
+
+
+
+        public void DeleteFile(string fileName, string subFolder)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return;
+
+            var path = Path.Combine(_environment.WebRootPath, subFolder, fileName);
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+
+
+
+
+        public async Task<string> ReplaceFileAsync(IFormFile newFile, string oldFileName, string subFolder)
+        {
+            DeleteFile(oldFileName, subFolder);
+            return await SaveFileAsync(newFile, subFolder);
         }
     }
 }

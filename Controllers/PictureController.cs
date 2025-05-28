@@ -23,7 +23,7 @@ namespace FrontendHelper.Controllers
                 .Select(PassDataToViewModel)
                 .ToList();
 
-            ViewBag.Topic = topic;   // для вывода темы во вьюшке, ПОТОМ УБЕРУ
+           
             return View(viewModels);
         }
 

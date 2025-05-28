@@ -43,7 +43,7 @@
 
 @section Scripts {
     <script>
-        // Берём токен из формы
+        // токен из формы
         const token = document.querySelector('#antiforgery-form input[name="__RequestVerificationToken"]').value;
 
         document.querySelectorAll('.remove-fav').forEach(btn => {
@@ -61,9 +61,9 @@
             })
             .then(res => {
               if (!res.ok) throw new Error('Ошибка при удалении из избранного');
-              // Удаляем карточку
+              // удаление карточки элемента
               btn.closest('.col-md-3').remove();
-              // Если больше нет элементов
+              // если нет избранных
               if (!document.querySelector('.col-md-3')) {
                 document.querySelector('.container.py-4').innerHTML = '<p>У вас ещё нет избранных элементов.</p>';
               }

@@ -1,0 +1,41 @@
+﻿@model FrontendHelper.Models.SearchViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<div class="container py-4">
+    <h2>Результаты поиска</h2>
+
+    @if (string.IsNullOrWhiteSpace(Model.Query))
+    {
+        <p>Введите запрос выше, чтобы начать поиск.</p>
+    }
+    else if (!Model.Results.Any())
+    {
+        <p>По запросу «<strong>@Model.Query</strong>» ничего не найдено.</p>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model.Results)
+            {
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        @if (!string.IsNullOrEmpty(item.PreviewUrl))
+                        {
+                            <img src="@item.PreviewUrl" class="card-img-top" alt="@item.Name" />
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Name</h5>
+                            <p><em>@item.ResourceType</em></p>
+                            <a asp-controller="@item.ResourceType"
+                               asp-action="Details"
+                               asp-route-id="@item.Id"
+                               class="btn btn-outline-primary btn-sm">
+                                Открыть
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

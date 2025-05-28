@@ -90,24 +90,21 @@
         </aside>
 
         <div class="container-fluid p-4">
-            <div class="d-flex mb-4 align-items-center">
-                <div class="dropdown me-2">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Все категории
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Иконки</a></li>
-                        <li><a class="dropdown-item" href="#">Шрифты</a></li>
-                        <li><a class="dropdown-item" href="#">Фотографии</a></li>
-                        <li><a class="dropdown-item" href="#">Кнопки</a></li>
-                        <li><a class="dropdown-item" href="#">Анимации</a></li>
-                        <li><a class="dropdown-item" href="#">Формы</a></li>
-                        <li><a class="dropdown-item" href="#">Шаблоны</a></li>
-                    </ul>
-                </div>
-                <input type="text" class="form-control me-2" placeholder="Поиск..." />
-                <button class="btn btn-primary">Найти</button>
-            </div>
+            <form class="d-flex mb-4 align-items-center"
+                  method="get"
+                  asp-controller="Search"
+                  asp-action="Index">
+
+                <input type="hidden"
+                       name="resourceTypeFilter"
+                       value="@(ViewBag.CurrentResourceType ?? "")" />
+
+                <input name="searchQuery" type="text" value="@(ViewBag.CurrentQuery ?? "")" class="form-control me-2" placeholder="Поиск по всем ресурсам..." /> 
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-1"></i>Найти
+                </button>
+            </form>
 
             @RenderBody()
         </div>

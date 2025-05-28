@@ -9,11 +9,14 @@
                 <div class="card h-100 shadow-sm d-flex flex-column p-3">
 
                     <div class="text-center mb-3">
- 
-                        <iframe src="@Url.Content($"~/buttons/{button.ButtonCode}")"
-                                frameborder="0"
-                                style="border:none; width:100%; height:50px;">
-                        </iframe>
+
+                        <div class="text-center mb-3">
+                            <iframe src="@Url.Content($"~/buttons/{button.ButtonCode}")"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="border:none; width:100%; height:50px; overflow:hidden;">
+                            </iframe>
+                        </div>
 
                     </div>
 

@@ -6,7 +6,9 @@ using FrontendHelper.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-
+using System;
+using System.Drawing;
+using FhEnums;
 namespace FrontendHelper.Controllers
 {
     public class IconController : Controller
@@ -70,8 +72,7 @@ namespace FrontendHelper.Controllers
 
 
         [HttpGet]
-        [Authorize]
-        [HasPermission(FhEnums.Permission.CanAddPublicAsset)]
+        [HasPermission(Permission.CanAddPublicAsset)]
         public IActionResult AddIcon()
         {
             if (!ModelState.IsValid)
@@ -89,8 +90,7 @@ namespace FrontendHelper.Controllers
             return View(viewModel);
         }
 
-        // ---------------------------------------------------------
-        // POST: сохраняем иконку + связи с фильтрами
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddIcon(CreateIconViewModel viewModel)
@@ -147,14 +147,20 @@ namespace FrontendHelper.Controllers
 
 
 
-
-
-
-        // показ иконок по введенному запросу (потом создам)
-        public IActionResult ShowFoundIconsForRequest(string request)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [HasPermission(Permission.CanRemovePublicAsset)]
+        public IActionResult DeleteIcon(int id)
         {
-            return View();
+            var icon = _iconRepository.GetAsset(id);
+            if (icon == null) return NotFound();
+            _fileService.DeleteFile(icon.Img, "images/icons");
+            _iconRepository.RemoveAsset(id);
+
+            return RedirectToAction(nameof(ShowGroupsOfIconsOnTheTopic));
         }
+
+
 
 
 
@@ -175,7 +181,7 @@ namespace FrontendHelper.Controllers
         {
             var isFav = userId.HasValue
                 && _favoriteRepository
-                    .GetByUser(userId.Value)
+                    .GetFavoriteElementByUser(userId.Value)
                     .Any(f => f.AssetType == "Icon" && f.AssetId == iconData.Id);
 
             return new IconViewModel
