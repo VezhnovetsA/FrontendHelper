@@ -25,63 +25,91 @@
         <div class="container d-flex align-items-center justify-content-between">
             <!-- Logo -->
             <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
-                <!-- Icon colored as text -->
                 <i class="bi bi-app-indicator logo-icon"></i>
                 <span class="logo-text">FRONTENDHELPER</span>
             </a>
-            <!-- Desktop menu dropdown -->
-            <div class="dropdown d-none d-lg-block me-3">
-                <button class="btn btn-link dropdown-toggle" type="button" id="desktopMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                    Меню
-                </button>
-                <ul class="dropdown-menu dropdown-glow" aria-labelledby="desktopMenu">
-                    <li><a class="dropdown-item nav-link-item" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a></li>
-                    <li><a class="dropdown-item nav-link-item" asp-controller="Picture" asp-action="ShowPreviewPictureOnTheTopic">Картинки</a></li>
-                    <li><a class="dropdown-item nav-link-item" asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимированные</a></li>
-                    <li><a class="dropdown-item nav-link-item" asp-controller="Button" asp-action="ShowAllButtons">Кнопки</a></li>
-                    <li><a class="dropdown-item nav-link-item" asp-controller="Font" asp-action="ShowFonts">Шрифты</a></li>
-                    <li><a class="dropdown-item nav-link-item" asp-controller="Form" asp-action="ShowAllForms">Формы</a></li>
-                    <li><a class="dropdown-item nav-link-item" asp-controller="Palette" asp-action="ShowAllPalettes">Палитры</a></li>
-                    <li><a class="dropdown-item nav-link-item" asp-controller="Template" asp-action="ShowAllTemplates">Шаблоны</a></li>
-                    <li><a class="dropdown-item nav-link-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a></li>
-                </ul>
-            </div>
-            <!-- Mobile menu toggle -->
-            <button class="btn mobile-menu-btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNav" aria-controls="mobileNav" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-list h3 mb-0 text-dark"></i>
-            </button>
-            <!-- Right icons -->
+
+            <!-- Right icons (телефон, тема, профиль) -->
             <div class="right-icons d-flex align-items-center">
-                <div class="dropdown me-3">
+                <div class="dropdown me-3 d-none d-lg-block">
                     <a href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                        <!-- Contact icon -->
                         <i class="bi bi-telephone-fill header-icon"></i>
                     </a>
-                    <ul class="dropdown-menu dropdown-glow" aria-labelledby="">
+                    <ul class="dropdown-menu dropdown-glow">
                         <li><a class="dropdown-item" href="tel:+123456789">+1 234 567 89</a></li>
                         <li><a class="dropdown-item" href="mailto:info@frontendhelper.com">info@frontendhelper.com</a></li>
                     </ul>
                 </div>
-                <a class="me-3 theme-toggle" id="themeToggle" href="#" title="Toggle theme"><i class="bi bi-brightness-high h4 mb-0"></i></a>
-                <!-- Profile icon -->
+                <a class="me-3 theme-toggle" id="themeToggle" href="#" title="Toggle theme">
+                    <i class="bi bi-brightness-high"></i>
+                </a>
                 <a data-bs-toggle="offcanvas" data-bs-target="#offcanvasProfile" aria-controls="offcanvasProfile">
                     <i class="bi bi-person-circle header-icon"></i>
                 </a>
+                <!-- Бургер для мобильного меню -->
+                <button class="btn mobile-menu-btn d-lg-none ms-3" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#mobileNav"
+                        aria-controls="mobileNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="bi bi-list h3 mb-0 text-dark"></i>
+                </button>
             </div>
         </div>
-        <!-- Mobile navigation menu -->
-        <div class="collapse" id="mobileNav">
-            <nav class="mobile-nav-links d-flex flex-column bg-light p-3">
-                <a class="mobile-item py-2 nav-link-item" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a>
-                <a class="mobile-item py-2 nav-link-item" asp-controller="Picture" asp-action="ShowPreviewPictureOnTheTopic">Картинки</a>
-                <a class="mobile-item py-2 nav-link-item" asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимированные</a>
-                <a class="mobile-item py-2 nav-link-item" asp-controller="Button" asp-action="ShowAllButtons">Кнопки</a>
-                <a class="mobile-item py-2 nav-link-item" asp-controller="Font" asp-action="ShowFonts">Шрифты</a>
-                <a class="mobile-item py-2 nav-link-item" asp-controller="Form" asp-action="ShowAllForms">Формы</a>
-                <a class="mobile-item py-2 nav-link-item" asp-controller="Palette" asp-action="ShowAllPalettes">Палитры</a>
-                <a class="mobile-item py-2 nav-link-item" asp-controller="Template" asp-action="ShowAllTemplates">Шаблоны</a>
-                <a class="mobile-item py-2 nav-link-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a>
-            </nav>
+
+        <!-- Горизонтальная навигация (desktop) -->
+        <div class="container d-none d-lg-flex justify-content-center mt-3">
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="Picture" asp-action="ShowPreviewPictureOnTheTopic">Картинки</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимированные</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="Button" asp-action="ShowAllButtons">Кнопки</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="Font" asp-action="ShowFonts">Шрифты</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="Form" asp-action="ShowAllForms">Формы</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="Palette" asp-action="ShowAllPalettes">Палитры</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="Template" asp-action="ShowAllTemplates">Шаблоны</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Мобильное меню (collapsed) -->
+        <div class="container d-lg-none collapse mt-3" id="mobileNav">
+            <ul class="mobile-nav-links list-unstyled">
+                <li><a class="mobile-item" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a></li>
+                <li><a class="mobile-item" asp-controller="Picture" asp-action="ShowPreviewPictureOnTheTopic">Картинки</a></li>
+                <li><a class="mobile-item" asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимированные</a></li>
+                <li><a class="mobile-item" asp-controller="Button" asp-action="ShowAllButtons">Кнопки</a></li>
+                <li><a class="mobile-item" asp-controller="Font" asp-action="ShowFonts">Шрифты</a></li>
+                <li><a class="mobile-item" asp-controller="Form" asp-action="ShowAllForms">Формы</a></li>
+                <li><a class="mobile-item" asp-controller="Palette" asp-action="ShowAllPalettes">Палитры</a></li>
+                <li><a class="mobile-item" asp-controller="Template" asp-action="ShowAllTemplates">Шаблоны</a></li>
+                <li><a class="mobile-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a></li>
+            </ul>
+        </div>
+
+        <!-- Search Bar внутри шапки -->
+        <div class="container search-form mt-3">
+            <form class="d-flex w-100" method="get" asp-controller="Search" asp-action="Index">
+                <input type="hidden" name="resourceTypeFilter" value="@(ViewBag.CurrentResourceType ?? "")" />
+                <input name="searchQuery" type="text" class="form-control search-input me-2" placeholder="Поиск..." />
+                <button type="submit" class="btn btn-glow btn-lg text-center">Найти</button>
+            </form>
         </div>
     </header>
 
@@ -96,20 +124,32 @@
             {
                 <p>Добро пожаловать, <strong>@authService.GetUserName()</strong></p>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a asp-controller="Favorites" asp-action="Index" class="btn btn-glow w-100 text-center">Мои избранные</a></li>
+                    <li class="mb-2">
+                        <a asp-controller="Favorites" asp-action="Index" class="btn btn-glow w-100 text-center">Мои избранные</a>
+                    </li>
                     @if (authService.IsAdmin())
                     {
-                        <li class="mb-2"><a asp-controller="User" asp-action="Index" class="btn btn-glow w-100 text-center">Пользователи</a></li>
-                        <li class="mb-2"><a asp-controller="User" asp-action="ShowRoles" class="btn btn-glow w-100 text-center">Роли пользователей</a></li>
+                        <li class="mb-2">
+                            <a asp-controller="User" asp-action="Index" class="btn btn-glow w-100 text-center">Пользователи</a>
+                        </li>
+                        <li class="mb-2">
+                            <a asp-controller="User" asp-action="ShowRoles" class="btn btn-glow w-100 text-center">Роли пользователей</a>
+                        </li>
                     }
-                    <li><a asp-controller="Authentication" asp-action="Logout" class="btn btn-glow w-100 text-center">Выйти</a></li>
+                    <li>
+                        <a asp-controller="Authentication" asp-action="Logout" class="btn btn-glow w-100 text-center">Выйти</a>
+                    </li>
                 </ul>
             }
             else
             {
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a asp-controller="Authentication" asp-action="Login" class="btn btn-glow w-100 text-center">Вход</a></li>
-                    <li><a asp-controller="Authentication" asp-action="Registration" class="btn btn-glow w-100 text-center">Регистрация</a></li>
+                    <li class="mb-2">
+                        <a asp-controller="Authentication" asp-action="Login" class="btn btn-glow w-100 text-center">Вход</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Authentication" asp-action="Registration" class="btn btn-glow w-100 text-center">Регистрация</a>
+                    </li>
                 </ul>
             }
         </div>
@@ -118,12 +158,6 @@
     <!-- Main Content -->
     <main class="content-wrapper flex-fill">
         <div class="container py-4">
-            <!-- Search bar -->
-            <form class="d-flex mb-5 align-items-center justify-content-center" method="get" asp-controller="Search" asp-action="Index">
-                <input type="hidden" name="resourceTypeFilter" value="@(ViewBag.CurrentResourceType ?? "")" />
-                <input name="searchQuery" type="text" value="@(ViewBag.CurrentQuery ?? "")" class="form-control search-input me-2" placeholder="Поиск..." />
-                <button type="submit" class="btn btn-glow btn-lg text-center">Найти</button>
-            </form>
             @RenderBody()
         </div>
     </main>
@@ -131,7 +165,12 @@
     <!-- Footer -->
     <footer class="footer-bar mt-auto">
         <div class="container text-center py-3">
-            <p class="mb-0">&copy; 2025 FrontendHelper | <a href="#" class="footer-link nav-link-item">О нас</a> | <a href="#" class="footer-link nav-link-item">Помощь</a> | <a href="#" class="footer-link nav-link-item">Контакты</a></p>
+            <p class="mb-0">
+                &copy; 2025 FrontendHelper |
+                <a href="#" class="footer-link nav-link-item">О нас</a> |
+                <a href="#" class="footer-link nav-link-item">Помощь</a> |
+                <a href="#" class="footer-link nav-link-item">Контакты</a>
+            </p>
         </div>
     </footer>
 
@@ -144,15 +183,15 @@
         const htmlEl = document.documentElement;
         const themeToggle = document.getElementById('themeToggle');
         themeToggle.addEventListener('click', e => {
-          e.preventDefault();
-          const current = htmlEl.getAttribute('data-theme');
-          const next = current === 'light' ? 'dark' : 'light';
-          htmlEl.setAttribute('data-theme', next);
-          localStorage.setItem('theme', next);
+            e.preventDefault();
+            const current = htmlEl.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            htmlEl.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
         });
         const saved = localStorage.getItem('theme');
         if (saved === 'dark' || saved === 'light') {
-          htmlEl.setAttribute('data-theme', saved);
+            htmlEl.setAttribute('data-theme', saved);
         }
     </script>
 </body>

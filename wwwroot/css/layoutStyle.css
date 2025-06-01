@@ -1,27 +1,41 @@
 ﻿/* Color Variables */
 :root {
-    --bg: #FFF9F1; /* Слегка желтоватый фон */
-    --bg-alt: #F5EFE7; /* Чуть темнее фон */
+    /* Backgrounds */
+    --bg: #F5F7FA; /* Нейтральный светло-серый фон */
+    --bg-alt: #FFFFFF; /* Чуть светлее для градиентов, если нужно */
     --surface: #FFFFFF; /* Белые карточки */
-    --text-primary: #4E342E; /* Темно-коричневый текст */
-    --text-secondary: #6D4C41; /* Более светлый коричневый */
-    --shadow: rgba(0, 0, 0, 0.1); /* Тень */
-    --accent: #FFB300; /* Насыщенный теплый желтый */
-    --accent-hover: #FFD54F; /* Более светлый желтый при наведении */
-    --accent-glow: rgba(255, 179, 0, 0.5); /* Свечение */
-    --font-family: 'Varela Round', sans-serif; /* Новый шрифт */
+    /* Тексты */
+    --text-primary: #383F51; /* Тёмно-индиго */
+    --text-secondary: #7798AB; /* Холодный бирюзово-серый */
+    /* Градиенты */
+    --gradient-primary-from: #383F51;
+    --gradient-primary-to: #7798AB;
+    --gradient-secondary-from: #A6808C;
+    --gradient-secondary-to: #EDAFB8;
+    /* Акцент */
+    --accent: #94ECBE; /* Обновлённый мятный для белого фона */
+    --accent-hover: #69D8A0; /* Более тёмный при наведении */
+    --accent-glow: rgba(148, 236, 190, 0.4); /* Полупрозрачный мятный */
+    --font-family: 'Varela Round', sans-serif;
 }
 
     :root[data-theme="dark"] {
-        --bg: #3D3730; /* Спокойный темно-коричневый фон */
-        --bg-alt: #4A4038; /* Чуть светлее темный фон */
-        --surface: #3D3730; /* Темно-коричневые карточки */
-        --text-primary: #FFF8E1; /* Теплый кремовый текст */
-        --text-secondary: #D7CCC8; /* Светло-кремовый */
-        --shadow: rgba(0, 0, 0, 0.3); /* Более интенсивная тень */
-        --accent: #FFB300; /* Тот же насыщенный желтый */
-        --accent-hover: #FFD54F; /* Светлый желтый при наведении */
-        --accent-glow: rgba(255, 179, 0, 0.5); /* Свечение */
+        /* Фоны */
+        --bg: #1E1E1E; /* Тёмный фон */
+        --bg-alt: #2A2A2A; /* Немного светлее */
+        --surface: #2E2E2E;
+        /* Тексты */
+        --text-primary: #FFFFFF; /* Белый текст на тёмном фоне */
+        --text-secondary: #7798AB; /* Держим бирюзовый для второстепенного */
+        /* Градиенты остаются те же */
+        --gradient-primary-from: #383F51;
+        --gradient-primary-to: #7798AB;
+        --gradient-secondary-from: #A6808C;
+        --gradient-secondary-to: #EDAFB8;
+        /* Акценты */
+        --accent: #94ECBE;
+        --accent-hover: #69D8A0;
+        --accent-glow: rgba(148, 236, 190, 0.4);
         --font-family: 'Varela Round', sans-serif;
     }
 
@@ -37,12 +51,20 @@ html, body {
     background: var(--bg);
     color: var(--text-primary);
     font-family: var(--font-family);
-    font-weight: 500; /* Средний вес */
+    font-weight: 500;
     scroll-behavior: smooth;
 }
 
+/* Container adjustments */
+.container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
 a {
-    text-decoration: none; /* Убираем подчёркивание */
+    text-decoration: none;
     color: inherit;
     outline: none;
 }
@@ -54,9 +76,12 @@ img {
 
 /* Top Navbar */
 .top-navbar {
-    background: var(--bg); /* Цвет совпадает с фоном */
-    box-shadow: 0 4px 20px var(--shadow);
-    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--bg);
+    box-shadow: 0 4px 20px var(--shadow, rgba(0,0,0,0.08));
+    padding: 1rem 0;
     height: auto;
 }
 
@@ -68,68 +93,50 @@ img {
 .logo-text {
     margin-left: 0.5rem;
     font-family: var(--font-family);
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: var(--text-primary);
     letter-spacing: 1px;
 }
 
 .logo-icon {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     color: var(--text-primary);
 }
 
-/* Dropdown (Desktop) */
-.dropdown {
+/* Horizontal Navigation */
+.nav {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-link-item {
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding-bottom: 0.25rem;
+    transition: color 0.2s, border-color 0.2s;
     position: relative;
 }
 
-/* Градиентная кнопка "Меню" */
-.dropdown-toggle {
-    padding: 0.75rem 2rem;
-    font-size: 0.9rem;
-    border-radius: 50px;
-    background: linear-gradient(90deg, var(--bg), var(--bg-alt));
-    border: none;
-    color: var(--text-primary);
-    box-shadow: 0 2px 5px var(--shadow);
-    font-family: var(--font-family);
-    font-weight: 500;
-    text-decoration: none;
-    transition: box-shadow 0.2s, transform 0.2s, color 0.2s;
-}
+    .nav-link-item:hover {
+        color: var(--accent-hover);
+    }
 
-    .dropdown-toggle:hover {
-        box-shadow: 0 0 0 4px var(--accent), 0 0 15px var(--accent-glow);
-        transform: scale(1.05);
+    .nav-link-item.active {
         color: var(--accent);
     }
 
-.dropdown-menu {
-    display: none; /* Скрыто по умолчанию, показывается по клику */
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: var(--surface);
-    color: var(--text-primary);
-    margin-top: 0.5rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px var(--shadow);
-    min-width: 180px;
-    z-index: 1000;
-}
-
-    .dropdown-menu .dropdown-item {
-        color: var(--text-primary);
-        padding: 0.75rem 1rem;
-        transition: background 0.2s, color 0.2s;
-    }
-
-        .dropdown-menu .dropdown-item:hover {
-            background: rgba(255, 179, 0, 0.1);
-            color: var(--accent-hover);
+        .nav-link-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.4rem;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 1px;
         }
 
-/* Mobile Menu Button (Burger) */
+/* Mobile Menu Button */
 .mobile-menu-btn {
     background: none;
     border: none;
@@ -139,7 +146,7 @@ img {
 }
 
     .mobile-menu-btn:hover {
-        color: var(--accent-hover); /* Подсветка при наведении */
+        color: var(--accent-hover);
         transform: scale(1.05);
         box-shadow: 0 0 15px var(--accent-glow);
     }
@@ -147,31 +154,31 @@ img {
 /* Mobile Navigation */
 .mobile-nav-links {
     background: var(--surface);
-    box-shadow: 0 4px 20px var(--shadow);
+    box-shadow: 0 4px 20px var(--shadow, rgba(0,0,0,0.08));
 }
 
-/* Пункты мобильного меню */
 .mobile-item {
-    padding: 1rem;
-    border-bottom: 1px solid var(--shadow);
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--shadow, rgba(0,0,0,0.08));
     border-radius: 8px;
     text-align: center;
     transition: color 0.2s, background 0.2s;
     color: var(--text-primary);
-    text-decoration: none; /* Убираем подчёркивание */
 }
 
-    .mobile-item + .mobile-item {
-        margin-top: 0.5rem;
+    .mobile-item:not(:last-child) {
+        margin-bottom: 0.5rem;
     }
 
     .mobile-item:hover {
-        color: var(--accent-hover);
-        background: rgba(255, 179, 0, 0.06);
+        background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
+        color: var(--text-primary);
     }
 
 /* Right Icons Section */
 .right-icons {
+    display: flex;
+    align-items: center;
     gap: 1rem;
 }
 
@@ -182,17 +189,11 @@ img {
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    background: var(--bg); /* Фон соответствует фону страницы */
+    background: var(--bg);
     font-size: 1.2rem;
     color: var(--text-primary);
     transition: color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
-
-    .header-icon:hover {
-        color: var(--accent-hover);
-        transform: scale(1.1);
-        box-shadow: 0 0 10px var(--accent-glow);
-    }
 
     .header-icon:hover {
         color: var(--accent-hover);
@@ -219,44 +220,52 @@ img {
 }
 
 /* Search Bar */
-form.d-flex {
-    margin-bottom: 3rem;
-    justify-content: center;
+.search-form {
+    width: 100%;
+    padding: 0 1rem;
 }
 
 .search-input {
     flex: 1;
-    padding: 0.75rem 1rem 0.75rem 1.5rem; /* Увеличен отступ слева */
-    border-radius: 999px; /* Более овальная форма */
-    border: none; /* Убрана обводка */
+    padding: 0.75rem 1rem 0.75rem 1.5rem;
+    border-radius: 999px;
+    border: none;
     background: var(--surface);
     font-size: 1rem;
-    box-shadow: 0 2px 5px var(--shadow);
+    box-shadow: 0 2px 5px var(--shadow, rgba(0,0,0,0.08));
+    width: 100%;
+    max-width: 800px;
 }
 
     .search-input:focus {
-        outline: none !important; /* Убираем стандартную обводку */
-        border: none !important; /* Убираем любую обводку */
-        box-shadow: 0 2px 5px var(--shadow) !important; /* Восстанавливаем обычную тень при фокусе */
+        outline: none !important;
+        border: none !important;
+        box-shadow: 0 2px 5px var(--shadow, rgba(0,0,0,0.08)) !important;
     }
 
-/* Градиентная кнопка поиска */
+/* Ensure search stays light in dark theme */
+:root[data-theme="dark"] .search-input {
+    background: #FFFFFF;
+    color: var(--text-primary);
+}
+
+/* Search button styles with primary gradient */
 button.btn-glow {
     padding: 0.75rem 2rem;
     font-size: 0.9rem;
     border-radius: 50px;
-    background: linear-gradient(90deg, var(--bg), var(--bg-alt)); /* Используем динамичный градиент */
-    border: none !important; /* Убираем обводку */
-    color: var(--text-primary);
+    background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
+    border: none !important;
+    color: #FFFFFF; /* Изменено на белый для лучшей читаемости */
     text-align: center;
-    box-shadow: 0 2px 5px var(--shadow); /* Обычная тень в обычном состоянии */
+    box-shadow: 0 2px 5px var(--shadow, rgba(0,0,0,0.08));
     transition: box-shadow 0.2s, transform 0.2s, color 0.2s;
 }
 
     button.btn-glow:hover {
         box-shadow: 0 0 0 4px var(--accent), 0 0 15px var(--accent-glow);
         transform: scale(1.05);
-        color: var(--accent); /* Текст становится желтым при наведении */
+        color: var(--accent);
     }
 
     button.btn-glow:focus {
@@ -298,5 +307,9 @@ button.btn-glow {
 
     .theme-toggle:focus {
         outline: none !important;
-        box-shadow: 0 0 0 4px var(--accent), 0 0 15px var(--accent-glow) !important;
     }
+
+/* Footer links hover */
+.footer-link:hover {
+    color: var(--accent-hover);
+}
