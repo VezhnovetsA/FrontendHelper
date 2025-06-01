@@ -74,6 +74,12 @@ img {
     display: block;
 }
 
+/* Logo Image Size */
+.logo-img {
+    max-height: 50px; /* Небольшой увеличенный размер логотипа */
+    width: auto;
+}
+
 /* Top Navbar */
 .top-navbar {
     position: sticky;
@@ -256,7 +262,7 @@ button.btn-glow {
     border-radius: 50px;
     background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
     border: none !important;
-    color: #FFFFFF; /* Изменено на белый для лучшей читаемости */
+    color: #FFFFFF; /* Белый для читаемости */
     text-align: center;
     box-shadow: 0 2px 5px var(--shadow, rgba(0,0,0,0.08));
     transition: box-shadow 0.2s, transform 0.2s, color 0.2s;
