@@ -1,55 +1,321 @@
-﻿.custom-navbar {
-    height: 100px;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
+﻿/* Color Variables */
+:root {
+    /* Backgrounds */
+    --bg: #F5F7FA; /* Нейтральный светло-серый фон */
+    --bg-alt: #FFFFFF; /* Чуть светлее для градиентов, если нужно */
+    --surface: #FFFFFF; /* Белые карточки */
+    /* Тексты */
+    --text-primary: #383F51; /* Тёмно-индиго */
+    --text-secondary: #7798AB; /* Холодный бирюзово-серый */
+    /* Градиенты */
+    --gradient-primary-from: #383F51;
+    --gradient-primary-to: #7798AB;
+    --gradient-secondary-from: #A6808C;
+    --gradient-secondary-to: #EDAFB8;
+    /* Акцент */
+    --accent: #94ECBE; /* Обновлённый мятный для белого фона */
+    --accent-hover: #69D8A0; /* Более тёмный при наведении */
+    --accent-glow: rgba(148, 236, 190, 0.4); /* Полупрозрачный мятный */
+    --font-family: 'Varela Round', sans-serif;
+}
+
+    :root[data-theme="dark"] {
+        /* Фоны */
+        --bg: #1E1E1E; /* Тёмный фон */
+        --bg-alt: #2A2A2A; /* Немного светлее */
+        --surface: #2E2E2E;
+        /* Тексты */
+        --text-primary: #FFFFFF; /* Белый текст на тёмном фоне */
+        --text-secondary: #7798AB; /* Держим бирюзовый для второстепенного */
+        /* Градиенты остаются те же */
+        --gradient-primary-from: #383F51;
+        --gradient-primary-to: #7798AB;
+        --gradient-secondary-from: #A6808C;
+        --gradient-secondary-to: #EDAFB8;
+        /* Акценты */
+        --accent: #94ECBE;
+        --accent-hover: #69D8A0;
+        --accent-glow: rgba(148, 236, 190, 0.4);
+        --font-family: 'Varela Round', sans-serif;
+    }
+
+/* Global Styles */
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
-.mainicon {
-    height: 40px;
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-weight: 500;
+    scroll-behavior: smooth;
+}
+
+/* Container adjustments */
+.container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* Logo Image Size */
+.logo-img {
+    max-height: 50px; /* Небольшой увеличенный размер логотипа */
     width: auto;
 }
 
-.logo-text {
-    margin-left: 100px;
-    font-size: 1.5rem;
-    font-weight: 600;
+/* Top Navbar */
+.top-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--bg);
+    box-shadow: 0 4px 20px var(--shadow, rgba(0,0,0,0.08));
+    padding: 1rem 0;
+    height: auto;
 }
 
-.contact-icon {
-    margin-right: 70px;
-    cursor: pointer;
-}
-
-.profile-icon {
-    margin-right: 60px;
-}
-
-.custom-sidebar {
-    width: 400px;
-}
-
-.custom-sidebar-nav {
-    text-align: right;
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-html, body {
-    height: 100%; 
-    margin: 0; 
-}
-
-body {
+.navbar-brand {
     display: flex;
-    flex-direction: column; /
+    align-items: center;
 }
 
-.main-content {
+.logo-text {
+    margin-left: 0.5rem;
+    font-family: var(--font-family);
+    font-size: 2rem;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+}
+
+.logo-icon {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+}
+
+/* Horizontal Navigation */
+.nav {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-link-item {
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding-bottom: 0.25rem;
+    transition: color 0.2s, border-color 0.2s;
+    position: relative;
+}
+
+    .nav-link-item:hover {
+        color: var(--accent-hover);
+    }
+
+    .nav-link-item.active {
+        color: var(--accent);
+    }
+
+        .nav-link-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.4rem;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.75rem;
+    color: var(--text-primary);
+    transition: color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+    .mobile-menu-btn:hover {
+        color: var(--accent-hover);
+        transform: scale(1.05);
+        box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+/* Mobile Navigation */
+.mobile-nav-links {
+    background: var(--surface);
+    box-shadow: 0 4px 20px var(--shadow, rgba(0,0,0,0.08));
+}
+
+.mobile-item {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--shadow, rgba(0,0,0,0.08));
+    border-radius: 8px;
+    text-align: center;
+    transition: color 0.2s, background 0.2s;
+    color: var(--text-primary);
+}
+
+    .mobile-item:not(:last-child) {
+        margin-bottom: 0.5rem;
+    }
+
+    .mobile-item:hover {
+        background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
+        color: var(--text-primary);
+    }
+
+/* Right Icons Section */
+.right-icons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--bg);
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    transition: color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+    .header-icon:hover {
+        color: var(--accent-hover);
+        transform: scale(1.1);
+        box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+.dropdown-glow {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+}
+
+/* Offcanvas Profile */
+.offcanvas-glow {
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+}
+
+/* Content Wrapper */
+.content-wrapper {
     flex: 1 0 auto;
+    padding-top: 1rem;
 }
 
-footer {
-    flex-shrink: 0;
+/* Search Bar */
+.search-form {
+    width: 100%;
+    padding: 0 1rem;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.75rem 1rem 0.75rem 1.5rem;
+    border-radius: 999px;
+    border: none;
+    background: var(--surface);
+    font-size: 1rem;
+    box-shadow: 0 2px 5px var(--shadow, rgba(0,0,0,0.08));
+    width: 100%;
+    max-width: 800px;
+}
+
+    .search-input:focus {
+        outline: none !important;
+        border: none !important;
+        box-shadow: 0 2px 5px var(--shadow, rgba(0,0,0,0.08)) !important;
+    }
+
+/* Ensure search stays light in dark theme */
+:root[data-theme="dark"] .search-input {
+    background: #FFFFFF;
+    color: var(--text-primary);
+}
+
+/* Search button styles with primary gradient */
+button.btn-glow {
+    padding: 0.75rem 2rem;
+    font-size: 0.9rem;
+    border-radius: 50px;
+    background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
+    border: none !important;
+    color: #FFFFFF; /* Белый для читаемости */
+    text-align: center;
+    box-shadow: 0 2px 5px var(--shadow, rgba(0,0,0,0.08));
+    transition: box-shadow 0.2s, transform 0.2s, color 0.2s;
+}
+
+    button.btn-glow:hover {
+        box-shadow: 0 0 0 4px var(--accent), 0 0 15px var(--accent-glow);
+        transform: scale(1.05);
+        color: var(--accent);
+    }
+
+    button.btn-glow:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 4px var(--accent), 0 0 15px var(--accent-glow) !important;
+    }
+
+.dropdown-toggle:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 4px var(--accent), 0 0 15px var(--accent-glow) !important;
+}
+
+/* Theme Toggle Icon Styles */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--bg);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .theme-toggle i {
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        transition: color 0.2s;
+    }
+
+    .theme-toggle:hover i {
+        color: var(--accent-hover);
+    }
+
+    .theme-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .theme-toggle:focus {
+        outline: none !important;
+    }
+
+/* Footer links hover */
+.footer-link:hover {
+    color: var(--accent-hover);
 }
