@@ -21,7 +21,6 @@
     <link rel="stylesheet" href="~/css/layoutStyle.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/viewStyle.css" asp-append-version="true" />
-
 </head>
 <body class="d-flex flex-column h-100">
     <header class="top-navbar">
@@ -79,13 +78,19 @@
                 <li><a class="mobile-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a></li>
             </ul>
         </div>
-        <!-- Search Bar внутри шапки -->
+
+        <!-- === Search Bar внутри шапки === -->
         <div class="container search-form mt-3">
             <form class="row gx-2 gy-2 align-items-center" method="get" asp-controller="Search" asp-action="Index">
                 <!-- Поле для текстового поиска -->
                 <div class="col-auto flex-grow-1">
-                    <input name="searchQuery" type="text" class="form-control search-input" placeholder="Поиск..." value="@(ViewBag.CurrentQuery ?? "")" />
+                    <input name="searchQuery"
+                           type="text"
+                           class="form-control search-input"
+                           placeholder="Поиск..."
+                           value="@(ViewBag.CurrentQuery ?? "")" />
                 </div>
+
                 <!-- Селектор типа ресурса -->
                 @{
                     var current = ViewBag.CurrentResourceType as string;
@@ -183,6 +188,43 @@
                 </div>
             </form>
         </div>
+
+        <!-- === ПАНЕЛЬ ФИЛЬТРОВ (всегда сразу после выбора типа ресурса) === -->
+        @{
+            var availableFilters = ViewBag.AvailableFilters as List<FilterViewModel> ?? new List<FilterViewModel>();
+            var selectedIds = ViewBag.SelectedFilterIds as List<int> ?? new List<int>();
+            var currentType = ViewBag.CurrentResourceType as string;
+            var currentQuery = ViewBag.CurrentQuery as string;
+        }
+        @if (!string.IsNullOrEmpty(currentType) && availableFilters.Any())
+        {
+            <div class="filter-bar mb-4">
+                <form method="get" asp-controller="Search" asp-action="Index" id="filtersFormInLayout">
+                    <!-- Скрытые поля, чтобы не потерять текст и тип ресурса -->
+                    <input type="hidden" name="searchQuery" value="@(currentQuery)" />
+                    <input type="hidden" name="resourceTypeFilter" value="@(currentType)" />
+
+                    @foreach (var filter in availableFilters)
+                    {
+                        var isChecked = selectedIds.Contains(filter.Id);
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="selectedFilters"
+                                   value="@filter.Id"
+                                   id="layoutFilter_@filter.Id"
+                            @(isChecked ? "checked" : "")
+                                   onchange="document.getElementById('filtersFormInLayout').submit();" />
+                            <label class="form-check-label filter-label @(isChecked ? "active" : "")"
+                                   for="layoutFilter_@filter.Id">
+                                @filter.Name
+                            </label>
+                        </div>
+                    }
+                </form>
+            </div>
+        }
+        <!-- /ПАНЕЛЬ ФИЛЬТРОВ -->
     </header>
 
     <!-- Offcanvas Profile -->

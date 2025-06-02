@@ -1,7 +1,7 @@
 ﻿/* -----------------------------------------------
-   Views-specific Styles (views.css)
+   Views-specific Styles (viewStyle.css)
    Охватывает: карточки результатов, превью шаблонов,
-   кнопок, форм, изображений, шрифтов, палитр и т.д.
+   кнопок, форм, изображений, шрифтов, палитр, фильтры и т.д.
    ----------------------------------------------- */
 
 /* === Карточки === */
@@ -227,13 +227,64 @@
             z-index: 20;
         }
 
+/* === Панель фильтров под строкой поиска === */
+.filter-bar {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    margin: 1rem 0 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+    /* Обёртка чекбоксов в «пилл»-лейблы */
+    .filter-bar .form-check {
+        margin: 0;
+    }
+
+    .filter-bar .filter-label {
+        display: inline-block;
+        background: var(--bg-alt);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.4rem 0.8rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s, color 0.2s, background 0.2s;
+        user-select: none;
+    }
+
+        /* При наведении на label */
+        .filter-bar .filter-label:hover {
+            transform: scale(1.05);
+            color: var(--accent-hover);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        /* Активный (выбранный) фильтр */
+        .filter-bar .filter-label.active {
+            background: var(--accent);
+            color: var(--surface);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+    /* Скрываем сам чекбокс */
+    .filter-bar .form-check-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
 /* === Кнопки внутри карточек === */
-/* Общий стиль для всех .btn в карточке */
 .card-body .btn {
     font-size: 0.85rem;
     padding: 0.5rem 1rem;
     border-radius: 50px;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
 }
 
 /* “Скачать” (outline-primary): градиент A6808C → EDAFB8 */
@@ -276,6 +327,7 @@
 
     .card-body .btn-primary:hover {
         background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
+        color: var(--surface);
         transform: scale(1.02);
         box-shadow: 0 0 12px var(--accent-glow);
         border-radius: 50px;
@@ -302,17 +354,62 @@
     margin-bottom: 0.75rem !important;
 }
 
-/* Поддержка темной темы */
-:root[data-theme="dark"] .card {
-    background: var(--surface);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+/* === Поддержка тёмной темы === */
+:root[data-theme="dark"] .top-navbar {
+    /* Заменяем тень под хедером на светлую, как у фильтров */
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
+:root[data-theme="dark"] .card {
+    background: var(--surface);
+    /* Более заметная тень на тёмном фоне */
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+    :root[data-theme="dark"] .card:hover {
+        /* Усиленная hover-тень */
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2), 0 0 12px var(--accent-glow);
+        border-color: var(--accent);
+    }
+
+:root[data-theme="dark"] .template-preview:hover,
+:root[data-theme="dark"] .position-relative:hover,
+:root[data-theme="dark"] .card-img-top.img-fluid:hover,
+:root[data-theme="dark"] .palette-swatch:hover {
+    /* Более контрастная тень при наведении на превью */
+    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2), 0 0 12px var(--accent-glow);
+}
+
+/* Палитра: номер цвета внутри свотча */
 :root[data-theme="dark"] .palette-swatch .swatch-hex {
     background: rgba(0, 0, 0, 0.7);
     color: var(--surface);
 }
 
+/* Панель фильтров: более тёмный фон и усиленная тень */
+:root[data-theme="dark"] .filter-bar {
+    background: rgba(30, 30, 30, 0.9);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+    :root[data-theme="dark"] .filter-bar .filter-label {
+        background: var(--surface);
+        color: var(--text-secondary);
+    }
+
+        :root[data-theme="dark"] .filter-bar .filter-label:hover {
+            transform: scale(1.05);
+            color: var(--accent-hover);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        :root[data-theme="dark"] .filter-bar .filter-label.active {
+            background: var(--accent);
+            color: var(--surface);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+/* Кнопки внутри карточек: держим белый текст при hover */
 :root[data-theme="dark"] .card-body .btn-outline-secondary:hover {
     background: linear-gradient(90deg, #7798AB, #383F51);
     color: var(--surface);
@@ -326,3 +423,22 @@
     box-shadow: 0 0 12px var(--accent-glow);
     border-radius: 50px;
 }
+
+:root[data-theme="dark"] .card-body .btn-primary:hover {
+    background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
+    color: var(--surface);
+    transform: scale(1.02);
+    box-shadow: 0 0 12px var(--accent-glow);
+    border-radius: 50px;
+}
+
+/* === Поисковая строка === */
+:root[data-theme="dark"] .search-input {
+    /* В тёмной теме оставляем фон белым, но делаем текст тёмным */
+    background: #FFFFFF;
+    color: #383F51;
+}
+
+    :root[data-theme="dark"] .search-input::placeholder {
+        color: #383F51;
+    }

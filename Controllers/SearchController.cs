@@ -1,11 +1,10 @@
-﻿using FHDatabase;
+﻿// FrontendHelper/Controllers/SearchController.cs
 using FHDatabase.Models;
 using FHDatabase.Repositories;
 using FrontendHelper.Models;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
+using System.Linq.Expressions;
 
 namespace FrontendHelper.Controllers
 {
@@ -20,8 +19,6 @@ namespace FrontendHelper.Controllers
         private readonly FontRepository _fontRepo;
         private readonly PaletteRepository _paletteRepo;
         private readonly FilterRepository _filterRepo;
-        private readonly FhDbContext _dbContext;
-        private readonly IWebHostEnvironment _env;
 
         public SearchController(
             IconRepository iconRepo,
@@ -32,9 +29,7 @@ namespace FrontendHelper.Controllers
             FormRepository formRepo,
             FontRepository fontRepo,
             PaletteRepository paletteRepo,
-            FilterRepository filterRepo,
-            FhDbContext dbContext,
-            IWebHostEnvironment env
+            FilterRepository filterRepo
         )
         {
             _iconRepo = iconRepo;
@@ -46,363 +41,310 @@ namespace FrontendHelper.Controllers
             _fontRepo = fontRepo;
             _paletteRepo = paletteRepo;
             _filterRepo = filterRepo;
-            _dbContext = dbContext;
-            _env = env;
         }
 
         [HttpGet]
-        public IActionResult Index(string? searchQuery, string? resourceTypeFilter, int[]? selectedFilterIds)
+        public IActionResult Index(
+            string? searchQuery,
+            string? resourceTypeFilter,
+            int[]? selectedFilters
+        )
         {
-            ViewBag.CurrentQuery = searchQuery ?? "";
-            ViewBag.CurrentResourceType = resourceTypeFilter ?? "";
-            ViewBag.CurrentFilterIds = selectedFilterIds ?? new int[0];
-
+            // 1) Подготовка VM и ViewBag
             var vm = new SearchViewModel
             {
                 Query = searchQuery ?? "",
-                ResourceType = resourceTypeFilter,
-                SelectedFilterIds = (selectedFilterIds ?? Array.Empty<int>()).ToList()
+                ResourceType = resourceTypeFilter
             };
 
+            if (selectedFilters != null && selectedFilters.Length > 0)
+            {
+                vm.SelectedFilterIds = selectedFilters.ToList();
+            }
+
+            // 2) Загружаем доступные фильтры из БД (если задан тип ресурса)
             if (!string.IsNullOrEmpty(resourceTypeFilter))
             {
-                var filters = _filterRepo.GetFiltersByCategory(resourceTypeFilter);
-                vm.AvailableFilters = filters
+                var filtersFromDb = _filterRepo.GetFiltersByCategory(resourceTypeFilter);
+                vm.AvailableFilters = filtersFromDb
                     .Select(f => new FilterViewModel { Id = f.Id, Name = f.Name })
                     .ToList();
             }
+            else
+            {
+                vm.AvailableFilters = new List<FilterViewModel>();
+            }
 
-            if (string.IsNullOrWhiteSpace(searchQuery))
-                return View(vm);
+            // Кладём во ViewBag, чтобы Layout мог отрисовать панель фильтров
+            ViewBag.AvailableFilters = vm.AvailableFilters;
+            ViewBag.SelectedFilterIds = vm.SelectedFilterIds;
+            ViewBag.CurrentQuery = vm.Query;
+            ViewBag.CurrentResourceType = vm.ResourceType ?? "";
 
-            if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Icon")
-                vm.Results.AddRange(SearchIcons(searchQuery, resourceTypeFilter == "Icon" ? vm.SelectedFilterIds : null));
+            // 3) Основной поиск: если есть текст OR выбран хотя бы один фильтр
+            if (!string.IsNullOrWhiteSpace(vm.Query) || vm.SelectedFilterIds.Any())
+            {
+                var allResults = new List<SearchResultItem>();
 
-            if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Picture")
-                vm.Results.AddRange(SearchPictures(searchQuery, resourceTypeFilter == "Picture" ? vm.SelectedFilterIds : null));
+                // Иконки
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Icon")
+                {
+                    allResults.AddRange(
+                        PerformSearchWithFilters(
+                            _iconRepo,
+                            "Icon",
+                            i => i.Name,
+                            i => i.Topic,
+                            i => Url.Content($"~/images/icons/{i.Img}"),
+                            vm.Query,
+                            vm.SelectedFilterIds
+                        )
+                    );
+                }
 
-            if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "AnimatedElement")
-                vm.Results.AddRange(SearchAnimatedElements(searchQuery, resourceTypeFilter == "AnimatedElement" ? vm.SelectedFilterIds : null));
+                // Картинки
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Picture")
+                {
+                    allResults.AddRange(
+                        PerformSearchWithFilters(
+                            _picRepo,
+                            "Picture",
+                            p => p.Name,
+                            p => p.Topic,
+                            p => Url.Content($"~/images/pictures/{p.Img}"),
+                            vm.Query,
+                            vm.SelectedFilterIds
+                        )
+                    );
+                }
 
-            if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Button")
-                vm.Results.AddRange(SearchButtons(searchQuery, resourceTypeFilter == "Button" ? vm.SelectedFilterIds : null));
+                // Анимированные
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "AnimatedElement")
+                {
+                    allResults.AddRange(
+                        PerformSearchWithFilters(
+                            _animRepo,
+                            "AnimatedElement",
+                            a => a.Name,
+                            a => a.Topic,
+                            a => Url.Content($"~/images/animated-elements/{a.Img}"),
+                            vm.Query,
+                            vm.SelectedFilterIds
+                        )
+                    );
+                }
 
-            if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Template")
-                vm.Results.AddRange(SearchTemplates(searchQuery, resourceTypeFilter == "Template" ? vm.SelectedFilterIds : null));
+                // Кнопки
+                // Кнопки (fix: заполняем и PreviewUrl, и DownloadUrl)
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Button")
+                {
+                    allResults.AddRange(
+                        PerformSearchWithFilters(
+                            _buttonRepo,
+                            "Button",
+                            b => b.Name,
+                            _ => (string?)null,
+                            _ => string.Empty,   // PreviewUrl пока заполним ниже вручную
+                            vm.Query,
+                            vm.SelectedFilterIds
+                        )
+                        .Select(item =>
+                        {
+                            // Возьмём из репозитория сам объект ButtonData, чтобы получить ButtonCode:
+                            var buttonEntity = _buttonRepo.GetAsset(item.Id);
+                            // Сформируем URL, который будет открыт в iframe:
+                            var url = Url.Content($"~/buttons/{buttonEntity.ButtonCode}");
+                            item.PreviewUrl = url;
+                            item.DownloadUrl = url;
+                            return item;
+                        })
+                        .ToList()
+                    );
+                }
 
-            if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Form")
-                vm.Results.AddRange(SearchForms(searchQuery, resourceTypeFilter == "Form" ? vm.SelectedFilterIds : null));
 
-            if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Font")
-                vm.Results.AddRange(SearchFonts(searchQuery, resourceTypeFilter == "Font" ? vm.SelectedFilterIds : null));
+                // Шаблоны
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Template")
+                {
+                    allResults.AddRange(
+                        PerformSearchWithFilters(
+                            _tplRepo,
+                            "Template",
+                            t => t.Name,
+                            _ => (string?)null,
+                            _ => string.Empty,
+                            vm.Query,
+                            vm.SelectedFilterIds
+                        )
+                        .Select(item =>
+                        {
+                            // Заполняем DownloadUrl (имя файла TemplateCode из БД)
+                            var tpl = _tplRepo.GetAsset(item.Id);
+                            item.PreviewUrl = Url.Content($"~/templates/{tpl.TemplateCode}");
+                            item.DownloadUrl = Url.Content($"~/templates/{tpl.TemplateCode}");
+                            return item;
+                        })
+                        .ToList()
+                    );
+                }
 
-            if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Palette")
-                vm.Results.AddRange(SearchPalettes(searchQuery, resourceTypeFilter == "Palette" ? vm.SelectedFilterIds : null));
+                // Формы
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Form")
+                {
+                    allResults.AddRange(
+                        PerformSearchWithFilters(
+                            _formRepo,
+                            "Form",
+                            f => f.Name,
+                            _ => (string?)null,
+                            _ => string.Empty,
+                            vm.Query,
+                            vm.SelectedFilterIds
+                        )
+                        .Select(item =>
+                        {
+                            // Заполняем DownloadUrl (имя файла FormCode из БД)
+                            var form = _formRepo.GetAsset(item.Id);
+                            item.PreviewUrl = Url.Content($"~/forms/{form.FormCode}");
+                            item.DownloadUrl = Url.Content($"~/forms/{form.FormCode}");
+                            return item;
+                        })
+                        .ToList()
+                    );
+                }
+
+                // Шрифты
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Font")
+                {
+                    allResults.AddRange(
+                        PerformSearchWithFilters(
+                            _fontRepo,
+                            "Font",
+                            f => f.Name,
+                            _ => (string?)null,
+                            _ => string.Empty,
+                            vm.Query,
+                            vm.SelectedFilterIds
+                        )
+                        .Select(item =>
+                        {
+                            // Заполняем FontFamily (из БД) — чтобы в представлении отобразился пример текста
+                            var font = _fontRepo.GetAsset(item.Id);
+                            item.FontFamily = font.FontFamily;
+                            return item;
+                        })
+                        .ToList()
+                    );
+                }
+
+                // Палитры
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Palette")
+                {
+                    allResults.AddRange(
+                        PerformSearchWithFilters(
+                            _paletteRepo,
+                            "Palette",
+                            p => p.Title,
+                            _ => (string?)null,
+                            _ => string.Empty,
+                            vm.Query,
+                            vm.SelectedFilterIds
+                        )
+                    );
+                }
+
+                vm.Results = allResults
+                    .OrderBy(r => r.ResourceType)
+                    .ThenBy(r => r.Name)
+                    .ToList();
+
+                // ** 4) После формирования vm.Results, для каждого элемента "Palette" 
+                // загружаем цвета из БД и заполняем PaletteColors **
+                foreach (var item in vm.Results.Where(r => r.ResourceType == "Palette"))
+                {
+                    // Берём саму сущность PaletteData с включённым navigation property Colors
+                    var paletteEntity = _paletteRepo.GetOnePalette(item.Id);
+                    if (paletteEntity != null && paletteEntity.Colors != null)
+                    {
+                        item.PaletteColors = paletteEntity.Colors
+                            .Select(c => new SearchColorViewModel { Hex = c.Hex })
+                            .ToList();
+                    }
+                    else
+                    {
+                        item.PaletteColors = new List<SearchColorViewModel>();
+                    }
+
+                    // Также, если надо, можно задать DownloadUrl (например, файл-JSON или какая-то ссылка).
+                    // Мы не делаем ссылку для палитры, т.к. копирование цвета выполняется по клику на свотч.
+                }
+            }
 
             return View(vm);
         }
 
-        #region Поиск по каждому типу ресурсов
-
-        private List<SearchResultItem> SearchIcons(string searchQuery, List<int>? filterIds)
+        /// <summary>
+        /// Общая функция поиска (по тексту + фильтрам). 
+        /// Если searchQuery пуст, возвращает сразу все записи данного типа, 
+        /// после чего применяется фильтрация по selectedFilterIds.
+        /// </summary>
+        private List<SearchResultItem> PerformSearchWithFilters<TData>(
+            BaseRepository<TData> repository,
+            string resourceTypeName,
+            Expression<Func<TData, string>> nameSelector,
+            Expression<Func<TData, string?>> topicSelector,
+            Func<TData, string> previewUrlSelector,
+            string searchQuery,
+            List<int> selectedFilterIds
+        ) where TData : BaseDataModel
         {
-            var likePattern = $"%{searchQuery}%";
-            var nameProp = nameof(IconData.Name);
-            var topicProp = nameof(IconData.Topic);
+            IQueryable<TData> query = repository.Query();
 
-            var query = _iconRepo.Query()
-                .Where(i =>
-                    EF.Functions.Like(EF.Property<string>(i, nameProp), likePattern)
-                    || EF.Functions.Like(EF.Property<string>(i, topicProp), likePattern)
+            // 1) Если задан текст поиска → накладываем LIKE; иначе оставляем всю коллекцию
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                string likePattern = $"%{searchQuery}%";
+                var nameMember = (MemberExpression)nameSelector.Body;
+                string nameProp = nameMember.Member.Name;
+                var topicMember = topicSelector?.Body as MemberExpression;
+                string topicProp = topicMember?.Member.Name ?? "";
+
+                query = query.Where(entity =>
+                    EF.Functions.Like(EF.Property<string>(entity, nameProp), likePattern)
+                    || (topicProp != "" && EF.Functions.Like(EF.Property<string>(entity, topicProp)!, likePattern))
                 );
-
-            if (filterIds?.Any() == true)
-            {
-                var assetIds = _dbContext.AssetFilters
-                    .Where(af => af.AssetType == "Icon" && filterIds.Contains(af.FilterId))
-                    .Select(af => af.AssetId)
-                    .ToList();
-
-                query = query.Where(i => assetIds.Contains(i.Id));
             }
 
-            return query
-                .AsNoTracking()
-                .Select(i => new SearchResultItem
-                {
-                    ResourceType = "Icon",
-                    Id = i.Id,
-                    Name = i.Name,
-                    Topic = i.Topic,
-                    PreviewUrl = Url.Content($"~/images/icons/{i.Img}"),
-                    CodeContent = null,
-                    DownloadUrl = Url.Content($"~/images/icons/{i.Img}")
-                })
-                .ToList();
-        }
-
-        private List<SearchResultItem> SearchPictures(string searchQuery, List<int>? filterIds)
-        {
-            var likePattern = $"%{searchQuery}%";
-            var nameProp = nameof(PictureData.Name);
-            var topicProp = nameof(PictureData.Topic);
-
-            var query = _picRepo.Query()
-                .Where(p =>
-                    EF.Functions.Like(EF.Property<string>(p, nameProp), likePattern)
-                    || EF.Functions.Like(EF.Property<string>(p, topicProp), likePattern)
+            // 2) Если выбраны какие-то фильтры → накладываем условие, что AssetFilter показывает все выбранные фильтры
+            if (selectedFilterIds != null && selectedFilterIds.Count > 0)
+            {
+                query = query.Where(entity =>
+                    _filterRepo.QueryAssetFilters()
+                        .Where(af =>
+                            af.AssetType == resourceTypeName
+                            && af.AssetId == EF.Property<int>(entity, "Id")
+                            && selectedFilterIds.Contains(af.FilterId)
+                        )
+                        .Select(af => af.FilterId)
+                        .Distinct()
+                        .Count()
+                        == selectedFilterIds.Count
                 );
-
-            if (filterIds?.Any() == true)
-            {
-                var assetIds = _dbContext.AssetFilters
-                    .Where(af => af.AssetType == "Picture" && filterIds.Contains(af.FilterId))
-                    .Select(af => af.AssetId)
-                    .ToList();
-
-                query = query.Where(p => assetIds.Contains(p.Id));
             }
 
+            // 3) Проекция в SearchResultItem (дошла очередь ставить PreviewUrl, остальное заполнится позже)
             return query
-                .AsNoTracking()
-                .Select(p => new SearchResultItem
+                .Select(entity => new SearchResultItem
                 {
-                    ResourceType = "Picture",
-                    Id = p.Id,
-                    Name = p.Name,
-                    Topic = p.Topic,
-                    PreviewUrl = Url.Content($"~/images/pictures/{p.Img}"),
-                    CodeContent = null,
-                    DownloadUrl = Url.Content($"~/images/pictures/{p.Img}")
+                    ResourceType = resourceTypeName,
+                    Id = entity.Id,
+                    Name = nameSelector.Compile()(entity),
+                    // Topic селектируется только для тех сущностей, у кого есть topicSelector
+                    Topic = topicSelector != null ? topicSelector.Compile()(entity) : null,
+                    PreviewUrl = previewUrlSelector(entity),
+                    // Остальное (DownloadUrl, FontFamily, PaletteColors) будет заполнено уже в Index-процессе
                 })
                 .ToList();
         }
-
-        private List<SearchResultItem> SearchAnimatedElements(string searchQuery, List<int>? filterIds)
-        {
-            var likePattern = $"%{searchQuery}%";
-            var nameProp = nameof(AnimatedElementData.Name);
-            var topicProp = nameof(AnimatedElementData.Topic);
-
-            var query = _animRepo.Query()
-                .Where(a =>
-                    EF.Functions.Like(EF.Property<string>(a, nameProp), likePattern)
-                    || EF.Functions.Like(EF.Property<string>(a, topicProp), likePattern)
-                );
-
-            if (filterIds?.Any() == true)
-            {
-                var assetIds = _dbContext.AssetFilters
-                    .Where(af => af.AssetType == "AnimatedElement" && filterIds.Contains(af.FilterId))
-                    .Select(af => af.AssetId)
-                    .ToList();
-
-                query = query.Where(a => assetIds.Contains(a.Id));
-            }
-
-            return query
-                .AsNoTracking()
-                .Select(a => new SearchResultItem
-                {
-                    ResourceType = "AnimatedElement",
-                    Id = a.Id,
-                    Name = a.Name,
-                    Topic = a.Topic,
-                    PreviewUrl = Url.Content($"~/images/animated-elements/{a.Img}"),
-                    CodeContent = null,
-                    DownloadUrl = Url.Content($"~/images/animated-elements/{a.Img}")
-                })
-                .ToList();
-        }
-
-        private List<SearchResultItem> SearchButtons(string searchQuery, List<int>? filterIds)
-        {
-            var likePattern = $"%{searchQuery}%";
-            var nameProp = nameof(ButtonData.Name);
-
-            var query = _buttonRepo.Query()
-                .Where(b => EF.Functions.Like(EF.Property<string>(b, nameProp), likePattern));
-
-            if (filterIds?.Any() == true)
-            {
-                var assetIds = _dbContext.AssetFilters
-                    .Where(af => af.AssetType == "Button" && filterIds.Contains(af.FilterId))
-                    .Select(af => af.AssetId)
-                    .ToList();
-
-                query = query.Where(b => assetIds.Contains(b.Id));
-            }
-
-            return query
-                .AsNoTracking()
-                .Select(b => new SearchResultItem
-                {
-                    ResourceType = "Button",
-                    Id = b.Id,
-                    Name = b.Name,
-                    Topic = null,
-                    // вместо чтения файла разворачиваем URL для iframe
-                    PreviewUrl = Url.Content($"~/buttons/{b.ButtonCode}"),
-                    CodeContent = null,
-                    DownloadUrl = Url.Action("DownloadCode", "Button", new { id = b.Id })
-                })
-                .ToList();
-        }
-
-        private List<SearchResultItem> SearchTemplates(string searchQuery, List<int>? filterIds)
-        {
-            var likePattern = $"%{searchQuery}%";
-            var nameProp = nameof(TemplateData.Name);
-
-            var query = _tplRepo.Query()
-                .Where(t => EF.Functions.Like(EF.Property<string>(t, nameProp), likePattern));
-
-            if (filterIds?.Any() == true)
-            {
-                var assetIds = _dbContext.AssetFilters
-                    .Where(af => af.AssetType == "Template" && filterIds.Contains(af.FilterId))
-                    .Select(af => af.AssetId)
-                    .ToList();
-
-                query = query.Where(t => assetIds.Contains(t.Id));
-            }
-
-            return query
-                .AsNoTracking()
-                .Select(t => new SearchResultItem
-                {
-                    ResourceType = "Template",
-                    Id = t.Id,
-                    Name = t.Name,
-                    Topic = null,
-                    PreviewUrl = Url.Content($"~/templates/{t.TemplateCode}"),
-                    CodeContent = null,
-                    DownloadUrl = Url.Content($"~/templates/{t.TemplateCode}")
-                })
-                .ToList();
-        }
-
-        private List<SearchResultItem> SearchForms(string searchQuery, List<int>? filterIds)
-        {
-            var likePattern = $"%{searchQuery}%";
-            var nameProp = nameof(FormData.Name);
-
-            var query = _formRepo.Query()
-                .Where(f => EF.Functions.Like(EF.Property<string>(f, nameProp), likePattern));
-
-            if (filterIds?.Any() == true)
-            {
-                var assetIds = _dbContext.AssetFilters
-                    .Where(af => af.AssetType == "Form" && filterIds.Contains(af.FilterId))
-                    .Select(af => af.AssetId)
-                    .ToList();
-
-                query = query.Where(f => assetIds.Contains(f.Id));
-            }
-
-            return query
-                .AsNoTracking()
-                .Select(f => new SearchResultItem
-                {
-                    ResourceType = "Form",
-                    Id = f.Id,
-                    Name = f.Name,
-                    Topic = null,
-                    PreviewUrl = Url.Content($"~/forms/{f.FormCode}"),
-                    CodeContent = null,
-                    DownloadUrl = Url.Content($"~/forms/{f.FormCode}")
-                })
-                .ToList();
-        }
-
-        private List<SearchResultItem> SearchFonts(string searchQuery, List<int>? filterIds)
-        {
-            var likePattern = $"%{searchQuery}%";
-            var nameProp = nameof(FontData.Name);
-
-            var query = _fontRepo.Query()
-                .Where(f => EF.Functions.Like(EF.Property<string>(f, nameProp), likePattern));
-
-            if (filterIds?.Any() == true)
-            {
-                var assetIds = _dbContext.AssetFilters
-                    .Where(af => af.AssetType == "Font" && filterIds.Contains(af.FilterId))
-                    .Select(af => af.AssetId)
-                    .ToList();
-
-                query = query.Where(f => assetIds.Contains(f.Id));
-            }
-
-            return query
-                .AsNoTracking()
-                .Select(f => new SearchResultItem
-                {
-                    ResourceType = "Font",
-                    Id = f.Id,
-                    Name = f.Name,
-                    Topic = null,
-                    PreviewUrl = null, // больше не нужен
-                    CodeContent = null,
-                    DownloadUrl = null, // не даём скачивать
-                    FontFamily = f.FontFamily,
-                    PaletteColors = null
-                })
-                .ToList();
-        }
-
-
-        private List<SearchResultItem> SearchPalettes(string searchQuery, List<int>? filterIds)
-        {
-            var likePattern = $"%{searchQuery}%";
-            var titleProp = nameof(PaletteData.Title);
-
-            // Берём палитры вместе с цветами
-            var query = _paletteRepo.Query()
-                .Include(p => p.Colors)
-                .Where(p => EF.Functions.Like(EF.Property<string>(p, titleProp), likePattern));
-
-            if (filterIds?.Any() == true)
-            {
-                var assetIds = _dbContext.AssetFilters
-                    .Where(af => af.AssetType == "Palette" && filterIds.Contains(af.FilterId))
-                    .Select(af => af.AssetId)
-                    .ToList();
-
-                query = query.Where(p => assetIds.Contains(p.Id));
-            }
-
-            var palettesInMemory = query.AsNoTracking().ToList();
-            var results = new List<SearchResultItem>();
-
-            foreach (var p in palettesInMemory)
-            {
-                // Собираем список цветов
-                var colorVMs = p.Colors
-                    .Select(c => new PaletteColorViewModel
-                    {
-                        Name = c.Name,
-                        Hex = c.Hex
-                    })
-                    .ToList();
-
-                results.Add(new SearchResultItem
-                {
-                    ResourceType = "Palette",
-                    Id = p.Id,
-                    Name = p.Title,
-                    Topic = null,
-                    PreviewUrl = null,
-                    CodeContent = null,
-                    DownloadUrl = null, // удаляем Json-скачивалку
-                    FontFamily = null,
-                    PaletteColors = colorVMs
-                });
-            }
-
-            return results;
-        }
-
-
-        #endregion
     }
 }

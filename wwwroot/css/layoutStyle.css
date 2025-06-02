@@ -402,3 +402,45 @@ button.btn-glow {
 .footer-link:hover {
     color: var(--accent-hover);
 }
+
+
+
+
+
+.filter-bar {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+}
+
+    .filter-bar .form-check-input {
+        display: none;
+    }
+
+    .filter-bar .filter-label {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        background: var(--surface);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: background 0.2s, color 0.2s, transform 0.2s;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+        .filter-bar .filter-label.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .filter-bar .filter-label:hover {
+            color: var(--accent);
+            transform: scale(1.05);
+        }
