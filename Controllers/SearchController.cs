@@ -341,18 +341,22 @@ namespace FrontendHelper.Controllers
                     Id = f.Id,
                     Name = f.Name,
                     Topic = null,
-                    PreviewUrl = f.Link,
+                    PreviewUrl = null, // больше не нужен
                     CodeContent = null,
-                    DownloadUrl = f.Link
+                    DownloadUrl = null, // не даём скачивать
+                    FontFamily = f.FontFamily,
+                    PaletteColors = null
                 })
                 .ToList();
         }
+
 
         private List<SearchResultItem> SearchPalettes(string searchQuery, List<int>? filterIds)
         {
             var likePattern = $"%{searchQuery}%";
             var titleProp = nameof(PaletteData.Title);
 
+            // Берём палитры вместе с цветами
             var query = _paletteRepo.Query()
                 .Include(p => p.Colors)
                 .Where(p => EF.Functions.Like(EF.Property<string>(p, titleProp), likePattern));
@@ -367,9 +371,21 @@ namespace FrontendHelper.Controllers
                 query = query.Where(p => assetIds.Contains(p.Id));
             }
 
-            return query
-                .AsNoTracking()
-                .Select(p => new SearchResultItem
+            var palettesInMemory = query.AsNoTracking().ToList();
+            var results = new List<SearchResultItem>();
+
+            foreach (var p in palettesInMemory)
+            {
+                // Собираем список цветов
+                var colorVMs = p.Colors
+                    .Select(c => new PaletteColorViewModel
+                    {
+                        Name = c.Name,
+                        Hex = c.Hex
+                    })
+                    .ToList();
+
+                results.Add(new SearchResultItem
                 {
                     ResourceType = "Palette",
                     Id = p.Id,
@@ -377,10 +393,15 @@ namespace FrontendHelper.Controllers
                     Topic = null,
                     PreviewUrl = null,
                     CodeContent = null,
-                    DownloadUrl = Url.Action("DownloadPalette", "Palette", new { id = p.Id })
-                })
-                .ToList();
+                    DownloadUrl = null, // удаляем Json-скачивалку
+                    FontFamily = null,
+                    PaletteColors = colorVMs
+                });
+            }
+
+            return results;
         }
+
 
         #endregion
     }

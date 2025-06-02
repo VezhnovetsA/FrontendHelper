@@ -1,5 +1,6 @@
 ﻿@model FrontendHelper.Models.SearchViewModel
 
+
 @{
     // Группируем результаты по ResourceType
     var grouped = Model.Results
@@ -19,7 +20,7 @@ else
     {
         <h4 class="mt-4 mb-3 text-capitalize">@group.Key</h4>
 
-        @* --- Особая обработка для шаблонов (Template) --- *@
+        @* --- Шаблоны (Template) --- *@
         @if (group.Key == "Template")
         {
             <div class="row gx-3 gy-4">
@@ -29,13 +30,22 @@ else
                         <div class="card shadow-sm mb-4">
                             <div class="card-body">
                                 <h5 class="card-title">@item.Name</h5>
-                                <div class="position-relative mb-3 template-preview" style="overflow:hidden; border:1px solid #e0e0e0;">
-                                    @* iframe с шаблоном, блокируем взаимодействие с помощью overlay *@
+                                <div class="position-relative mb-3 template-preview"
+                                     style="height:1200px; overflow:hidden; border:1px solid #e0e0e0;">
                                     <iframe src="@item.PreviewUrl"
-                                            style="border:none; width:100%; min-height:600px; pointer-events:none;">
+                                            style="border:none; width:100%; height:100%;"
+                                            scrolling="no">
                                     </iframe>
                                     <div class="template-overlay"
-                                         style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;">
+                                         style="
+                                           position:absolute;
+                                           top:0;
+                                           left:0;
+                                           width:100%;
+                                           height:100%;
+                                           z-index:10;
+                                           background:transparent;
+                                                         ">
                                     </div>
                                 </div>
                                 <a href="@item.DownloadUrl" download class="btn btn-primary">
@@ -49,19 +59,18 @@ else
         }
         else
         {
-            @* --- Для всех остальных типов (кроме Template) используем сетку 4 колонки --- *@
+            @* --- Остальные типы: сетка 4 колонки --- *@
             <div class="row gx-3 gy-4">
                 @foreach (var item in group)
                 {
                     <div class="col-sm-6 col-md-4 col-lg-3">
                         <div class="card h-100 shadow-sm">
-                            @* Превью для разных типов *@
+
                             @switch (item.ResourceType)
                             {
                                 case "Icon":
                                 case "Picture":
                                 case "AnimatedElement":
-                                case "Font":
                                     {
                                         <img src="@item.PreviewUrl"
                                              class="card-img-top img-fluid"
@@ -81,18 +90,54 @@ else
                                     {
                                         <div class="position-relative mb-2 border rounded" style="height: 400px;">
                                             <iframe src="@item.PreviewUrl"
-                                                    style="width:100%; height:100%; border:none; pointer-events:none;">
-                                            </iframe>
+                                                    style="width:100%; height:100%; border:none;"></iframe>
                                             <div class="form-overlay"
                                                  style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;">
                                             </div>
                                         </div>
                                         break;
                                     }
+                                case "Font":
+                                    {
+                                        <div class="p-4 d-flex justify-content-center align-items-center" style="height: 150px;">
+                                            <p style="font-family: '@item.FontFamily'; font-size: 1.5rem; margin:0;">
+                                                @item.Name
+                                            </p>
+                                        </div>
+                                        break;
+                                    }
                                 case "Palette":
                                     {
-                                        <div class="p-3 text-center text-muted" style="height: 300px;">
-                                            <span>⧗ Палитра</span>
+                                        <div class="p-3" style="height: 300px;">
+                                            <h6 class="mb-3 text-center">@item.Name</h6>
+                                            <div class="palette-grid d-flex flex-wrap" style="gap:2px;">
+                                                @foreach (var color in item.PaletteColors!)
+                                                {
+                                                    <div class="palette-swatch"
+                                                         title="Нажмите, чтобы скопировать HEX"
+                                                         style="
+                                                           flex: 1 0 30%;
+                                                           padding-top: 30%;
+                                                           background: @color.Hex;
+                                                           position: relative;
+                                                           cursor: pointer;
+                                                                                         "
+                                                         onclick="copyColorHex('@color.Hex')">
+                                                        <span class="swatch-hex"
+                                                              style="
+                                                                position: absolute;
+                                                                bottom: 4px;
+                                                                left: 4px;
+                                                                font-size: 0.75rem;
+                                                                background: rgba(255,255,255,0.7);
+                                                                padding: 2px;
+                                                                border-radius: 2px;
+                                                                                              ">
+                                                            @color.Hex
+                                                        </span>
+                                                    </div>
+                                                }
+                                            </div>
                                         </div>
                                         break;
                                     }
@@ -117,6 +162,7 @@ else
                                 </p>
 
                                 <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    @* Кнопки действий *@
                                     @if (item.ResourceType == "Button"
                                    || item.ResourceType == "Template"
                                    || item.ResourceType == "Form")
@@ -127,8 +173,7 @@ else
                                     }
                                     else if (item.ResourceType == "Icon"
                                     || item.ResourceType == "Picture"
-                                    || item.ResourceType == "AnimatedElement"
-                                    || item.ResourceType == "Font")
+                                    || item.ResourceType == "AnimatedElement")
                                     {
                                         <button class="btn btn-sm btn-outline-primary"
                                                 onclick="downloadImage('@item.PreviewUrl')">
@@ -139,11 +184,15 @@ else
                                             Копировать изображение
                                         </button>
                                     }
+                                    else if (item.ResourceType == "Font")
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("ShowFonts", "Font")">
+                                            Перейти к шрифтам
+                                        </a>
+                                    }
                                     else if (item.ResourceType == "Palette")
                                     {
-                                        <a class="btn btn-sm btn-outline-primary" href="@item.DownloadUrl">
-                                            Скачать JSON
-                                        </a>
+                                        @* Для палитр копирование HEX выполняется по клику на сам свотч *@
                                     }
                                 </div>
                             </div>
@@ -157,7 +206,7 @@ else
 
 @section Scripts {
     <script>
-        // Скачиваем изображение через создание скрытого <a download>
+        // Скачиваем изображение через скрытый <a download>
         function downloadImage(url) {
             if (!url) return;
             const link = document.createElement('a');
@@ -185,10 +234,37 @@ else
             }
         }
 
-        // Для форм: перехват скролла колёсиком мыши (по примеру вашего оригинала)
+        // Копируем HEX-код цвета
+        function copyColorHex(hex) {
+            if (!navigator.clipboard) {
+                alert('Clipboard API не поддерживается этим браузером.');
+                return;
+            }
+            navigator.clipboard.writeText(hex)
+                .then(() => alert('HEX-код скопирован: ' + hex))
+                .catch(err => alert('Ошибка копирования: ' + err));
+        }
+
+        // Для форм: прокрутка колесиком мыши
         document.querySelectorAll('.position-relative').forEach(container => {
             const iframe = container.querySelector('iframe');
             const overlay = container.querySelector('.form-overlay');
+
+            overlay.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                iframe.contentWindow.scrollBy(0, e.deltaY);
+            }, { passive: false });
+        });
+
+        // Для шаблонов: блокируем клики, но разрешаем прокрутку колесиком
+        document.querySelectorAll('.template-preview').forEach(container => {
+            const iframe = container.querySelector('iframe');
+            const overlay = container.querySelector('.template-overlay');
+
+            overlay.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
 
             overlay.addEventListener('wheel', function (e) {
                 e.preventDefault();

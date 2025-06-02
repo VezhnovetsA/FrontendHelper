@@ -1,0 +1,328 @@
+﻿/* -----------------------------------------------
+   Views-specific Styles (views.css)
+   Охватывает: карточки результатов, превью шаблонов,
+   кнопок, форм, изображений, шрифтов, палитр и т.д.
+   ----------------------------------------------- */
+
+/* === Карточки === */
+.card {
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
+        border-color: var(--accent);
+    }
+
+/* Заголовки карточек */
+.card-title {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Текст карточек */
+.card-text {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+    .card-text small {
+        color: var(--text-secondary);
+    }
+
+/* === Сетка результатов поиска === */
+.row.gx-3 {
+    --bs-gutter-x: 1rem;
+}
+
+.row.gy-4 {
+    --bs-gutter-y: 1.5rem;
+}
+
+.row.gx-3.gy-4 {
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+}
+
+    .row.gx-3.gy-4 > .col-sm-6,
+    .row.gx-3.gy-4 > .col-md-4,
+    .row.gx-3.gy-4 > .col-lg-3 {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+/* === Шаблоны (Template) === */
+.template-preview {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+    .template-preview iframe {
+        width: 100%;
+        height: 960px; /* Уменьшено на 1/5 от 1200px */
+        border: none;
+        background: var(--surface);
+        display: block;
+    }
+
+.template-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    cursor: default;
+    background: transparent;
+}
+
+.template-preview:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
+}
+
+/* === Кнопки (Button) === */
+.button-preview {
+    background: var(--surface);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+    .button-preview iframe {
+        width: 100%;
+        height: 120px;
+        border: none;
+        background: var(--surface);
+        display: block;
+    }
+
+/* === Формы (Form) === */
+.position-relative {
+    position: relative;
+}
+
+.form-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    cursor: default;
+    background: transparent;
+}
+
+.position-relative iframe {
+    width: 100%;
+    height: 400px;
+    border: none;
+    background: var(--surface);
+    display: block;
+}
+
+.position-relative:hover .form-overlay {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
+}
+
+/* === Изображения / Иконки / Анимированные === */
+.card-img-top {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+    .card-img-top.img-fluid {
+        object-fit: contain;
+        max-height: 300px;
+        width: 100%;
+        background: var(--bg-alt);
+        padding: 0.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        transition: box-shadow 0.2s;
+    }
+
+        .card-img-top.img-fluid:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
+        }
+
+/* === Шрифты (Font) === */
+.font-preview-container {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-alt);
+    border-radius: 8px;
+}
+
+    .font-preview-container p {
+        margin: 0;
+        font-size: 1.5rem;
+        color: var(--text-primary);
+    }
+
+    .font-preview-container:hover p {
+        text-decoration: underline var(--accent);
+    }
+
+/* === Палитры (Palette) === */
+.palette-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    background: transparent;
+}
+
+.palette-swatch {
+    position: relative;
+    flex: 1 0 30%;
+    padding-top: 30%;
+    border-radius: 0;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .palette-swatch:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
+    }
+
+    .palette-swatch .swatch-hex {
+        position: absolute;
+        bottom: 4px;
+        left: 4px;
+        font-size: 0.75rem;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text-primary);
+        padding: 2px 4px;
+        border-radius: 2px;
+    }
+
+    .palette-swatch[title] {
+        position: relative;
+    }
+
+        .palette-swatch[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-secondary);
+            color: var(--surface);
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 0.75rem;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+/* === Кнопки внутри карточек === */
+/* Общий стиль для всех .btn в карточке */
+.card-body .btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+/* “Скачать” (outline-primary): градиент A6808C → EDAFB8 */
+.card-body .btn-outline-primary {
+    color: var(--gradient-secondary-from);
+    border-color: var(--gradient-secondary-from);
+    border-radius: 50px;
+}
+
+    .card-body .btn-outline-primary:hover {
+        background: linear-gradient(90deg, #A6808C, #EDAFB8);
+        color: var(--surface);
+        box-shadow: 0 0 12px var(--accent-glow);
+        transform: scale(1.05);
+        border-radius: 50px;
+    }
+
+/* “Копировать” (outline-secondary): градиент 7798AB → 383F51 */
+.card-body .btn-outline-secondary {
+    color: #7798AB;
+    border-color: #7798AB;
+    border-radius: 50px;
+}
+
+    .card-body .btn-outline-secondary:hover {
+        background: linear-gradient(90deg, #7798AB, #383F51);
+        color: var(--surface);
+        box-shadow: 0 0 12px var(--accent-glow);
+        transform: scale(1.05);
+        border-radius: 50px;
+    }
+
+/* “Скачать HTML” (btn-primary): основной градиент и glow */
+.card-body .btn-primary {
+    background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
+    border: none;
+    color: var(--surface);
+    border-radius: 50px;
+}
+
+    .card-body .btn-primary:hover {
+        background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
+        transform: scale(1.02);
+        box-shadow: 0 0 12px var(--accent-glow);
+        border-radius: 50px;
+    }
+
+/* Отступы для превью, карточек, свотчей */
+.template-preview,
+.button-preview,
+.position-relative,
+.font-preview-container,
+.palette-grid {
+    margin-bottom: 1rem;
+}
+
+    /* ИFRAME без лишних отступов */
+    .template-preview iframe,
+    .button-preview iframe,
+    .position-relative iframe {
+        display: block;
+    }
+
+/* Отступ для названия палитры */
+.card .mb-3.text-center {
+    margin-bottom: 0.75rem !important;
+}
+
+/* Поддержка темной темы */
+:root[data-theme="dark"] .card {
+    background: var(--surface);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="dark"] .palette-swatch .swatch-hex {
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--surface);
+}
+
+:root[data-theme="dark"] .card-body .btn-outline-secondary:hover {
+    background: linear-gradient(90deg, #7798AB, #383F51);
+    color: var(--surface);
+    box-shadow: 0 0 12px var(--accent-glow);
+    border-radius: 50px;
+}
+
+:root[data-theme="dark"] .card-body .btn-outline-primary:hover {
+    background: linear-gradient(90deg, #A6808C, #EDAFB8);
+    color: var(--surface);
+    box-shadow: 0 0 12px var(--accent-glow);
+    border-radius: 50px;
+}
