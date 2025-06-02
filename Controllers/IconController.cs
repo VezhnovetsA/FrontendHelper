@@ -72,7 +72,6 @@ namespace FrontendHelper.Controllers
 
 
         [HttpGet]
-        [HasPermission(Permission.CanAddPublicAsset)]
         public IActionResult AddIcon()
         {
             if (!ModelState.IsValid)
@@ -149,7 +148,6 @@ namespace FrontendHelper.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission(Permission.CanRemovePublicAsset)]
         public IActionResult DeleteIcon(int id)
         {
             var icon = _iconRepository.GetAsset(id);

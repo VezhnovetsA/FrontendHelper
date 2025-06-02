@@ -35,5 +35,18 @@ namespace FrontendHelper.Controllers
                 FormCode = formData.FormCode
             };
         }
+
+        [HttpGet]
+        public IActionResult DownloadCode(int id)
+        {
+            var form = _formRepository.GetAsset(id);
+            if (form == null)
+                return NotFound();
+
+            var content = form.FormCode;
+            var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+            var fileName = $"form_{form.Id}.txt";
+            return File(bytes, "text/plain; charset=utf-8", fileName);
+        }
     }
 }

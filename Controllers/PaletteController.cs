@@ -2,6 +2,7 @@
 using FHDatabase.Repositories;
 using FrontendHelper.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace FrontendHelper.Controllers
 {
@@ -57,6 +58,25 @@ namespace FrontendHelper.Controllers
             };
         }
 
+        [HttpGet]
+        public IActionResult DownloadPalette(int id)
+        {
+            var palette = _paletteRepository.GetOnePalette(id);
+            if (palette == null)
+                return NotFound();
+
+            // Сериализуем объект палитры (например, только список цветов в JSON)
+            var dto = new
+            {
+                palette.Id,
+                palette.Title,
+                Colors = palette.Colors.Select(c => new { c.Id, c.Name, c.Hex })
+            };
+            var json = JsonConvert.SerializeObject(dto, Formatting.Indented);
+            var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+            var fileName = $"palette_{palette.Id}.json";
+            return File(bytes, "application/json; charset=utf-8", fileName);
+        }
 
     }
 }
