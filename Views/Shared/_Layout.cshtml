@@ -1,9 +1,8 @@
-﻿<!-- _Layout.cshtml -->
-@using FrontendHelper.Services
+﻿@using FrontendHelper.Services
 @inject AuthService authService
 
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="ru" data-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -80,10 +79,106 @@
         </div>
         <!-- Search Bar внутри шапки -->
         <div class="container search-form mt-3">
-            <form class="d-flex w-100" method="get" asp-controller="Search" asp-action="Index">
-                <input type="hidden" name="resourceTypeFilter" value="@(ViewBag.CurrentResourceType ?? "")" />
-                <input name="searchQuery" type="text" class="form-control search-input me-2" placeholder="Поиск..." />
-                <button type="submit" class="btn btn-glow btn-lg text-center">Найти</button>
+            <form class="row gx-2 gy-2 align-items-center" method="get" asp-controller="Search" asp-action="Index">
+                <!-- Поле для текстового поиска -->
+                <div class="col-auto flex-grow-1">
+                    <input name="searchQuery" type="text" class="form-control search-input" placeholder="Поиск..." value="@(ViewBag.CurrentQuery ?? "")" />
+                </div>
+                <!-- Селектор типа ресурса -->
+                @{
+                    var current = ViewBag.CurrentResourceType as string;
+                }
+
+                <div class="col-auto">
+                    <select name="resourceTypeFilter" class="form-select">
+                        <option value="">Все типы</option>
+
+                        @* Иконки *@
+                        @if (current == "Icon")
+                        {
+                            <option value="Icon" selected>Иконки</option>
+                        }
+                        else
+                        {
+                            <option value="Icon">Иконки</option>
+                        }
+
+                        @* Картинки *@
+                        @if (current == "Picture")
+                        {
+                            <option value="Picture" selected>Картинки</option>
+                        }
+                        else
+                        {
+                            <option value="Picture">Картинки</option>
+                        }
+
+                        @* Анимированные *@
+                        @if (current == "AnimatedElement")
+                        {
+                            <option value="AnimatedElement" selected>Анимированные</option>
+                        }
+                        else
+                        {
+                            <option value="AnimatedElement">Анимированные</option>
+                        }
+
+                        @* Кнопки *@
+                        @if (current == "Button")
+                        {
+                            <option value="Button" selected>Кнопки</option>
+                        }
+                        else
+                        {
+                            <option value="Button">Кнопки</option>
+                        }
+
+                        @* Шаблоны *@
+                        @if (current == "Template")
+                        {
+                            <option value="Template" selected>Шаблоны</option>
+                        }
+                        else
+                        {
+                            <option value="Template">Шаблоны</option>
+                        }
+
+                        @* Формы *@
+                        @if (current == "Form")
+                        {
+                            <option value="Form" selected>Формы</option>
+                        }
+                        else
+                        {
+                            <option value="Form">Формы</option>
+                        }
+
+                        @* Шрифты *@
+                        @if (current == "Font")
+                        {
+                            <option value="Font" selected>Шрифты</option>
+                        }
+                        else
+                        {
+                            <option value="Font">Шрифты</option>
+                        }
+
+                        @* Палитры *@
+                        @if (current == "Palette")
+                        {
+                            <option value="Palette" selected>Палитры</option>
+                        }
+                        else
+                        {
+                            <option value="Palette">Палитры</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Кнопка “Найти” -->
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-glow btn-lg text-center">Найти</button>
+                </div>
             </form>
         </div>
     </header>

@@ -48,5 +48,18 @@ namespace FrontendHelper.Controllers
                 ButtonCode = buttonData.ButtonCode
             };
         }
+
+        [HttpGet]
+        public IActionResult DownloadCode(int id)
+        {
+            var button = _buttonRepository.GetAsset(id);
+            if (button == null)
+                return NotFound();
+
+            var content = button.ButtonCode;
+            var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+            var fileName = $"button_{button.Id}.txt";
+            return File(bytes, "text/plain; charset=utf-8", fileName);
+        }
     }
 }

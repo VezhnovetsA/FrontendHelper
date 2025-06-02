@@ -1,41 +1,199 @@
 ﻿@model FrontendHelper.Models.SearchViewModel
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
-<div class="container py-4">
-    <h2>Результаты поиска</h2>
+@{
+    // Группируем результаты по ResourceType
+    var grouped = Model.Results
+        .GroupBy(item => item.ResourceType)
+        .OrderBy(g => g.Key);
+}
 
-    @if (string.IsNullOrWhiteSpace(Model.Query))
+<h2>Результаты поиска для "@Model.Query"</h2>
+
+@if (!Model.Results.Any())
+{
+    <p>Ничего не найдено.</p>
+}
+else
+{
+    @foreach (var group in grouped)
     {
-        <p>Введите запрос выше, чтобы начать поиск.</p>
-    }
-    else if (!Model.Results.Any())
-    {
-        <p>По запросу «<strong>@Model.Query</strong>» ничего не найдено.</p>
-    }
-    else
-    {
-        <div class="row g-4">
-            @foreach (var item in Model.Results)
-            {
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        @if (!string.IsNullOrEmpty(item.PreviewUrl))
-                        {
-                            <img src="@item.PreviewUrl" class="card-img-top" alt="@item.Name" />
-                        }
-                        <div class="card-body">
-                            <h5 class="card-title">@item.Name</h5>
-                            <p><em>@item.ResourceType</em></p>
-                            <a asp-controller="@item.ResourceType"
-                               asp-action="Details"
-                               asp-route-id="@item.Id"
-                               class="btn btn-outline-primary btn-sm">
-                                Открыть
-                            </a>
+        <h4 class="mt-4 mb-3 text-capitalize">@group.Key</h4>
+
+        @* --- Особая обработка для шаблонов (Template) --- *@
+        @if (group.Key == "Template")
+        {
+            <div class="row gx-3 gy-4">
+                @foreach (var item in group)
+                {
+                    <div class="col-12">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">@item.Name</h5>
+                                <div class="position-relative mb-3 template-preview" style="overflow:hidden; border:1px solid #e0e0e0;">
+                                    @* iframe с шаблоном, блокируем взаимодействие с помощью overlay *@
+                                    <iframe src="@item.PreviewUrl"
+                                            style="border:none; width:100%; min-height:600px; pointer-events:none;">
+                                    </iframe>
+                                    <div class="template-overlay"
+                                         style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;">
+                                    </div>
+                                </div>
+                                <a href="@item.DownloadUrl" download class="btn btn-primary">
+                                    Скачать HTML
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        }
+        else
+        {
+            @* --- Для всех остальных типов (кроме Template) используем сетку 4 колонки --- *@
+            <div class="row gx-3 gy-4">
+                @foreach (var item in group)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 shadow-sm">
+                            @* Превью для разных типов *@
+                            @switch (item.ResourceType)
+                            {
+                                case "Icon":
+                                case "Picture":
+                                case "AnimatedElement":
+                                case "Font":
+                                    {
+                                        <img src="@item.PreviewUrl"
+                                             class="card-img-top img-fluid"
+                                             style="object-fit: contain; max-height: 300px; width: 100%;" />
+                                        break;
+                                    }
+                                case "Button":
+                                    {
+                                        <div class="button-preview p-3 d-flex justify-content-center align-items-center"
+                                             style="height: 120px;">
+                                            <iframe src="@item.PreviewUrl"
+                                                    style="border:none; width:100%; height:100%;"></iframe>
+                                        </div>
+                                        break;
+                                    }
+                                case "Form":
+                                    {
+                                        <div class="position-relative mb-2 border rounded" style="height: 400px;">
+                                            <iframe src="@item.PreviewUrl"
+                                                    style="width:100%; height:100%; border:none; pointer-events:none;">
+                                            </iframe>
+                                            <div class="form-overlay"
+                                                 style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;">
+                                            </div>
+                                        </div>
+                                        break;
+                                    }
+                                case "Palette":
+                                    {
+                                        <div class="p-3 text-center text-muted" style="height: 300px;">
+                                            <span>⧗ Палитра</span>
+                                        </div>
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        <div class="d-flex align-items-center justify-content-center bg-light"
+                                             style="height:300px;">
+                                            <span class="text-muted">Нет превью</span>
+                                        </div>
+                                        break;
+                                    }
+                            }
+
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title" style="font-size: 1.1rem;">@item.Name</h5>
+                                @if (!string.IsNullOrEmpty(item.Topic))
+                                {
+                                    <p class="card-text text-muted small mb-2">Тема: @item.Topic</p>
+                                }
+                                <p class="card-text mb-1">
+                                    <span class="badge bg-secondary text-capitalize">@item.ResourceType</span>
+                                </p>
+
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    @if (item.ResourceType == "Button"
+                                   || item.ResourceType == "Template"
+                                   || item.ResourceType == "Form")
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary" href="@item.DownloadUrl" download>
+                                            Скачать HTML
+                                        </a>
+                                    }
+                                    else if (item.ResourceType == "Icon"
+                                    || item.ResourceType == "Picture"
+                                    || item.ResourceType == "AnimatedElement"
+                                    || item.ResourceType == "Font")
+                                    {
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                onclick="downloadImage('@item.PreviewUrl')">
+                                            Скачать
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                onclick="copyImageToClipboard('@item.PreviewUrl')">
+                                            Копировать изображение
+                                        </button>
+                                    }
+                                    else if (item.ResourceType == "Palette")
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary" href="@item.DownloadUrl">
+                                            Скачать JSON
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     }
-</div>
+}
+
+@section Scripts {
+    <script>
+        // Скачиваем изображение через создание скрытого <a download>
+        function downloadImage(url) {
+            if (!url) return;
+            const link = document.createElement('a');
+            link.href = url;
+            const fileName = url.substring(url.lastIndexOf('/') + 1);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Копируем изображение в буфер (Clipboard API)
+        async function copyImageToClipboard(url) {
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                if (!navigator.clipboard) {
+                    alert('Clipboard API не поддерживается этим браузером.');
+                    return;
+                }
+                await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                alert('Изображение скопировано в буфер обмена');
+            } catch (err) {
+                alert('Не удалось скопировать изображение: ' + err);
+            }
+        }
+
+        // Для форм: перехват скролла колёсиком мыши (по примеру вашего оригинала)
+        document.querySelectorAll('.position-relative').forEach(container => {
+            const iframe = container.querySelector('iframe');
+            const overlay = container.querySelector('.form-overlay');
+
+            overlay.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                iframe.contentWindow.scrollBy(0, e.deltaY);
+            }, { passive: false });
+        });
+    </script>
+}
