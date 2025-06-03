@@ -1,6 +1,7 @@
 ﻿@using FrontendHelper.Services
 @inject AuthService authService
 
+
 <!DOCTYPE html>
 <html lang="ru" data-theme="light">
 <head>
@@ -257,6 +258,8 @@
         </div>
     </div>
 
+
+
     <!-- Main Content -->
     <main class="content-wrapper flex-fill">
         <div class="container py-4">
@@ -271,10 +274,16 @@
         </div>
     </footer>
 
+    @* Вставляем невидимую форму только ради анти-CSRF-токена *@
+    <form id="antiForgeryForm" style="display:none">
+        @Html.AntiForgeryToken()
+    </form>
+
     <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
+
     <script>
         // Theme toggle
         const htmlEl = document.documentElement;

@@ -1,196 +1,311 @@
 ﻿using FHDatabase.Models;
 using FHDatabase.Repositories;
+using FhEnums;
 using FrontendHelper.Controllers.AuthorizationAttributes;
 using FrontendHelper.Models;
+using FrontendHelper.Services;
 using FrontendHelper.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Drawing;
-using FhEnums;
+using System.Linq;
+using System.Threading.Tasks;
+
 namespace FrontendHelper.Controllers
 {
     public class IconController : Controller
     {
-        private IconRepository _iconRepository;
+        private readonly IconRepository _iconRepository;
         private readonly IFileService _fileService;
-        private FilterRepository _filterRepository;
-        private FavoriteRepository _favoriteRepository;
-        public IconController(IconRepository iconRepository,
+        private readonly FilterRepository _filterRepository;
+        private readonly FavoriteRepository _favoriteRepository;
+        private readonly AuthService _authService;
+
+        public IconController(
+            IconRepository iconRepository,
             IFileService fileService,
             FilterRepository filterRepository,
-            FavoriteRepository favoriteRepository)
+            FavoriteRepository favoriteRepository,
+            AuthService authService
+        )
         {
             _iconRepository = iconRepository;
             _fileService = fileService;
             _filterRepository = filterRepository;
             _favoriteRepository = favoriteRepository;
+            _authService = authService;
         }
 
+        // ===========================
+        // ПРОСМОТР (CanViewIcons)
+        // ===========================
 
-        // показ всех иконок (без фильтра)
+        [HasPermission(Permission.CanViewIcons)]
         public IActionResult ShowAllIcons()
         {
-            var iconDatas = _iconRepository.GetAssets();
-            var viewModels = iconDatas.Select(PassDataToViewModel).ToList();
+            // (Не используется в данном запросе, но для единообразия можно сделать так же, как ShowAllIconsOnTheTopic)
+            var all = _iconRepository.GetAssets();
+            var userId = _authService.IsAuthenticated()
+                ? _authService.GetUserId()
+                : (int?)null;
+
+            var viewModels = all
+                .Select(d => ToViewModel(d, userId))
+                .ToList();
+
             return View(viewModels);
         }
 
-
-
+        [HasPermission(Permission.CanViewIcons)]
         public IActionResult ShowAllIconsOnTheTopic(string topic)
         {
-            var userId = int.TryParse(User.FindFirst("Id")?.Value, out var uid) ? uid : (int?)null;
+            var data = _iconRepository.GetAllIconsByTopic(topic);
+            var userId = _authService.IsAuthenticated()
+                ? _authService.GetUserId()
+                : (int?)null;
 
-            var viewModels = _iconRepository
-                .GetAllIconsByTopic(topic)
-                .Select(data => PassDataToViewModelForFavorites(data, userId))
+            var viewModels = data
+                .Select(d => ToViewModel(d, userId))
                 .ToList();
 
             ViewBag.Topic = topic;
             return View(viewModels);
         }
 
-
-        // показ групп иконок по всем темам
+        [HasPermission(Permission.CanViewIcons)]
         public IActionResult ShowGroupsOfIconsOnTheTopic(int numberOfIcons = 6)
         {
-            var iconTopics = _iconRepository.GetIconTopics();
+            var topics = _iconRepository.GetIconTopics();
+            var userId = _authService.IsAuthenticated()
+                ? _authService.GetUserId()
+                : (int?)null;
 
-            var viewModels = iconTopics.Select(topic => new IconGroupViewModel
+            var vm = topics.Select(topic => new IconGroupViewModel
             {
                 Topic = topic,
                 Icons = _iconRepository
-                .GetIconGroupByTopic(topic, numberOfIcons)
-                .Select(PassDataToViewModel)
-                .ToList()
+                    .GetIconGroupByTopic(topic, numberOfIcons)
+                    .Select(d => ToViewModel(d, userId))
+                    .ToList()
             });
 
-            return View(viewModels);
+            return View(vm);
         }
 
+        // ===========================
+        // СОЗДАНИЕ (CanManageIcons)
+        // ===========================
 
+        [HasPermission(Permission.CanManageIcons)]
         [HttpGet]
-        public IActionResult AddIcon()
+        public IActionResult CreateIcon()
         {
-            if (!ModelState.IsValid)
+            var vm = new CreateIconViewModel
             {
-                return View();
-            }
-
-            var viewModel = new CreateIconViewModel();
-
-            viewModel.AvailableFilters = _filterRepository.GetAssets()
-                .Where(f => f.AssetType == "Icon")            // только фильтры для иконок
-                .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
-                .ToList();
-
-            return View(viewModel);
+                AvailableFilters = _filterRepository.GetAssets()
+                    .Where(f => f.AssetType == "Icon")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList()
+            };
+            return View(vm);
         }
 
-
+        [HasPermission(Permission.CanManageIcons)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddIcon(CreateIconViewModel viewModel)
+        public async Task<IActionResult> CreateIcon(CreateIconViewModel vm)
         {
-            //  валидация не прошла —> вернуть форму создания
             if (!ModelState.IsValid)
             {
-                viewModel.AvailableFilters = _filterRepository.GetAssets()
+                vm.AvailableFilters = _filterRepository.GetAssets()
                     .Where(f => f.AssetType == "Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList();
-                return View(viewModel);
+                return View(vm);
             }
 
-            //  проверка дубликата иконки (если нет дубликата - создание иконки)
-            if (_iconRepository.CheckIconDuplicate(viewModel.Name, viewModel.Topic))
+            // Проверка на дубли
+            if (_iconRepository.CheckIconDuplicate(vm.Name, vm.Topic))
             {
-                ModelState.AddModelError(nameof(viewModel.Name),
-                    "Иконка с таким именем уже существует в этой теме");
-
-                viewModel.AvailableFilters = _filterRepository.GetAssets()
+                ModelState.AddModelError(nameof(vm.Name), "Иконка с таким именем уже существует в этой теме");
+                vm.AvailableFilters = _filterRepository.GetAssets()
                     .Where(f => f.AssetType == "Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList();
-
-                return View(viewModel);
+                return View(vm);
             }
 
-            // сохранение картинки и создание записи в таблицу иконок
-            var savedFileName = await _fileService
-                .SaveFileAsync(viewModel.ImgFile, "images/icons");
-
-            var icon = new IconData
+            // Сохраняем файл
+            var savedFileName = await _fileService.SaveFileAsync(vm.ImgFile, "images/icons");
+            var newIcon = new IconData
             {
-                Name = viewModel.Name,
-                Topic = viewModel.Topic,
+                Name = vm.Name,
+                Topic = vm.Topic,
                 Img = savedFileName
             };
-            _iconRepository.AddAsset(icon);
+            _iconRepository.AddAsset(newIcon);
 
-            // связка выбранных фильтров (таблица AssetFilter) с иконкой по их id
-            foreach (var filterId in viewModel.SelectedFilterIds)
+            // Привязываем фильтры
+            foreach (var filterId in vm.SelectedFilterIds)
             {
                 _filterRepository.AddAssetFilter(new AssetFilter
                 {
                     FilterId = filterId,
                     AssetType = "Icon",
-                    AssetId = icon.Id
+                    AssetId = newIcon.Id
                 });
             }
 
-            return RedirectToAction(nameof(ShowGroupsOfIconsOnTheTopic));
+            return RedirectToAction(nameof(ShowAllIcons));
         }
 
+        // ===========================
+        // РЕДАКТИРОВАНИЕ (CanManageIcons)
+        // ===========================
 
+        [HasPermission(Permission.CanManageIcons)]
+        [HttpGet]
+        public IActionResult EditIcon(int id)
+        {
+            var iconData = _iconRepository.GetAsset(id);
+            if (iconData == null)
+                return NotFound();
 
+            var existingFilters = _filterRepository
+                .GetFiltersForAsset("Icon", id)
+                .Select(f => f.Id)
+                .ToList();
+
+            var viewModel = new EditIconViewModel
+            {
+                Id = iconData.Id,
+                Name = iconData.Name,
+                Topic = iconData.Topic,
+                ExistingImg = iconData.Img,
+                SelectedFilterIds = existingFilters,
+                AvailableFilters = _filterRepository.GetAssets()
+                    .Where(f => f.AssetType == "Icon")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        [HasPermission(Permission.CanManageIcons)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditIcon(EditIconViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                viewModel.AvailableFilters = _filterRepository.GetAssets()
+                    .Where(f => f.AssetType == "Icon")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList();
+                return View(viewModel);
+            }
+
+            var icon = _iconRepository.GetAsset(viewModel.Id);
+            if (icon == null)
+                return NotFound();
+
+            // Обновляем поля
+            icon.Name = viewModel.Name;
+            icon.Topic = viewModel.Topic;
+
+            // Если пришёл новый файл — сохраняем его и удаляем старый
+            if (viewModel.ImgFile != null)
+            {
+                _fileService.DeleteFile(icon.Img, "images/icons");
+                var newFileName = await _fileService.SaveFileAsync(viewModel.ImgFile, "images/icons");
+                icon.Img = newFileName;
+            }
+
+            _iconRepository.UpdateAsset(icon);
+
+            // === Обновляем связи с фильтрами ===
+            var currentFilterIds = _filterRepository
+                .GetFiltersForAsset("Icon", viewModel.Id)
+                .Select(f => f.Id)
+                .ToList();
+
+            foreach (var oldFilterId in currentFilterIds)
+            {
+                if (!viewModel.SelectedFilterIds.Contains(oldFilterId))
+                {
+                    _filterRepository.RemoveAssetFilter("Icon", viewModel.Id, oldFilterId);
+                }
+            }
+
+            foreach (var newFilterId in viewModel.SelectedFilterIds)
+            {
+                if (!currentFilterIds.Contains(newFilterId))
+                {
+                    _filterRepository.AddAssetFilter(new AssetFilter
+                    {
+                        AssetType = "Icon",
+                        AssetId = viewModel.Id,
+                        FilterId = newFilterId
+                    });
+                }
+            }
+
+            return RedirectToAction(nameof(ShowAllIconsOnTheTopic), new { topic = icon.Topic });
+        }
+
+        // ===========================
+        // УДАЛЕНИЕ (CanManageIcons)
+        // ===========================
+
+        [HasPermission(Permission.CanManageIcons)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteIcon(int id)
         {
             var icon = _iconRepository.GetAsset(id);
             if (icon == null) return NotFound();
-            _fileService.DeleteFile(icon.Img, "images/icons");
-            _iconRepository.RemoveAsset(id);
 
+            _fileService.DeleteFile(icon.Img, "images/icons");
+
+            var filterIds = _filterRepository
+                .GetFiltersForAsset("Icon", id)
+                .Select(f => f.Id)
+                .ToList();
+
+            foreach (var fid in filterIds)
+            {
+                _filterRepository.RemoveAssetFilter("Icon", id, fid);
+            }
+
+            _iconRepository.RemoveAsset(id);
             return RedirectToAction(nameof(ShowGroupsOfIconsOnTheTopic));
         }
 
+        // ===========================
+        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+        // ===========================
 
-
-
-
-        // передача данных во ViewModel (маппер)
-        private IconViewModel PassDataToViewModel(IconData iconData)
+        /// <summary>
+        /// Конструирует IconViewModel и сразу проставляет флаг IsFavorited для текущего пользователя
+        /// </summary>
+        private IconViewModel ToViewModel(IconData d, int? userId)
         {
-            return new IconViewModel
+            bool isFav = false;
+            if (userId.HasValue)
             {
-                Id = iconData.Id,
-                Name = iconData.Name,
-                Img = iconData.Img,
-                Topic = iconData.Topic
-            };
-        }
-
-        // еще один маппер но с работой с избранными
-        private IconViewModel PassDataToViewModelForFavorites(IconData iconData, int? userId)
-        {
-            var isFav = userId.HasValue
-                && _favoriteRepository
+                isFav = _favoriteRepository
                     .GetFavoriteElementByUser(userId.Value)
-                    .Any(f => f.AssetType == "Icon" && f.AssetId == iconData.Id);
+                    .Any(f => f.AssetType == "Icon" && f.AssetId == d.Id);
+            }
 
             return new IconViewModel
             {
-                Id = iconData.Id,
-                Name = iconData.Name,
-                Topic = iconData.Topic,
-                Img = iconData.Img,
+                Id = d.Id,
+                Name = d.Name,
+                Topic = d.Topic,
+                Img = d.Img,
                 IsFavorited = isFav
             };
         }
-
     }
 }
