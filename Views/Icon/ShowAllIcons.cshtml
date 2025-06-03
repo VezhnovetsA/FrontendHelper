@@ -1,10 +1,28 @@
 ﻿@model IEnumerable<FrontendHelper.Models.IconViewModel>
+@using FhEnums
+@inject FrontendHelper.Services.AuthService authService
 
 @{
     ViewData["Title"] = "Все иконки";
 }
 
 <h2 class="mb-4">Все иконки</h2>
+
+@* Кнопка «Группы иконок» (переход обратно) *@
+<div class="mb-4">
+    <a class="btn btn-sm btn-outline-primary btn-view-all"
+       asp-controller="Icon"
+       asp-action="ShowGroupsOfIconsOnTheTopic">
+        ← Группы иконок
+    </a>
+</div>
+
+@if (authService.HasPermission(Permission.CanManageIcons))
+{
+    <a class="btn-create-icon mb-3" asp-action="CreateIcon" asp-controller="Icon">
+        <i class="bi bi-plus-lg"></i> Создать иконку
+    </a>
+}
 
 <div class="row gx-3 gy-4">
     @foreach (var icon in Model)
@@ -14,7 +32,14 @@
                 <img src="@Url.Content($"~/images/icons/{icon.Img}")"
                      alt="@icon.Name"
                      class="card-img-top img-fluid"
-                     style="object-fit: contain; max-height: 200px; width: 100%; background: var(--bg-alt); padding: 0.5rem;" />
+                     style="object-fit: contain; max-height: 200px; width: 100%; background: var(--bg-alt); padding: 0.5rem;"
+                     data-bs-toggle="modal"
+                     data-bs-target="#iconDetailModal"
+                     data-icon-id="@icon.Id"
+                     data-icon-name="@icon.Name"
+                     data-icon-topic="@icon.Topic"
+                     data-icon-img="@Url.Content($"~/images/icons/{icon.Img}")"
+                     data-icon-favorited="@(icon.IsFavorited.ToString().ToLower())" />
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-truncate" title="@icon.Name" style="font-size: 1.1rem;">@icon.Name</h5>
                     <p class="card-text text-muted small mb-2">Тема: @icon.Topic</p>
@@ -29,10 +54,9 @@
                         </button>
                     </div>
                 </div>
-                @* Сердечко «в избранное» *@
                 <button class="favorite-toggle-btn"
-                        data‐asset‐type="Icon"
-                        data‐asset‐id="@icon.Id"
+                        data-asset-type="Icon"
+                        data-asset-id="@icon.Id"
                         style="position: absolute; top: 8px; right: 8px; background: none; border: none;">
                     @if (icon.IsFavorited)
                     {
@@ -46,6 +70,59 @@
             </div>
         </div>
     }
+</div>
+
+@* Тот же модальный #iconDetailModal, что и выше. Можно скопировать его из ShowGroupsOfIconsOnTheTopic *@
+<div class="modal fade" id="iconDetailModal" tabindex="-1" aria-labelledby="iconDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="iconDetailModalLabel">Детали иконки</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalIconImage"
+                     src=""
+                     alt=""
+                     class="img-fluid mb-3"
+                     style="max-height: 300px; margin: 0 auto; display: block;" />
+                <h5 id="modalIconName" class="mb-1"></h5>
+                <p id="modalIconTopic" class="text-muted small mb-3"></p>
+
+                <div class="d-flex justify-content-center mb-3">
+                    <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-download"></i> Скачать
+                    </button>
+                    <button id="modalCopyBtn" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-clipboard"></i> Копировать
+                    </button>
+                    <button id="modalFavBtn" class="btn btn-outline-danger">
+                        <i id="modalFavIcon" class="bi"></i> Избранное
+                    </button>
+                </div>
+
+                @if (authService.HasPermission(Permission.CanManageIcons))
+                {
+                    <div class="d-flex justify-content-center">
+                        <a id="modalEditBtn" class="btn btn-warning me-2" href="#">
+                            <i class="bi bi-pencil"></i> Редактировать
+                        </a>
+                        <form id="modalDeleteForm"
+                              method="post"
+                              asp-controller="Icon"
+                              asp-action="DeleteIcon"
+                              onsubmit="return confirm('Вы уверены, что хотите удалить эту иконку?');">
+                            <input type="hidden" id="modalDeleteId" name="id" value="" />
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Удалить
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -81,12 +158,15 @@
         document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const assetType = this.dataset.assetType;
-                const assetId = this.dataset.assetId;
+                const assetId   = parseInt(this.dataset.assetId, 10);
                 try {
                     const response = await fetch('/Favorites/Toggle', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
-                        body: JSON.stringify({ assetType: assetType, assetId: parseInt(assetId) })
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        body: JSON.stringify({ assetType, assetId })
                     });
                     if (!response.ok) throw new Error('Сетевая ошибка');
                     const result = await response.json();
@@ -104,6 +184,96 @@
                     alert('Не удалось обновить избранное: ' + err);
                 }
             });
+        });
+
+        // Обработка открытия модального окна
+        const iconDetailModal = document.getElementById('iconDetailModal');
+        iconDetailModal.addEventListener('show.bs.modal', function (event) {
+            const triggerEl = event.relatedTarget;
+            const iconId    = triggerEl.dataset.iconId;
+            const name      = triggerEl.dataset.iconName;
+            const topic     = triggerEl.dataset.iconTopic;
+            const imgUrl    = triggerEl.dataset.iconImg;
+
+            // Считываем реальное состояние «лайка» прямо из карточки:
+            const cardIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${iconId}"] i`);
+            const isFavoritedCard = cardIcon && cardIcon.classList.contains('bi-heart-fill');
+
+            document.getElementById('modalIconImage').src       = imgUrl;
+            document.getElementById('modalIconName').innerText  = name;
+            document.getElementById('modalIconTopic').innerText = 'Тема: ' + topic;
+
+            const downloadBtn = document.getElementById('modalDownloadBtn');
+            downloadBtn.onclick = () => downloadIcon(imgUrl);
+
+            const copyBtn = document.getElementById('modalCopyBtn');
+            copyBtn.onclick = () => copyImageToClipboard(imgUrl);
+
+            const favIcon = document.getElementById('modalFavIcon');
+            const favBtn  = document.getElementById('modalFavBtn');
+
+            // Устанавливаем иконку в модалке в зависимости от карточки:
+            if (isFavoritedCard) {
+                favIcon.className = 'bi bi-heart-fill text-danger';
+                favBtn.title     = 'Убрать из избранного';
+            } else {
+                favIcon.className = 'bi bi-heart text-secondary';
+                favBtn.title     = 'Добавить в избранное';
+            }
+
+            favBtn.onclick = async () => {
+                try {
+                    const response = await fetch('/Favorites/Toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        body: JSON.stringify({ assetType: 'Icon', assetId: parseInt(iconId, 10) })
+                    });
+                    if (!response.ok) throw new Error('Сервер вернул ' + response.status);
+                    const result = await response.json();
+
+                    // Модальное окно: переключаем иконку
+                    if (result.favorited) {
+                        favIcon.className = 'bi bi-heart-fill text-danger';
+                        favBtn.title     = 'Убрать из избранного';
+                    } else {
+                        favIcon.className = 'bi bi-heart text-secondary';
+                        favBtn.title     = 'Добавить в избранное';
+                    }
+
+                    // CARD: находим карточку и меняем её иконку
+                    const cardBtnIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${iconId}"] i`);
+                    if (cardBtnIcon) {
+                        if (result.favorited) {
+                            cardBtnIcon.classList.remove('bi-heart');
+                            cardBtnIcon.classList.add('bi-heart-fill', 'text-danger');
+                            cardBtnIcon.title = 'Убрать из избранного';
+                        } else {
+                            cardBtnIcon.classList.remove('bi-heart-fill', 'text-danger');
+                            cardBtnIcon.classList.add('bi-heart', 'text-secondary');
+                            cardBtnIcon.title = 'Добавить в избранное';
+                        }
+                    }
+                } catch (err) {
+                    alert('Не удалось обновить избранное: ' + err);
+                }
+            };
+
+        @* Если есть права на редактирование/удаление, настраиваем кнопки: *@
+        @if (authService.HasPermission(Permission.CanManageIcons))
+        {
+            <text>
+                        const editBtn       = document.getElementById('modalEditBtn');
+                        const deleteForm    = document.getElementById('modalDeleteForm');
+                        const deleteIdInput = document.getElementById('modalDeleteId');
+
+                        editBtn.href        = '@Url.Action("EditIcon", "Icon")/' + iconId;
+                        deleteForm.action   = '@Url.Action("DeleteIcon", "Icon")';
+                        deleteIdInput.value = iconId;
+            </text>
+        }
         });
     </script>
 }

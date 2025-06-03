@@ -8,20 +8,28 @@
 
 <h2 class="mb-4">Группы иконок</h2>
 
+@* Кнопка «Все иконки» (переход на ShowAllIcons) *@
+<div class="mb-4">
+    <a class="btn btn-sm btn-outline-primary btn-view-all"
+       asp-controller="Icon"
+       asp-action="ShowAllIcons">
+        ← Все иконки
+    </a>
+</div>
+
 @if (authService.HasPermission(Permission.CanManageIcons))
 {
-    <a class="btn-create-icon" asp-action="AddIcon" asp-controller="Icon">
+    <a class="btn-create-icon mb-3" asp-action="CreateIcon" asp-controller="Icon">
         <i class="bi bi-plus-lg"></i> Создать иконку
     </a>
 }
-
 
 @foreach (var group in Model)
 {
     <div class="mb-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="text-capitalize mb-0">@group.Topic</h3>
-            <a class="btn-view-all btn-sm"
+            <a class="btn btn-sm btn-outline-primary btn-view-all"
                asp-controller="Icon"
                asp-action="ShowAllIconsOnTheTopic"
                asp-route-topic="@group.Topic">
@@ -165,13 +173,13 @@
             }
         }
 
-        // Чтение токена антифальсификации
+        // Получаем токен антифальсификации
         function getAntiForgeryToken() {
             const tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]');
             return tokenInput ? tokenInput.value : '';
         }
 
-        // Обработчик «Избранное» на карточке
+        // Обработчик toggle–«Избранное» для карточки
         document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const assetType = this.dataset.assetType;
@@ -205,7 +213,7 @@
 
         // Обработка открытия модального окна
         const iconDetailModal = document.getElementById('iconDetailModal');
-                iconDetailModal.addEventListener('show.bs.modal', function (event) {
+        iconDetailModal.addEventListener('show.bs.modal', function (event) {
             const triggerEl = event.relatedTarget;
             const iconId    = triggerEl.dataset.iconId;
             const name      = triggerEl.dataset.iconName;
@@ -278,21 +286,19 @@
                 }
             };
 
-        @* Если есть права на редактирование/удаление, настраиваем кнопки:
-       (этот блок уже был в вашем коде) *@
+        @* Если есть права на редактирование/удаление, настраиваем кнопки: *@
         @if (authService.HasPermission(Permission.CanManageIcons))
         {
             <text>
-                    const editBtn       = document.getElementById('modalEditBtn');
-                    const deleteForm    = document.getElementById('modalDeleteForm');
-                    const deleteIdInput = document.getElementById('modalDeleteId');
+                        const editBtn       = document.getElementById('modalEditBtn');
+                        const deleteForm    = document.getElementById('modalDeleteForm');
+                        const deleteIdInput = document.getElementById('modalDeleteId');
 
-                    editBtn.href        = '@Url.Action("EditIcon", "Icon")/' + iconId;
-                    deleteForm.action   = '@Url.Action("DeleteIcon", "Icon")';
-                    deleteIdInput.value = iconId;
+                        editBtn.href        = '@Url.Action("EditIcon", "Icon")/' + iconId;
+                        deleteForm.action   = '@Url.Action("DeleteIcon", "Icon")';
+                        deleteIdInput.value = iconId;
             </text>
         }
         });
-
     </script>
 }

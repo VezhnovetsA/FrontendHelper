@@ -23,6 +23,8 @@ namespace FrontendHelper.Controllers
         }
 
         // Показать все шрифты (View)
+
+        [HasPermission(Permission.CanViewFonts)]
         public IActionResult ShowFonts()
         {
             var fonts = _fontRepository.GetAssets();

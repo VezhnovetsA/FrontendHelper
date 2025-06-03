@@ -1,68 +1,80 @@
 ﻿@model FrontendHelper.Models.EditIconViewModel
 
+@using FhEnums
+@inject FrontendHelper.Services.AuthService authService
+
 @{
-    ViewData["Title"] = "Редактировать иконку";
+    ViewData["Title"] = "Редактировать";
 }
 
-<h2 class="mb-4">Редактировать иконку</h2>
+<div class="form-container">
+    <h2 class="mb-4">Редактировать</h2>
 
-<form asp-action="EditIcon" asp-controller="Icon" method="post" enctype="multipart/form-data" class="mb-5">
-    @Html.AntiForgeryToken()
+    <div class="card form-card mx-auto shadow-sm">
+        <div class="card-body">
+            <form asp-action="EditIcon" asp-controller="Icon" method="post" enctype="multipart/form-data" class="generic-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
 
-    <input type="hidden" asp-for="Id" />
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Название</label>
+                    <input asp-for="Name" class="form-control" placeholder="Введите название" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
 
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label">Название</label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger small"></span>
-    </div>
+                <div class="mb-3">
+                    <label asp-for="Topic" class="form-label">Тема</label>
+                    <input asp-for="Topic" class="form-control" placeholder="Введите тему, например “Природа”" />
+                    <span asp-validation-for="Topic" class="text-danger small"></span>
+                </div>
 
-    <div class="mb-3">
-        <label asp-for="Topic" class="form-label">Тема</label>
-        <input asp-for="Topic" class="form-control" />
-        <span asp-validation-for="Topic" class="text-danger small"></span>
-    </div>
+                <div class="mb-3">
+                    <label class="form-label">Текущий файл</label>
+                    <div class="mb-2 text-center">
+                        <img src="@Url.Content($"~/images/icons/{Model.ExistingImg}")"
+                             alt="@Model.Name"
+                             class="img-thumbnail existing-preview" />
+                    </div>
+                    <label asp-for="ImgFile" class="form-label">Загрузить новый файл (необязательно)</label>
+                    <input asp-for="ImgFile" type="file" class="form-control" />
+                    <span asp-validation-for="ImgFile" class="text-danger small"></span>
+                </div>
 
-    <div class="mb-3">
-        <label class="form-label">Текущая иконка</label>
-        <div class="mb-2">
-            <img src="@Url.Content($"~/images/icons/{Model.ExistingImg}")"
-                 alt="@Model.Name"
-                 class="img-thumbnail"
-                 style="max-height: 150px;" />
-        </div>
-        <label asp-for="ImgFile" class="form-label">Загрузить новую иконку (необязательно)</label>
-        <input asp-for="ImgFile" type="file" class="form-control" />
-        <span asp-validation-for="ImgFile" class="text-danger small"></span>
-    </div>
-
-    @if (Model.AvailableFilters != null && Model.AvailableFilters.Any())
-    {
-        <div class="mb-3">
-            <label class="form-label">Фильтры</label>
-            <div>
-                @foreach (var filter in Model.AvailableFilters)
+                @if (Model.AvailableFilters != null && Model.AvailableFilters.Any())
                 {
-                    var isChecked = Model.SelectedFilterIds.Contains(int.Parse(filter.Value));
-                    <div class="form-check form-check-inline me-3">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="SelectedFilterIds"
-                               value="@filter.Value"
-                               checked="@isChecked" />
-                        <label class="form-check-label">@filter.Text</label>
+                    <div class="mb-3">
+                        <label class="form-label">Фильтры</label>
+                        <div>
+                            @foreach (var filter in Model.AvailableFilters)
+                            {
+                                var isChecked = Model.SelectedFilterIds.Contains(int.Parse(filter.Value));
+                                <div class="form-check form-check-inline me-3">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="SelectedFilterIds"
+                                           value="@filter.Value"
+                                           checked="@(isChecked ? "checked" : null)" />
+                                    <label class="form-check-label">@filter.Text</label>
+                                </div>
+                            }
+                        </div>
                     </div>
                 }
-            </div>
-        </div>
-    }
 
-    <button type="submit" class="btn btn-primary me-2">Сохранить изменения</button>
-    <a asp-action="ShowGroupsOfIconsOnTheTopic" class="btn btn-secondary">Отмена</a>
-</form>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-check-lg"></i> Сохранить
+                    </button>
+                    <a asp-action="ShowGroupsOfIconsOnTheTopic" class="btn btn-secondary">
+                        <i class="bi bi-x-lg"></i> Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
-    @* Подключаем клиентскую валидацию *@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

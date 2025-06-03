@@ -109,6 +109,7 @@ namespace FrontendHelper.Controllers
             return View(vm);
         }
 
+
         [HasPermission(Permission.CanManageIcons)]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -155,27 +156,28 @@ namespace FrontendHelper.Controllers
                 });
             }
 
-            return RedirectToAction(nameof(ShowAllIcons));
+            return RedirectToAction(nameof(ShowAllIconsOnTheTopic), new { topic = vm.Topic });
+
         }
 
         // ===========================
         // РЕДАКТИРОВАНИЕ (CanManageIcons)
         // ===========================
 
+        // GET: форма редактирования
         [HasPermission(Permission.CanManageIcons)]
         [HttpGet]
         public IActionResult EditIcon(int id)
         {
             var iconData = _iconRepository.GetAsset(id);
-            if (iconData == null)
-                return NotFound();
+            if (iconData == null) return NotFound();
 
             var existingFilters = _filterRepository
                 .GetFiltersForAsset("Icon", id)
                 .Select(f => f.Id)
                 .ToList();
 
-            var viewModel = new EditIconViewModel
+            var vm = new EditIconViewModel
             {
                 Id = iconData.Id,
                 Name = iconData.Name,
@@ -188,16 +190,22 @@ namespace FrontendHelper.Controllers
                     .ToList()
             };
 
-            return View(viewModel);
+            return View(vm);
         }
 
+        // POST: сохраняем изменения
         [HasPermission(Permission.CanManageIcons)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditIcon(EditIconViewModel viewModel)
         {
+            // Убираем из ModelState то, что не bбидится из формы
+            ModelState.Remove(nameof(viewModel.ExistingImg));
+            ModelState.Remove(nameof(viewModel.AvailableFilters));
+
             if (!ModelState.IsValid)
             {
+                // Если что-то ещё не прошло валидацию — восстанавливаем список фильтров
                 viewModel.AvailableFilters = _filterRepository.GetAssets()
                     .Where(f => f.AssetType == "Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
@@ -206,14 +214,12 @@ namespace FrontendHelper.Controllers
             }
 
             var icon = _iconRepository.GetAsset(viewModel.Id);
-            if (icon == null)
-                return NotFound();
+            if (icon == null) return NotFound();
 
-            // Обновляем поля
             icon.Name = viewModel.Name;
             icon.Topic = viewModel.Topic;
 
-            // Если пришёл новый файл — сохраняем его и удаляем старый
+            // Если пришёл новый файл, удаляем старый и сохраняем новый
             if (viewModel.ImgFile != null)
             {
                 _fileService.DeleteFile(icon.Img, "images/icons");
@@ -223,29 +229,29 @@ namespace FrontendHelper.Controllers
 
             _iconRepository.UpdateAsset(icon);
 
-            // === Обновляем связи с фильтрами ===
+            // Обновляем связи с фильтрами
             var currentFilterIds = _filterRepository
                 .GetFiltersForAsset("Icon", viewModel.Id)
                 .Select(f => f.Id)
                 .ToList();
 
-            foreach (var oldFilterId in currentFilterIds)
+            // Удаляем старые, которые пользователь снял
+            foreach (var oldId in currentFilterIds)
             {
-                if (!viewModel.SelectedFilterIds.Contains(oldFilterId))
-                {
-                    _filterRepository.RemoveAssetFilter("Icon", viewModel.Id, oldFilterId);
-                }
+                if (!viewModel.SelectedFilterIds.Contains(oldId))
+                    _filterRepository.RemoveAssetFilter("Icon", viewModel.Id, oldId);
             }
 
-            foreach (var newFilterId in viewModel.SelectedFilterIds)
+            // Добавляем новые
+            foreach (var newId in viewModel.SelectedFilterIds)
             {
-                if (!currentFilterIds.Contains(newFilterId))
+                if (!currentFilterIds.Contains(newId))
                 {
                     _filterRepository.AddAssetFilter(new AssetFilter
                     {
                         AssetType = "Icon",
                         AssetId = viewModel.Id,
-                        FilterId = newFilterId
+                        FilterId = newId
                     });
                 }
             }

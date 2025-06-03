@@ -18,10 +18,13 @@
 
 @if (authService.HasPermission(Permission.CanManageIcons))
 {
-    <a class="btn-create-icon" asp-action="AddIcon" asp-controller="Icon">
+    <a class="btn-create-icon"
+       asp-controller="Icon"
+       asp-action="CreateIcon">
         <i class="bi bi-plus-lg"></i> Создать иконку
     </a>
 }
+
 
 
 <div class="row gx-3 gy-4">

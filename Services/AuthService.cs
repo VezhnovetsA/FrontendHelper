@@ -42,8 +42,19 @@ namespace FrontendHelper.Services
 
         public bool HasPermission(Permission permission)
         {
-            var permissionInt = int.Parse(GetClaim(CLAIM_KEY_PERMISSION));
-            if (permissionInt < 0) { return false; }
+            // Если пользователь не аутентифицирован, сразу false
+            if (!IsAuthenticated())
+                return false;
+
+            // Попробуем получить claim с правами
+            var claimValue = GetClaim(CLAIM_KEY_PERMISSION);
+            if (string.IsNullOrEmpty(claimValue))
+                return false;
+
+            // Если claim оказался непарсимым, тоже false
+            if (!int.TryParse(claimValue, out var permissionInt))
+                return false;
+
             var userPermission = (Permission)permissionInt;
             return userPermission.HasFlag(permission);
         }

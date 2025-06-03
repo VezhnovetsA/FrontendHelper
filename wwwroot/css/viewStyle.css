@@ -613,6 +613,137 @@
     }
 
 
+
+
+/* ===============================
+   Правки для универсальной формы
+   =============================== */
+
+.form-container {
+    max-width: 600px; /* Фиксированная ширина формы */
+    margin: 0 auto; /* Центрируем по горизонтали */
+    padding: 2rem 1rem; /* Отступ сверху/снизу и по краям */
+}
+
+.form-card {
+    border-radius: 12px; /* Округлые углы карточки */
+    background: var(--surface); /* Фон карточки (в зависимости от темы) */
+    transition: box-shadow 0.2s;
+}
+
+    /* Убрано любое изменение размеров (transform) при hover */
+    .form-card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
+    }
+
+/* Превью текущего загруженного изображения */
+.existing-preview {
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Стили для самой формы */
+.generic-form .form-control {
+    border-radius: 20px; /* Скругленные углы у полей ввода */
+}
+
+/* Стиль кнопок «Сохранить» / «Отмена» */
+.generic-form .btn-primary {
+    background: linear-gradient( 90deg, var(--gradient-primary-from), var(--gradient-primary-to) );
+    border: none;
+    color: var(--surface);
+    border-radius: 50px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .generic-form .btn-primary:hover {
+        background: linear-gradient( 90deg, var(--gradient-secondary-from), var(--gradient-secondary-to) );
+        transform: scale(1.02);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+.generic-form .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--gradient-secondary-from);
+    color: var(--gradient-secondary-from);
+    border-radius: 50px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+
+    .generic-form .btn-secondary:hover {
+        background: var(--gradient-secondary-from);
+        color: var(--surface);
+        transform: scale(1.02);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+/* Поля ввода при фокусе */
+.generic-form .form-control:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 6px var(--accent-glow);
+}
+
+/* Метки полей */
+.generic-form .form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* =====================================
+   Стилизация чекбоксов (галочек) сайта
+   ===================================== */
+
+/* Делаем чекбокс более заметным и единым по цвету */
+.generic-form .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--text-secondary);
+    background-color: transparent;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+    /* Состояние «checked» – применяем accent-цвет */
+    .generic-form .form-check-input:checked {
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    /* При наведении на чекбокс – слегка подсвечиваем */
+    .generic-form .form-check-input:hover {
+        border-color: var(--accent);
+    }
+
+/* В тёмной теме корректируем фон карточки и превью */
+:root[data-theme="dark"] .form-card {
+    background: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="dark"] .existing-preview {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+/* В тёмной теме чекбоксам даём чуть более тёмную границу по умолчанию */
+:root[data-theme="dark"] .generic-form .form-check-input {
+    border-color: var(--text-secondary);
+}
+
+    :root[data-theme="dark"] .generic-form .form-check-input:checked {
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+
+
+
+
+
+
 /* ===========================================
    Конец дополнительных стилей
    =========================================== */
