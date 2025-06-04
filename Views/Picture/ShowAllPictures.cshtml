@@ -3,17 +3,21 @@
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    ViewData["Title"] = $"Картинки: {ViewBag.Topic}";
+    ViewData["Title"] = "Все картинки";
 }
 
-<h2 class="mb-4">Картинки: @ViewBag.Topic</h2>
+<h2 class="mb-4">Все картинки</h2>
 
-<a class="btn btn-outline-primary btn-view-all mb-3"
-   asp-action="ShowGroupsOfPicturesOnTheTopic"
-   asp-controller="Picture">
-    ← Назад к темам
-</a>
+@* Кнопка «Группы иконок» (переход обратно) *@
+<div class="mb-4">
+    <a class="btn btn-sm btn-outline-primary btn-view-all"
+       asp-controller="Picture"
+       asp-action="ShowGroupsOfPicturesOnTheTopic">
+        ← Группы картинок
+    </a>
+</div>
 
+@* Кнопка «Загрузить картинку» (если есть права) *@
 @if (authService.HasPermission(Permission.CanManagePictures))
 {
     <a class="btn-create-icon mb-3"
@@ -39,10 +43,9 @@
                      data-picture-topic="@pic.Topic"
                      data-picture-img="@Url.Content($"~/images/pictures/{pic.Img}")"
                      data-picture-favorited="@(pic.IsFavorited.ToString().ToLower())" />
+
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-truncate"
-                        title="@pic.Name"
-                        style="font-size:1.1rem;">
+                    <h5 class="card-title text-truncate" title="@pic.Name" style="font-size:1.1rem;">
                         @pic.Name
                     </h5>
                     <p class="card-text text-muted small mb-2">Тема: @pic.Topic</p>
@@ -57,6 +60,7 @@
                         </button>
                     </div>
                 </div>
+
                 <button class="favorite-toggle-btn"
                         data-asset-type="Picture"
                         data-asset-id="@pic.Id"
@@ -75,6 +79,7 @@
     }
 </div>
 
+@* Модальное окно с детальным просмотром картинки *@
 <div class="modal fade" id="pictureDetailModal" tabindex="-1" aria-labelledby="pictureDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -301,4 +306,3 @@
         });
     </script>
 }
-
