@@ -1,9 +1,13 @@
-﻿using FHDatabase.Repositories;
+﻿using FHDatabase.Models;
+using FHDatabase.Repositories;
+using FhEnums;
 using FrontendHelper.Controllers.AuthorizationAttributes;
 using FrontendHelper.Models;
 using FrontendHelper.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace FrontendHelper.Controllers
 {
@@ -18,16 +22,50 @@ namespace FrontendHelper.Controllers
             _fileService = fileService;
         }
 
-        [IsAdmin]
+        // Показать все шрифты (View)
+
+        [HasPermission(Permission.CanViewFonts)]
+        public IActionResult ShowFonts()
+        {
+            var fonts = _fontRepository.GetAssets();
+            var items = fonts.Select(f =>
+            {
+                var src = !string.IsNullOrEmpty(f.Link)
+                    ? f.Link
+                    : Url.Content($"~/fonts/{f.LocalFileName}");
+
+                var format = !string.IsNullOrEmpty(f.LocalFileName)
+                    ? Path.GetExtension(f.LocalFileName).TrimStart('.') : "ttf";
+
+                return new ExtendedSelectListItem
+                {
+                    Text = f.Name,
+                    Value = f.FontFamily,
+                    Group = new SelectListGroup { Name = src },
+                    DataAttributes = new Dictionary<string, string> { { "data-format", format } }
+                };
+            }).ToList();
+
+            var viewModel = new FontViewModel
+            {
+                AvailableFonts = items
+            };
+
+            return View(viewModel);
+        }
+
+        // Форма создания нового шрифта
+
+        [HasPermission(Permission.CanManageFonts)]
         [HttpGet]
         public IActionResult AddFont()
         {
             return View(new CreateFontViewModel());
         }
 
-
-
-        [HttpPost, ValidateAntiForgeryToken]
+        [HasPermission(Permission.CanManageFonts)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddFont(CreateFontViewModel viewModel, IFormFile? fontFile)
         {
             if (!ModelState.IsValid)
@@ -50,47 +88,76 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowFonts));
         }
 
-
-
-
-        [HttpPost]
-        public IActionResult Delete(int id)
+        // Форма редактирования существующего шрифта
+        [HasPermission(Permission.CanManageFonts)]
+        [HttpGet]
+        public IActionResult EditFont(int id)
         {
-            _fontRepository.RemoveAsset(id);
+            var font = _fontRepository.GetAsset(id);
+            if (font == null)
+                return NotFound();
+
+            var vm = new EditFontViewModel
+            {
+                Id = font.Id,
+                Name = font.Name,
+                FontFamily = font.FontFamily,
+                Link = font.Link,
+                ExistingFileName = font.LocalFileName
+            };
+            return View(vm);
+        }
+
+        [HasPermission(Permission.CanManageFonts)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditFont(EditFontViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+                return View(viewModel);
+
+            var font = _fontRepository.GetAsset(viewModel.Id);
+            if (font == null)
+                return NotFound();
+
+            // Обновляем свойства
+            font.Name = viewModel.Name;
+            font.FontFamily = viewModel.FontFamily;
+            font.Link = viewModel.Link;
+
+            // Если загрузили новый файл, заменяем старый:
+            if (viewModel.FontFile != null)
+            {
+                if (!string.IsNullOrEmpty(font.LocalFileName))
+                {
+                    _fileService.DeleteFile(font.LocalFileName, "fonts");
+                }
+                var newFileName = await _fileService.SaveFileAsync(viewModel.FontFile, "fonts");
+                font.LocalFileName = newFileName;
+            }
+
+            _fontRepository.UpdateAsset(font);
             return RedirectToAction(nameof(ShowFonts));
         }
 
-
-
-        public IActionResult ShowFonts()
+        // Удаление шрифта
+        [HasPermission(Permission.CanManageFonts)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
         {
-            var fonts = _fontRepository.GetAssets();
+            var font = _fontRepository.GetAsset(id);
+            if (font == null)
+                return NotFound();
 
-            var items = fonts.Select(f =>
+            // Удаляем файл с диска, если он есть
+            if (!string.IsNullOrEmpty(font.LocalFileName))
             {
-                var src = !string.IsNullOrEmpty(f.Link)
-                    ? f.Link
-                    : Url.Content($"~/fonts/{f.LocalFileName}");
+                _fileService.DeleteFile(font.LocalFileName, "fonts");
+            }
 
-                var format = !string.IsNullOrEmpty(f.LocalFileName)
-                    ? Path.GetExtension(f.LocalFileName).TrimStart('.') : "ttf";
-
-                return new ExtendedSelectListItem
-                {
-                    Text = f.Name,
-                    Value = f.FontFamily,
-                    Group = new SelectListGroup { Name = src },
-                    DataAttributes = new Dictionary<string, string> { { "data-format", format } }
-                };
-
-            }).ToList();
-
-            var viewModel = new FontViewModel
-            {
-                AvailableFonts = items
-            };
-
-            return View(viewModel);
+            _fontRepository.RemoveAsset(id);
+            return RedirectToAction(nameof(ShowFonts));
         }
     }
 }

@@ -91,48 +91,56 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
 }
 
-/* === Кнопки (Button) === */
-.button-preview {
-    background: var(--surface);
-    border-radius: 8px;
-    overflow: hidden;
+/* === Кнопки внутри карточек === */
+.card-body .btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+/* “Скачать” (outline-primary): градиент A6808C → EDAFB8 */
+.card-body .btn-outline-primary {
+    color: var(--gradient-secondary-from);
+    border-color: var(--gradient-secondary-from);
+    border-radius: 50px;
 }
 
-    .button-preview iframe {
-        width: 100%;
-        height: 120px;
-        border: none;
-        background: var(--surface);
-        display: block;
+    .card-body .btn-outline-primary:hover {
+        background: linear-gradient(90deg, #A6808C, #EDAFB8);
+        color: var(--surface);
+        box-shadow: 0 0 12px var(--accent-glow);
+        transform: scale(1.05);
+        border-radius: 50px;
     }
-
-/* === Формы (Form) === */
-.position-relative {
-    position: relative;
+/* “Копировать” (outline-secondary): градиент 7798AB → 383F51 */
+.card-body .btn-outline-secondary {
+    color: #7798AB;
+    border-color: #7798AB;
+    border-radius: 50px;
 }
 
-.form-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
-    cursor: default;
-    background: transparent;
-}
-
-.position-relative iframe {
-    width: 100%;
-    height: 400px;
+    .card-body .btn-outline-secondary:hover {
+        background: linear-gradient(90deg, #7798AB, #383F51);
+        color: var(--surface);
+        box-shadow: 0 0 12px var(--accent-glow);
+        transform: scale(1.05);
+        border-radius: 50px;
+    }
+/* “Скачать HTML” (btn-primary): основной градиент и glow */
+.card-body .btn-primary {
+    background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
     border: none;
-    background: var(--surface);
-    display: block;
+    color: var(--surface);
+    border-radius: 50px;
 }
 
-.position-relative:hover .form-overlay {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
-}
+    .card-body .btn-primary:hover {
+        background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
+        color: var(--surface);
+        transform: scale(1.02);
+        box-shadow: 0 0 12px var(--accent-glow);
+        border-radius: 50px;
+    }
 
 /* === Изображения / Иконки / Анимированные === */
 .card-img-top {
@@ -240,7 +248,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-    /* Обёртка чекбоксов в «пилл»-лейблы */
     .filter-bar .form-check {
         margin: 0;
     }
@@ -258,116 +265,45 @@
         user-select: none;
     }
 
-        /* При наведении на label */
         .filter-bar .filter-label:hover {
             transform: scale(1.05);
             color: var(--accent-hover);
             box-shadow: 0 0 8px var(--accent-glow);
         }
 
-        /* Активный (выбранный) фильтр */
         .filter-bar .filter-label.active {
             background: var(--accent);
             color: var(--surface);
             box-shadow: 0 0 8px var(--accent-glow);
         }
 
-    /* Скрываем сам чекбокс */
     .filter-bar .form-check-input {
         position: absolute;
         opacity: 0;
         pointer-events: none;
     }
 
-/* === Кнопки внутри карточек === */
-.card-body .btn {
-    font-size: 0.85rem;
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+/* === Поисковая строка === */
+:root[data-theme="dark"] .search-input {
+    background: #FFFFFF;
+    color: #383F51;
 }
 
-/* “Скачать” (outline-primary): градиент A6808C → EDAFB8 */
-.card-body .btn-outline-primary {
-    color: var(--gradient-secondary-from);
-    border-color: var(--gradient-secondary-from);
-    border-radius: 50px;
-}
-
-    .card-body .btn-outline-primary:hover {
-        background: linear-gradient(90deg, #A6808C, #EDAFB8);
-        color: var(--surface);
-        box-shadow: 0 0 12px var(--accent-glow);
-        transform: scale(1.05);
-        border-radius: 50px;
+    :root[data-theme="dark"] .search-input::placeholder {
+        color: #383F51;
     }
-
-/* “Копировать” (outline-secondary): градиент 7798AB → 383F51 */
-.card-body .btn-outline-secondary {
-    color: #7798AB;
-    border-color: #7798AB;
-    border-radius: 50px;
-}
-
-    .card-body .btn-outline-secondary:hover {
-        background: linear-gradient(90deg, #7798AB, #383F51);
-        color: var(--surface);
-        box-shadow: 0 0 12px var(--accent-glow);
-        transform: scale(1.05);
-        border-radius: 50px;
-    }
-
-/* “Скачать HTML” (btn-primary): основной градиент и glow */
-.card-body .btn-primary {
-    background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
-    border: none;
-    color: var(--surface);
-    border-radius: 50px;
-}
-
-    .card-body .btn-primary:hover {
-        background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
-        color: var(--surface);
-        transform: scale(1.02);
-        box-shadow: 0 0 12px var(--accent-glow);
-        border-radius: 50px;
-    }
-
-/* Отступы для превью, карточек, свотчей */
-.template-preview,
-.button-preview,
-.position-relative,
-.font-preview-container,
-.palette-grid {
-    margin-bottom: 1rem;
-}
-
-    /* ИFRAME без лишних отступов */
-    .template-preview iframe,
-    .button-preview iframe,
-    .position-relative iframe {
-        display: block;
-    }
-
-/* Отступ для названия палитры */
-.card .mb-3.text-center {
-    margin-bottom: 0.75rem !important;
-}
 
 /* === Поддержка тёмной темы === */
 :root[data-theme="dark"] .top-navbar {
-    /* Заменяем тень под хедером на светлую, как у фильтров */
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
 :root[data-theme="dark"] .card {
     background: var(--surface);
-    /* Более заметная тень на тёмном фоне */
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
     :root[data-theme="dark"] .card:hover {
-        /* Усиленная hover-тень */
         box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2), 0 0 12px var(--accent-glow);
         border-color: var(--accent);
     }
@@ -376,17 +312,14 @@
 :root[data-theme="dark"] .position-relative:hover,
 :root[data-theme="dark"] .card-img-top.img-fluid:hover,
 :root[data-theme="dark"] .palette-swatch:hover {
-    /* Более контрастная тень при наведении на превью */
     box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2), 0 0 12px var(--accent-glow);
 }
 
-/* Палитра: номер цвета внутри свотча */
 :root[data-theme="dark"] .palette-swatch .swatch-hex {
     background: rgba(0, 0, 0, 0.7);
     color: var(--surface);
 }
 
-/* Панель фильтров: более тёмный фон и усиленная тень */
 :root[data-theme="dark"] .filter-bar {
     background: rgba(30, 30, 30, 0.9);
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
@@ -408,8 +341,7 @@
             color: var(--surface);
             box-shadow: 0 0 12px var(--accent-glow);
         }
-
-/* Кнопки внутри карточек: держим белый текст при hover */
+/* Кнопки внутри карточек: белый текст при hover */
 :root[data-theme="dark"] .card-body .btn-outline-secondary:hover {
     background: linear-gradient(90deg, #7798AB, #383F51);
     color: var(--surface);
@@ -432,13 +364,388 @@
     border-radius: 50px;
 }
 
-/* === Поисковая строка === */
-:root[data-theme="dark"] .search-input {
-    /* В тёмной теме оставляем фон белым, но делаем текст тёмным */
-    background: #FFFFFF;
-    color: #383F51;
+/* === Модальное окно с иконкой === */
+.modal-body img {
+    margin: 0 auto; /* Центрируем изображение */
+    display: block;
 }
 
-    :root[data-theme="dark"] .search-input::placeholder {
-        color: #383F51;
+/* ===========================================
+   ПРАВКИ ДЛЯ МОДАЛЬНОГО ОКНА
+   =========================================== */
+
+/* Делаем само окно более круглым, с лёгкой полупрозрачностью */
+.modal-content {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95); /* чуть полупрозрачный белый фон */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+/* В тёмной теме слегка затемняем фон окна и делаем его более контрастным */
+:root[data-theme="dark"] .modal-content {
+    background: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Округляем края у заголовка/футера, чтобы не обрезался общий border-radius */
+.modal-header,
+.modal-footer {
+    border: none;
+    background: transparent;
+}
+
+/* Центрируем содержимое модального диалога по вертикали */
+.modal-dialog {
+    max-width: 500px;
+}
+
+/* Скролл внутри .modal-body, если контент слишком большой */
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Скрываем дефолтный border у кнопки закрытия, оставляем только красный крестик */
+.modal-header .btn-close {
+    background: none;
+    opacity: 0.7;
+}
+
+    .modal-header .btn-close:hover {
+        opacity: 1;
     }
+
+/* ===========================================
+   ГРАДИЕНТНАЯ КНОПКА «Создать иконку»
+   =========================================== */
+/* Заменили градиент на розовый (A6808C → EDAFB8) */
+.btn-create-icon {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #A6808C, #EDAFB8);
+    color: #FFF;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+    .btn-create-icon:hover {
+        background: linear-gradient(90deg, #EDAFB8, #A6808C);
+        transform: scale(1.03);
+        box-shadow: 0 0 12px var(--accent-glow);
+        color: #FFF;
+    }
+
+/* В тёмной теме чуть затемним розовый градиент */
+:root[data-theme="dark"] .btn-create-icon {
+    filter: brightness(0.9);
+}
+
+    :root[data-theme="dark"] .btn-create-icon:hover {
+        filter: brightness(1.1);
+    }
+
+/* ===========================================
+   Повторим стили модального окна из viewStyle.css,
+   чтобы все вместе выглядело единообразно
+   =========================================== */
+
+/* Центрируем изображение внутри модалки (если есть) */
+.modal-body img {
+    margin: 0 auto; /* Центрируем изображение */
+    display: block;
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Общий класс для кнопок внутри модалки */
+#modalDownloadBtn,
+#modalCopyBtn,
+#modalFavBtn,
+#modalEditBtn,
+#modalDeleteForm .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s, color 0.2s;
+}
+
+/* Градиенты для «Скачать» и «Копировать» */
+#modalDownloadBtn {
+    background: linear-gradient(90deg, #A6808C, #EDAFB8);
+    color: #FFF;
+    border: none;
+}
+
+    #modalDownloadBtn:hover {
+        background: linear-gradient(90deg, #EDAFB8, #A6808C);
+        transform: scale(1.05);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+#modalCopyBtn {
+    background: linear-gradient(90deg, #7798AB, #383F51);
+    color: #FFF;
+    border: none;
+}
+
+    #modalCopyBtn:hover {
+        background: linear-gradient(90deg, #383F51, #7798AB);
+        transform: scale(1.05);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+/* Кнопка «Избранное» (градиент + glow) */
+#modalFavBtn {
+    background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+    color: var(--surface);
+    border: none;
+}
+
+    #modalFavBtn:hover {
+        background: linear-gradient(90deg, var(--accent-hover), var(--accent));
+        transform: scale(1.05);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+/* Кнопки «Редактировать» / «Удалить» (градиенты + glow) */
+#modalEditBtn {
+    background: linear-gradient(90deg, #FFD966, #FFC000);
+    color: #000;
+    border: none;
+}
+
+    #modalEditBtn:hover {
+        background: linear-gradient(90deg, #FFC000, #FFD966);
+        transform: scale(1.03);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+#modalDeleteForm .btn {
+    background: linear-gradient(90deg, #E64A19, #D84315);
+    color: #FFF;
+    border: none;
+}
+
+    #modalDeleteForm .btn:hover {
+        background: linear-gradient(90deg, #D84315, #E64A19);
+        transform: scale(1.03);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+/* Тёмная тема: корректируем фон и тень у кнопок модалки */
+:root[data-theme="dark"] #modalDownloadBtn,
+:root[data-theme="dark"] #modalCopyBtn,
+:root[data-theme="dark"] #modalFavBtn,
+:root[data-theme="dark"] #modalEditBtn,
+:root[data-theme="dark"] #modalDeleteForm .btn {
+    filter: brightness(0.9);
+}
+
+    :root[data-theme="dark"] #modalDownloadBtn:hover,
+    :root[data-theme="dark"] #modalCopyBtn:hover,
+    :root[data-theme="dark"] #modalFavBtn:hover,
+    :root[data-theme="dark"] #modalEditBtn:hover,
+    :root[data-theme="dark"] #modalDeleteForm .btn:hover {
+        filter: brightness(1.1);
+    }
+
+/* Иконка внутри кнопок модалки */
+#modalDownloadBtn i,
+#modalCopyBtn i,
+#modalFavBtn i,
+#modalEditBtn i,
+#modalDeleteForm .btn i {
+    margin-right: 6px;
+    font-size: 1rem;
+}
+
+/* Устанавливаем минимальную ширину для «Редактировать» и «Удалить» */
+#modalEditBtn,
+#modalDeleteForm .btn {
+    min-width: 120px;
+}
+
+
+
+
+
+
+/* ===========================================
+   Стиль кнопки “Смотреть все” / “Назад”
+   =========================================== */
+
+.btn-view-all {
+    display: inline-block;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    color: var(--gradient-secondary-from);
+    border: 1px solid var(--gradient-secondary-from);
+    background: transparent;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+    /* Чтобы ровно совпадать с .card-body .btn-outline-primary */
+}
+
+    .btn-view-all:hover {
+        background: linear-gradient(90deg, #A6808C, #EDAFB8);
+        color: var(--surface);
+        box-shadow: 0 0 12px var(--accent-glow);
+        transform: scale(1.05);
+    }
+
+/* Тёмная тема: рамка и текст аккуратно подсвечиваются */
+:root[data-theme="dark"] .btn-view-all {
+    color: var(--gradient-secondary-from);
+    border-color: var(--gradient-secondary-from);
+}
+
+    :root[data-theme="dark"] .btn-view-all:hover {
+        filter: brightness(0.9);
+    }
+
+
+
+
+/* ===============================
+   Правки для универсальной формы
+   =============================== */
+
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.form-card {
+    border-radius: 12px;
+    background: var(--surface);
+    transition: box-shadow 0.2s; /* transform здесь не нужен */
+}
+
+    /* Полностью отключаем «прыжок» и подсветку */
+    .form-card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+/* Превью текущего загруженного изображения */
+.existing-preview {
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Стили для самой формы */
+.generic-form .form-control {
+    border-radius: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+    /* Мягкая подсветка поля при наведении */
+    .generic-form .form-control:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+    /* Поля ввода при фокусе */
+    .generic-form .form-control:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+/* Метки полей */
+.generic-form .form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Стиль кнопок «Сохранить» / «Отмена» */
+.generic-form .btn-primary {
+    background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
+    border: none;
+    color: var(--surface);
+    border-radius: 50px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .generic-form .btn-primary:hover {
+        background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
+        transform: scale(1.02);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+.generic-form .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--gradient-secondary-from);
+    color: var(--gradient-secondary-from);
+    border-radius: 50px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+
+    .generic-form .btn-secondary:hover {
+        background: var(--gradient-secondary-from);
+        color: var(--surface);
+        transform: scale(1.02);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+/* =====================================
+   Стилизация чекбоксов (галочек) сайта
+   ===================================== */
+.generic-form .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--text-secondary);
+    background-color: transparent;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+    .generic-form .form-check-input:checked {
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .generic-form .form-check-input:hover {
+        border-color: var(--accent);
+    }
+
+/* В тёмной теме корректируем фон карточки и превью */
+:root[data-theme="dark"] .form-card {
+    background: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="dark"] .existing-preview {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+/* Тёмная тема для чекбоксов */
+:root[data-theme="dark"] .generic-form .form-check-input {
+    border-color: var(--text-secondary);
+}
+
+    :root[data-theme="dark"] .generic-form .form-check-input:checked {
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+
+
+
+/* ===========================================
+   Конец дополнительных стилей
+   =========================================== */
+

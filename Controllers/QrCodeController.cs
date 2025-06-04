@@ -1,4 +1,6 @@
-﻿using FrontendHelper.Models;
+﻿using FhEnums;
+using FrontendHelper.Controllers.AuthorizationAttributes;
+using FrontendHelper.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FrontendHelper.Controllers
@@ -11,6 +13,8 @@ namespace FrontendHelper.Controllers
             _qrCodeService = qrCodeService;
         }
 
+
+        [HasPermission(Permission.CanGenerateQrCode)]
         public IActionResult GenerateQrCode(QrCodeViewModel viewModel)
         {
             if (!string.IsNullOrWhiteSpace(viewModel.Resource))
