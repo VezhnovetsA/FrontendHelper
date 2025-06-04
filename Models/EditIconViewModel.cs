@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,18 +15,17 @@ namespace FrontendHelper.Models
         [MaxLength(200)]
         public string Topic { get; set; }
 
-        // НЕ биндим это поле из формы
-        [BindNever]
+        // Имя уже существующего файла – обязательно должно отправляться назад
         public string ExistingImg { get; set; }
 
-        // Файл может быть null
         public IFormFile? ImgFile { get; set; }
 
-        // Список отмеченных ID фильтров
         public List<int> SelectedFilterIds { get; set; } = new List<int>();
 
-        // НЕ биндим этот список из формы
-        [BindNever]
-        public List<SelectListItem> AvailableFilters { get; set; }
+        public List<SelectListItem> AvailableFilters { get; set; } = new List<SelectListItem>();
+
+        [Display(Name = "Новые фильтры (через запятую)")]
+        public string? NewFilterNames { get; set; }
     }
+
 }

@@ -620,20 +620,21 @@
    =============================== */
 
 .form-container {
-    max-width: 600px; /* Фиксированная ширина формы */
-    margin: 0 auto; /* Центрируем по горизонтали */
-    padding: 2rem 1rem; /* Отступ сверху/снизу и по краям */
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
 }
 
 .form-card {
-    border-radius: 12px; /* Округлые углы карточки */
-    background: var(--surface); /* Фон карточки (в зависимости от темы) */
-    transition: box-shadow 0.2s;
+    border-radius: 12px;
+    background: var(--surface);
+    transition: box-shadow 0.2s; /* transform здесь не нужен */
 }
 
-    /* Убрано любое изменение размеров (transform) при hover */
+    /* Полностью отключаем «прыжок» и подсветку */
     .form-card:hover {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
+        transform: none !important;
+        box-shadow: none !important;
     }
 
 /* Превью текущего загруженного изображения */
@@ -645,12 +646,31 @@
 
 /* Стили для самой формы */
 .generic-form .form-control {
-    border-radius: 20px; /* Скругленные углы у полей ввода */
+    border-radius: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+    /* Мягкая подсветка поля при наведении */
+    .generic-form .form-control:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+    /* Поля ввода при фокусе */
+    .generic-form .form-control:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+/* Метки полей */
+.generic-form .form-label {
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 /* Стиль кнопок «Сохранить» / «Отмена» */
 .generic-form .btn-primary {
-    background: linear-gradient( 90deg, var(--gradient-primary-from), var(--gradient-primary-to) );
+    background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
     border: none;
     color: var(--surface);
     border-radius: 50px;
@@ -660,7 +680,7 @@
 }
 
     .generic-form .btn-primary:hover {
-        background: linear-gradient( 90deg, var(--gradient-secondary-from), var(--gradient-secondary-to) );
+        background: linear-gradient(90deg, var(--gradient-secondary-from), var(--gradient-secondary-to));
         transform: scale(1.02);
         box-shadow: 0 0 12px var(--accent-glow);
     }
@@ -682,23 +702,9 @@
         box-shadow: 0 0 12px var(--accent-glow);
     }
 
-/* Поля ввода при фокусе */
-.generic-form .form-control:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 6px var(--accent-glow);
-}
-
-/* Метки полей */
-.generic-form .form-label {
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
 /* =====================================
    Стилизация чекбоксов (галочек) сайта
    ===================================== */
-
-/* Делаем чекбокс более заметным и единым по цвету */
 .generic-form .form-check-input {
     width: 1.25rem;
     height: 1.25rem;
@@ -708,13 +714,11 @@
     transition: background-color 0.2s, border-color 0.2s;
 }
 
-    /* Состояние «checked» – применяем accent-цвет */
     .generic-form .form-check-input:checked {
         background-color: var(--accent);
         border-color: var(--accent);
     }
 
-    /* При наведении на чекбокс – слегка подсвечиваем */
     .generic-form .form-check-input:hover {
         border-color: var(--accent);
     }
@@ -729,7 +733,7 @@
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
 }
 
-/* В тёмной теме чекбоксам даём чуть более тёмную границу по умолчанию */
+/* Тёмная тема для чекбоксов */
 :root[data-theme="dark"] .generic-form .form-check-input {
     border-color: var(--text-secondary);
 }
@@ -738,9 +742,6 @@
         background-color: var(--accent);
         border-color: var(--accent);
     }
-
-
-
 
 
 

@@ -72,7 +72,7 @@ namespace FrontendHelper.Controllers
         }
 
         [HasPermission(Permission.CanViewIcons)]
-        public IActionResult ShowGroupsOfIconsOnTheTopic(int numberOfIcons = 6)
+        public IActionResult ShowGroupsOfIconsOnTheTopic(int numberOfIcons = 8)
         {
             var topics = _iconRepository.GetIconTopics();
             var userId = _authService.IsAuthenticated()
@@ -101,14 +101,13 @@ namespace FrontendHelper.Controllers
         {
             var vm = new CreateIconViewModel
             {
-                AvailableFilters = _filterRepository.GetAssets()
-                    .Where(f => f.AssetType == "Icon")
+                AvailableFilters = _filterRepository
+                    .GetFiltersByCategory("Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList()
             };
             return View(vm);
         }
-
 
         [HasPermission(Permission.CanManageIcons)]
         [HttpPost]
@@ -117,19 +116,19 @@ namespace FrontendHelper.Controllers
         {
             if (!ModelState.IsValid)
             {
-                vm.AvailableFilters = _filterRepository.GetAssets()
-                    .Where(f => f.AssetType == "Icon")
+                vm.AvailableFilters = _filterRepository
+                    .GetFiltersByCategory("Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList();
                 return View(vm);
             }
 
-            // Проверка на дубли
+            // Проверка на дубли...
             if (_iconRepository.CheckIconDuplicate(vm.Name, vm.Topic))
             {
                 ModelState.AddModelError(nameof(vm.Name), "Иконка с таким именем уже существует в этой теме");
-                vm.AvailableFilters = _filterRepository.GetAssets()
-                    .Where(f => f.AssetType == "Icon")
+                vm.AvailableFilters = _filterRepository
+                    .GetFiltersByCategory("Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList();
                 return View(vm);
@@ -137,40 +136,68 @@ namespace FrontendHelper.Controllers
 
             // Сохраняем файл
             var savedFileName = await _fileService.SaveFileAsync(vm.ImgFile, "images/icons");
-            var newIcon = new IconData
-            {
-                Name = vm.Name,
-                Topic = vm.Topic,
-                Img = savedFileName
-            };
+            var newIcon = new IconData { Name = vm.Name, Topic = vm.Topic, Img = savedFileName };
             _iconRepository.AddAsset(newIcon);
 
-            // Привязываем фильтры
-            foreach (var filterId in vm.SelectedFilterIds)
+            // 1) Найдём все новые имена из vm.NewFilterNames (если строка НЕ пустая)
+            var allNewFilterNames = (vm.NewFilterNames ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var createdFilterIds = new List<int>();
+            foreach (var fname in allNewFilterNames)
+            {
+                // проверим, нет ли уже такого фильтра
+                var already = _filterRepository
+                    .GetFiltersByCategory("Icon")
+                    .FirstOrDefault(f => f.Name.Equals(fname, StringComparison.OrdinalIgnoreCase));
+
+                if (already != null)
+                {
+                    createdFilterIds.Add(already.Id);
+                }
+                else
+                {
+                    var newFilter = new FilterData { Name = fname, AssetType = "Icon" };
+                    _filterRepository.AddAsset(newFilter);
+                    createdFilterIds.Add(newFilter.Id);
+                }
+            }
+
+            // 2) Соберём все фильтры: уже выбранные + только что созданные
+            var toBindFilterIds = vm.SelectedFilterIds
+                                  .Concat(createdFilterIds)
+                                  .Distinct()
+                                  .ToList();
+
+            foreach (var fid in toBindFilterIds)
             {
                 _filterRepository.AddAssetFilter(new AssetFilter
                 {
-                    FilterId = filterId,
+                    FilterId = fid,
                     AssetType = "Icon",
                     AssetId = newIcon.Id
                 });
             }
 
             return RedirectToAction(nameof(ShowAllIconsOnTheTopic), new { topic = vm.Topic });
-
         }
+
 
         // ===========================
         // РЕДАКТИРОВАНИЕ (CanManageIcons)
         // ===========================
 
-        // GET: форма редактирования
         [HasPermission(Permission.CanManageIcons)]
         [HttpGet]
         public IActionResult EditIcon(int id)
         {
             var iconData = _iconRepository.GetAsset(id);
-            if (iconData == null) return NotFound();
+            if (iconData == null)
+                return NotFound();
 
             var existingFilters = _filterRepository
                 .GetFiltersForAsset("Icon", id)
@@ -184,80 +211,116 @@ namespace FrontendHelper.Controllers
                 Topic = iconData.Topic,
                 ExistingImg = iconData.Img,
                 SelectedFilterIds = existingFilters,
-                AvailableFilters = _filterRepository.GetAssets()
-                    .Where(f => f.AssetType == "Icon")
+                AvailableFilters = _filterRepository
+                    .GetFiltersByCategory("Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
-                    .ToList()
+                    .ToList(),
+                NewFilterNames = null
             };
 
             return View(vm);
         }
 
-        // POST: сохраняем изменения
         [HasPermission(Permission.CanManageIcons)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditIcon(EditIconViewModel viewModel)
+        public async Task<IActionResult> EditIcon(EditIconViewModel vm)
         {
-            // Убираем из ModelState то, что не bбидится из формы
-            ModelState.Remove(nameof(viewModel.ExistingImg));
-            ModelState.Remove(nameof(viewModel.AvailableFilters));
-
+            // Если модель не прошла валидацию, надо восстановить AvailableFilters
+            // (и ExistingImg уже придёт из скрытого поля)
             if (!ModelState.IsValid)
             {
-                // Если что-то ещё не прошло валидацию — восстанавливаем список фильтров
-                viewModel.AvailableFilters = _filterRepository.GetAssets()
-                    .Where(f => f.AssetType == "Icon")
+                vm.AvailableFilters = _filterRepository
+                    .GetFiltersByCategory("Icon")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList();
-                return View(viewModel);
+                return View(vm);
             }
 
-            var icon = _iconRepository.GetAsset(viewModel.Id);
-            if (icon == null) return NotFound();
+            var icon = _iconRepository.GetAsset(vm.Id);
+            if (icon == null)
+                return NotFound();
 
-            icon.Name = viewModel.Name;
-            icon.Topic = viewModel.Topic;
+            // Обновляем Name и Topic
+            icon.Name = vm.Name;
+            icon.Topic = vm.Topic;
 
-            // Если пришёл новый файл, удаляем старый и сохраняем новый
-            if (viewModel.ImgFile != null)
+            // Если пришёл новый файл, то заменяем старый
+            if (vm.ImgFile != null)
             {
+                // Удаляем физически старый и сохраняем новый
                 _fileService.DeleteFile(icon.Img, "images/icons");
-                var newFileName = await _fileService.SaveFileAsync(viewModel.ImgFile, "images/icons");
+                var newFileName = await _fileService.SaveFileAsync(vm.ImgFile, "images/icons");
                 icon.Img = newFileName;
             }
+            // Если vm.ImgFile == null, то icon.Img остаётся прежним, а vm.ExistingImg в форме
+            // просто дублирует старое значение.
 
             _iconRepository.UpdateAsset(icon);
 
-            // Обновляем связи с фильтрами
+            // Обработка новых фильтров (как в CreateIcon)
+            var allNewFilterNames = (vm.NewFilterNames ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var createdFilterIds = new List<int>();
+            foreach (var fname in allNewFilterNames)
+            {
+                var already = _filterRepository
+                    .GetFiltersByCategory("Icon")
+                    .FirstOrDefault(f => f.Name.Equals(fname, StringComparison.OrdinalIgnoreCase));
+                if (already != null)
+                {
+                    createdFilterIds.Add(already.Id);
+                }
+                else
+                {
+                    var newFilter = new FilterData { Name = fname, AssetType = "Icon" };
+                    _filterRepository.AddAsset(newFilter);
+                    createdFilterIds.Add(newFilter.Id);
+                }
+            }
+
+            // 1) Удаляем те связи, которые пользователь снял в чекбоксах
             var currentFilterIds = _filterRepository
-                .GetFiltersForAsset("Icon", viewModel.Id)
+                .GetFiltersForAsset("Icon", vm.Id)
                 .Select(f => f.Id)
                 .ToList();
 
-            // Удаляем старые, которые пользователь снял
-            foreach (var oldId in currentFilterIds)
+            foreach (var oldFid in currentFilterIds)
             {
-                if (!viewModel.SelectedFilterIds.Contains(oldId))
-                    _filterRepository.RemoveAssetFilter("Icon", viewModel.Id, oldId);
+                if (!vm.SelectedFilterIds.Contains(oldFid))
+                {
+                    _filterRepository.RemoveAssetFilter("Icon", vm.Id, oldFid);
+                }
             }
 
-            // Добавляем новые
-            foreach (var newId in viewModel.SelectedFilterIds)
+            // 2) Собираем окончательный список: уже выбранные + вновь созданные
+            var finalFilterIds = vm.SelectedFilterIds
+                                 .Concat(createdFilterIds)
+                                 .Distinct()
+                                 .ToList();
+
+            foreach (var fid in finalFilterIds)
             {
-                if (!currentFilterIds.Contains(newId))
+                if (!currentFilterIds.Contains(fid))
                 {
                     _filterRepository.AddAssetFilter(new AssetFilter
                     {
                         AssetType = "Icon",
-                        AssetId = viewModel.Id,
-                        FilterId = newId
+                        AssetId = vm.Id,
+                        FilterId = fid
                     });
                 }
             }
 
             return RedirectToAction(nameof(ShowAllIconsOnTheTopic), new { topic = icon.Topic });
         }
+
+
 
         // ===========================
         // УДАЛЕНИЕ (CanManageIcons)
