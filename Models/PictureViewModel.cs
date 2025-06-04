@@ -1,4 +1,5 @@
-﻿namespace FrontendHelper.Models
+﻿// FrontendHelper/Models/PictureViewModel.cs
+namespace FrontendHelper.Models
 {
     public class PictureViewModel
     {
@@ -6,6 +7,6 @@
         public string Name { get; set; }
         public string Topic { get; set; }
         public string Img { get; set; }
-
+        public bool IsFavorited { get; set; }
     }
 }

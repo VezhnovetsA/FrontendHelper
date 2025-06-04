@@ -1,18 +1,20 @@
-﻿@model IEnumerable<FrontendHelper.Models.PictureViewModel>
+﻿@model IEnumerable<FrontendHelper.Models.PictureGroupViewModel>
 @using FhEnums
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    ViewData["Title"] = $"Картинки: {ViewBag.Topic}";
+    ViewData["Title"] = "Группы картинок";
 }
 
-<h2 class="mb-4">Картинки: @ViewBag.Topic</h2>
+<h2 class="mb-4">Группы картинок</h2>
 
-<a class="btn btn-outline-primary btn-view-all mb-3"
-   asp-action="ShowGroupsOfPicturesOnTheTopic"
-   asp-controller="Picture">
-    ← Назад к темам
-</a>
+<div class="mb-4">
+    <a class="btn btn-sm btn-outline-primary btn-view-all"
+       asp-controller="Picture"
+       asp-action="ShowAllPictures">
+        ← Все картинки
+    </a>
+</div>
 
 @if (authService.HasPermission(Permission.CanManagePictures))
 {
@@ -23,57 +25,72 @@
     </a>
 }
 
-<div class="row gx-3 gy-4">
-    @foreach (var pic in Model)
-    {
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card h-100 shadow-sm position-relative">
-                <img src="@Url.Content($"~/images/pictures/{pic.Img}")"
-                     alt="@pic.Name"
-                     class="card-img-top img-fluid"
-                     style="object-fit: contain; max-height:200px; width:100%; background: var(--bg-alt); padding:0.5rem;"
-                     data-bs-toggle="modal"
-                     data-bs-target="#pictureDetailModal"
-                     data-picture-id="@pic.Id"
-                     data-picture-name="@pic.Name"
-                     data-picture-topic="@pic.Topic"
-                     data-picture-img="@Url.Content($"~/images/pictures/{pic.Img}")"
-                     data-picture-favorited="@(pic.IsFavorited.ToString().ToLower())" />
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-truncate"
-                        title="@pic.Name"
-                        style="font-size:1.1rem;">
-                        @pic.Name
-                    </h5>
-                    <p class="card-text text-muted small mb-2">Тема: @pic.Topic</p>
-                    <div class="mt-auto d-flex justify-content-between align-items-center">
-                        <button class="btn btn-sm btn-outline-primary"
-                                onclick="downloadImage('@Url.Content($"~/images/pictures/{pic.Img}")')">
-                            Скачать
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary"
-                                onclick="copyImageToClipboard('@Url.Content($"~/images/pictures/{pic.Img}")')">
-                            Копировать
+@foreach (var group in Model)
+{
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="text-capitalize mb-0">@group.Topic</h3>
+            <a class="btn btn-sm btn-outline-primary btn-view-all"
+               asp-controller="Picture"
+               asp-action="ShowAllPicturesOnTheTopic"
+               asp-route-topic="@group.Topic">
+                Смотреть все →
+            </a>
+        </div>
+
+        <div class="row gx-3 gy-4">
+            @foreach (var pic in group.Pictures)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm position-relative">
+                        <img src="@Url.Content($"~/images/pictures/{pic.Img}")"
+                             alt="@pic.Name"
+                             class="card-img-top img-fluid"
+                             style="object-fit: contain; max-height: 200px; width: 100%; background: var(--bg-alt); padding: 0.5rem;"
+                             data-bs-toggle="modal"
+                             data-bs-target="#pictureDetailModal"
+                             data-picture-id="@pic.Id"
+                             data-picture-name="@pic.Name"
+                             data-picture-topic="@pic.Topic"
+                             data-picture-img="@Url.Content($"~/images/pictures/{pic.Img}")"
+                             data-picture-favorited="@(pic.IsFavorited.ToString().ToLower())" />
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-truncate"
+                                title="@pic.Name"
+                                style="font-size: 1.1rem;">
+                                @pic.Name
+                            </h5>
+                            <p class="card-text text-muted small mb-2">Тема: @pic.Topic</p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        onclick="downloadImage('@Url.Content($"~/images/pictures/{pic.Img}")')">
+                                    Скачать
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        onclick="copyImageToClipboard('@Url.Content($"~/images/pictures/{pic.Img}")')">
+                                    Копировать
+                                </button>
+                            </div>
+                        </div>
+                        <button class="favorite-toggle-btn"
+                                data-asset-type="Picture"
+                                data-asset-id="@pic.Id"
+                                style="position: absolute; top: 8px; right: 8px; background: none; border: none;">
+                            @if (pic.IsFavorited)
+                            {
+                                <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                            }
                         </button>
                     </div>
                 </div>
-                <button class="favorite-toggle-btn"
-                        data-asset-type="Picture"
-                        data-asset-id="@pic.Id"
-                        style="position:absolute; top:8px; right:8px; background:none; border:none;">
-                    @if (pic.IsFavorited)
-                    {
-                        <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
-                    }
-                    else
-                    {
-                        <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
-                    }
-                </button>
-            </div>
+            }
         </div>
-    }
-</div>
+    </div>
+}
 
 <div class="modal fade" id="pictureDetailModal" tabindex="-1" aria-labelledby="pictureDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -87,7 +104,7 @@
                      src=""
                      alt=""
                      class="img-fluid mb-3"
-                     style="max-height:300px; margin:0 auto; display:block;" />
+                     style="max-height: 300px; margin: 0 auto; display: block;" />
                 <h5 id="modalPictureName" class="mb-1"></h5>
                 <p id="modalPictureTopic" class="text-muted small mb-3"></p>
 
@@ -301,4 +318,3 @@
         });
     </script>
 }
-
