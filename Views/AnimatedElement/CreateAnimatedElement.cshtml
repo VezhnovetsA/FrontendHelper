@@ -1,0 +1,76 @@
+﻿@model FrontendHelper.Models.CreateAnimatedElementViewModel
+
+@{
+    ViewData["Title"] = "Добавить анимированный элемент";
+}
+
+<h2 class="mb-4">Добавить анимированный элемент</h2>
+
+<div class="form-container">
+    <div class="form-card card p-4 mb-5">
+        <form asp-action="CreateAnimatedElement"
+              asp-controller="AnimatedElement"
+              method="post"
+              enctype="multipart/form-data"
+              class="generic-form">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Название</label>
+                <input asp-for="Name" class="form-control" placeholder="Введите название" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Topic" class="form-label">Тема</label>
+                <input asp-for="Topic" class="form-control" placeholder="Введите тему (например “Природа”)" />
+                <span asp-validation-for="Topic" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ImgFile" class="form-label">Файл (GIF/MP4/WebM)</label>
+                <input asp-for="ImgFile" type="file" class="form-control" />
+                <span asp-validation-for="ImgFile" class="text-danger small"></span>
+            </div>
+
+            @* Чекбоксы для выбора уже существующих фильтров *@
+            @if (Model.AvailableFilters.Any())
+            {
+                <div class="mb-3">
+                    <label class="form-label">Существующие фильтры</label>
+                    <div>
+                        @foreach (var filter in Model.AvailableFilters)
+                        {
+                            var fid = int.Parse(filter.Value);
+                            <div class="form-check form-check-inline me-3">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="SelectedFilterIds"
+                                       value="@filter.Value"
+                                @(Model.SelectedFilterIds.Contains(fid) ? "checked" : "") />
+                                <label class="form-check-label">@filter.Text</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Новые фильтры (через запятую) *@
+            <div class="mb-3">
+                <label asp-for="NewFilterNames" class="form-label">
+                    Новые фильтры (через запятую)
+                </label>
+                <input asp-for="NewFilterNames" class="form-control" placeholder="Например: Красный, С подсветкой" />
+                <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a asp-action="ShowGroupsOfAnimatedElementsOnTheTopic"
+               class="btn btn-secondary ms-2">Отмена</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

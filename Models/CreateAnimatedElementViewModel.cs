@@ -1,21 +1,27 @@
 ﻿// FrontendHelper/Models/CreateAnimatedElementViewModel.cs
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Models
 {
     public class CreateAnimatedElementViewModel
     {
-        [Required]
-        [MaxLength(100)]
+        [Required, MaxLength(100)]
         public string Name { get; set; }
 
-        [Required]
-        [MaxLength(100)]
+        [Required, MaxLength(100)]
         public string Topic { get; set; }
 
+        // Убираем [FileExtensions], оставляем просто [Required]
         [Required]
-        [FileExtensions(Extensions = "gif,mp4,webm", ErrorMessage = "Поддерживаются только GIF/MP4/WebM файлы.")]
         public IFormFile ImgFile { get; set; }
+
+        public List<int> SelectedFilterIds { get; set; } = new List<int>();
+        public List<SelectListItem> AvailableFilters { get; set; } = new List<SelectListItem>();
+
+        [Display(Name = "Новые фильтры (через запятую)")]
+        public string? NewFilterNames { get; set; }
     }
 }

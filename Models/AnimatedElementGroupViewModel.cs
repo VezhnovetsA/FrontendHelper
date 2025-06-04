@@ -1,4 +1,6 @@
-﻿namespace FrontendHelper.Models
+﻿using System.Collections.Generic;
+
+namespace FrontendHelper.Models
 {
     public class AnimatedElementGroupViewModel
     {
