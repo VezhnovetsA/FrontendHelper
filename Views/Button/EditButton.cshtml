@@ -1,5 +1,5 @@
-﻿@* EditButton.cshtml *@
-@model FrontendHelper.Models.EditButtonViewModel
+﻿@model FrontendHelper.Models.EditButtonViewModel
+@using FhEnums
 
 @{
     ViewData["Title"] = "Редактировать кнопку";
@@ -12,6 +12,7 @@
         <form asp-action="EditButton" asp-controller="Button" method="post" enctype="multipart/form-data" class="generic-form">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ExistingFileName" />
 
             <div class="mb-3">
                 <label asp-for="Name" class="form-label">Название</label>
@@ -34,6 +35,39 @@
                 <label asp-for="HtmlFile" class="form-label">Новый HTML-файл (по желанию)</label>
                 <input asp-for="HtmlFile" type="file" class="form-control" />
                 <span asp-validation-for="HtmlFile" class="text-danger small"></span>
+            </div>
+
+            @* Существующие фильтры в чекбоксах *@
+            @if (Model.AvailableFilters.Any())
+            {
+                <div class="mb-3">
+                    <label class="form-label">Выберите существующие фильтры</label>
+                    <div>
+                        @foreach (var filter in Model.AvailableFilters)
+                        {
+                            var fid = int.Parse(filter.Value);
+                            <div class="form-check form-check-inline me-3">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="SelectedFilterIds"
+                                       value="@filter.Value"
+                                @(Model.SelectedFilterIds.Contains(fid) ? "checked" : "") />
+                                <label class="form-check-label">@filter.Text</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Поле для ввода новых фильтров *@
+            <div class="mb-3">
+                <label asp-for="NewFilterNames" class="form-label">
+                    Новые фильтры (через запятую)
+                </label>
+                <input asp-for="NewFilterNames"
+                       class="form-control"
+                       placeholder="Например: Красный, Большой" />
+                <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
             </div>
 
             <button type="submit" class="btn btn-primary me-2">Сохранить изменения</button>

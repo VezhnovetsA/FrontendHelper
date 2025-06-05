@@ -1,5 +1,5 @@
-﻿@* CreateButton.cshtml *@
-@model FrontendHelper.Models.CreateButtonViewModel
+﻿@model FrontendHelper.Models.CreateButtonViewModel
+@using FhEnums
 
 @{
     ViewData["Title"] = "Добавить новую кнопку";
@@ -30,7 +30,40 @@
                 <span asp-validation-for="HtmlFile" class="text-danger small"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary">Сохранить</button>
+            @* Список существующих фильтров *@
+            @if (Model.AvailableFilters.Any())
+            {
+                <div class="mb-3">
+                    <label class="form-label">Выберите существующие фильтры</label>
+                    <div>
+                        @foreach (var filter in Model.AvailableFilters)
+                        {
+                            var fid = int.Parse(filter.Value);
+                            <div class="form-check form-check-inline me-3">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="SelectedFilterIds"
+                                       value="@filter.Value"
+                                @(Model.SelectedFilterIds.Contains(fid) ? "checked" : "") />
+                                <label class="form-check-label">@filter.Text</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Новые фильтры через запятую *@
+            <div class="mb-3">
+                <label asp-for="NewFilterNames" class="form-label">
+                    Новые фильтры (через запятую)
+                </label>
+                <input asp-for="NewFilterNames"
+                       class="form-control"
+                       placeholder="Например: Красный, Большой, С подсветкой" />
+                <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить кнопку</button>
             <a asp-action="ShowAllButtons" class="btn btn-secondary ms-2">Отмена</a>
         </form>
     </div>

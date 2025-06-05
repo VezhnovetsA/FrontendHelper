@@ -8,7 +8,7 @@
 
 <h2 class="mb-4">Все кнопки</h2>
 
-@* Кнопка «Группы кнопок» *@
+<!-- Кнопка «Группы кнопок» -->
 <div class="mb-4">
     <a class="btn btn-sm btn-outline-primary btn-view-all"
        asp-action="ShowGroupsOfButtons"
@@ -30,15 +30,13 @@
     @foreach (var btn in Model)
     {
         <div class="col-sm-6 col-md-4 col-lg-3">
-            @* Перенесли data-button-* на саму карточку *@
             <div class="card h-100 shadow-sm position-relative"
                  style="cursor:pointer;"
                  data-button-id="@btn.Id"
                  data-button-name="@btn.Name"
                  data-button-topic="@btn.Topic"
                  data-button-file="@btn.ButtonCode">
-
-                @* 1) Превью: iframe сверху *@
+                <!-- Превью: iframe сверху, pointer-events: none -->
                 <div style="
                         height: 100px;
                         display: flex;
@@ -46,10 +44,9 @@
                         justify-content: flex-start;
                         background: var(--bg-alt);
                         padding: 0.5rem;
-                        border-top-left-radius: 12px;
-                        border-top-right-radius: 12px;
-                        overflow: hidden;">
-                    @* Добавили pointer-events:none, чтобы iframe не «ловил» клики *@
+                        border-top-left-radius:12px;
+                        border-top-right-radius:12px;
+                        overflow:hidden;">
                     <iframe src="@Url.Content($"~/buttons/{btn.ButtonCode}")"
                             style="
                                 border: none;
@@ -62,7 +59,7 @@
                     </iframe>
                 </div>
 
-                @* 2) Тело карточки *@
+                <!-- Тело карточки -->
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-truncate"
                         title="@btn.Name"
@@ -71,10 +68,24 @@
                     </h5>
                     <p class="card-text text-muted small mb-2">Категория: @btn.Topic</p>
 
-                    <div class="mt-auto d-flex justify-content-start">
+                    <div class="mt-auto d-flex justify-content-between align-items-center">
                         <button class="btn btn-sm btn-outline-primary"
                                 onclick="event.stopPropagation(); downloadCode('@Url.Action("DownloadCode","Button", new { id = btn.Id })')">
                             Скачать код
+                        </button>
+
+                        <button class="favorite-toggle-btn"
+                                data-asset-type="Button"
+                                data-asset-id="@btn.Id"
+                                style="background:none; border:none;">
+                            @if (btn.IsFavorited)
+                            {
+                                <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                            }
                         </button>
                     </div>
                 </div>
@@ -83,9 +94,7 @@
     }
 </div>
 
-@* =======================================
-   Модальное окно «Детали кнопки»
-   ======================================= *@
+<!-- Модальное окно «Детали кнопки» -->
 <div class="modal fade" id="buttonDetailModal" tabindex="-1" aria-labelledby="buttonDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -96,7 +105,7 @@
             </div>
 
             <div class="modal-body text-center">
-                @* Preview: iframe высотой 200px, pointer-events:none *@
+                <!-- Preview: iframe высотой 200px -->
                 <div id="modalButtonPreview"
                      class="mb-3"
                      style="
@@ -106,32 +115,36 @@
                         align-items:center;
                         justify-content:flex-start;
                         background: var(--bg-alt);
-                        border-top-left-radius: 12px;
-                        border-top-right-radius: 12px;
                         overflow:hidden;
                      ">
-                    <!-- JS вставит сюда <iframe src="/buttons/{ButtonCode}"> -->
+                    <!-- JS вставит сюда <iframe> -->
                 </div>
                 <h5 id="modalButtonName" class="mb-1"></h5>
                 <p id="modalButtonTopic" class="text-muted small mb-3"></p>
-            </div>
 
-            <div class="modal-footer d-flex justify-content-center">
-                <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-download"></i> Скачать код
-                </button>
+                <div class="d-flex justify-content-center mb-3">
+                    <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-download"></i> Скачать код
+                    </button>
+                    <button id="modalFavBtn" class="btn btn-outline-danger">
+                        <i id="modalFavIcon" class="bi"></i> Избранное
+                    </button>
+                </div>
 
                 @if (authService.HasPermission(Permission.CanManageButtons))
                 {
-                    <button id="modalEditBtn" class="btn btn-outline-secondary me-2">
-                        <i class="bi bi-pencil"></i> Редактировать
-                    </button>
-                    @* ОБЕРНУЛИ кнопку «Удалить» в form#modalDeleteForm, чтобы подхватить стили *@
-                    <form id="modalDeleteForm" style="display:inline;">
-                        <button id="modalDeleteBtn" type="button" class="btn">
-                            <i class="bi bi-trash"></i> Удалить
-                        </button>
-                    </form>
+                    <div class="d-flex justify-content-center">
+                        <a id="modalEditBtn" class="btn btn-outline-secondary me-2" href="#">
+                            <i class="bi bi-pencil"></i> Редактировать
+                        </a>
+                        <form id="modalDeleteForm" method="post" asp-controller="Button" asp-action="DeleteButton" onsubmit="return confirm('Вы уверены, что хотите удалить эту кнопку?');" style="display:inline;">
+                            <input type="hidden" id="modalDeleteId" name="id" value="" />
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Удалить
+                            </button>
+                        </form>
+                    </div>
                 }
             </div>
 
@@ -141,6 +154,7 @@
 
 @section Scripts {
     <script>
+        // Скачиваем HTML-файл кнопки
         function downloadCode(url) {
             const link = document.createElement('a');
             link.href = url;
@@ -149,23 +163,66 @@
             document.body.removeChild(link);
         }
 
+        // Получаем антифальсификационный токен
+        function getAntiForgeryToken() {
+            const input = document.querySelector('input[name="__RequestVerificationToken"]');
+            return input ? input.value : '';
+        }
+
+        // Toggle “Избранное” в самой карточке
+        document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', async function (e) {
+                // Останавливаем распространение, чтобы не открывать модалку
+                e.stopPropagation();
+
+                const assetType = this.dataset.assetType; // "Button"
+                const assetId   = parseInt(this.dataset.assetId, 10);
+                const iconEl    = this.querySelector('i');
+
+                try {
+                    const response = await fetch('/Favorites/Toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getAntiForgeryToken()
+                        },
+                        body: JSON.stringify({ assetType, assetId })
+                    });
+                    if (!response.ok) throw new Error('Сетевая ошибка');
+                    const result = await response.json();
+
+                    if (result.favorited) {
+                        iconEl.classList.remove('bi-heart');
+                        iconEl.classList.add('bi-heart-fill', 'text-danger');
+                        iconEl.title = 'Убрать из избранного';
+                    } else {
+                        iconEl.classList.remove('bi-heart-fill', 'text-danger');
+                        iconEl.classList.add('bi-heart', 'text-secondary');
+                        iconEl.title = 'Добавить в избранное';
+                    }
+                } catch (err) {
+                    alert('Не удалось обновить избранное: ' + err);
+                }
+            });
+        });
+
+        // Открыть модалку “Детали кнопки”
         function openButtonModal(buttonId) {
-            // Находим карточку (теперь она сама содержит data-button-id)
-            const triggerEl = document.querySelector(`.card[data-button-id='${buttonId}']`);
+            var triggerEl = document.querySelector(`.card[data-button-id='${buttonId}']`);
             if (!triggerEl) return;
 
-            const name  = triggerEl.getAttribute('data-button-name');
-            const topic = triggerEl.getAttribute('data-button-topic');
-            const file  = triggerEl.getAttribute('data-button-file');
-            const previewUrl = "/buttons/" + file;
+            var name       = triggerEl.getAttribute('data-button-name');
+            var topic      = triggerEl.getAttribute('data-button-topic');
+            var codeFile   = triggerEl.getAttribute('data-button-file');
+            var previewUrl = "/buttons/" + codeFile;
 
             document.getElementById('modalButtonName').innerText  = name;
             document.getElementById('modalButtonTopic').innerText = "Категория: " + topic;
 
-            // Вставляем iframe с pointer-events: none
-            const container = document.getElementById('modalButtonPreview');
+            // Вставляем iframe
+            var container = document.getElementById('modalButtonPreview');
             container.innerHTML = "";
-            const iframe = document.createElement('iframe');
+            var iframe = document.createElement('iframe');
             iframe.src = previewUrl;
             iframe.style.cssText = `
                 width: auto;
@@ -175,52 +232,95 @@
             `;
             container.appendChild(iframe);
 
+            // Кнопка «Скачать»
             document.getElementById('modalDownloadBtn').onclick = () => {
                 downloadCode(`@Url.Action("DownloadCode", "Button")/${buttonId}`);
             };
 
+            // Кнопка «Добавить/убрать из избранного» в модалке
+            var favIcon = document.getElementById('modalFavIcon');
+            var favBtn  = document.getElementById('modalFavBtn');
+
+            // Считываем текущее состояние «сердечка» прямо из карточки:
+            var cardIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${buttonId}"] i`);
+            var isFavCard = cardIcon && cardIcon.classList.contains('bi-heart-fill');
+
+            if (isFavCard) {
+                favIcon.className = 'bi bi-heart-fill text-danger';
+                favBtn.title      = 'Убрать из избранного';
+            } else {
+                favIcon.className = 'bi bi-heart text-secondary';
+                favBtn.title      = 'Добавить в избранное';
+            }
+
+            favBtn.onclick = async () => {
+                try {
+                    const response = await fetch('/Favorites/Toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getAntiForgeryToken()
+                        },
+                        body: JSON.stringify({ assetType: 'Button', assetId: parseInt(buttonId, 10) })
+                    });
+                    if (!response.ok) throw new Error('Ошибка от сервера: ' + response.status);
+                    const result = await response.json();
+
+                    // Переключаем иконку в модалке
+                    if (result.favorited) {
+                        favIcon.className = 'bi bi-heart-fill text-danger';
+                        favBtn.title     = 'Убрать из избранного';
+                    } else {
+                        favIcon.className = 'bi bi-heart text-secondary';
+                        favBtn.title     = 'Добавить в избранное';
+                    }
+
+                    // А теперь на карточке тоже обновляем «сердечко»
+                    var cardBtnIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${buttonId}"] i`);
+                    if (cardBtnIcon) {
+                        if (result.favorited) {
+                            cardBtnIcon.classList.remove('bi-heart');
+                            cardBtnIcon.classList.add('bi-heart-fill', 'text-danger');
+                            cardBtnIcon.title = 'Убрать из избранного';
+                        } else {
+                            cardBtnIcon.classList.remove('bi-heart-fill', 'text-danger');
+                            cardBtnIcon.classList.add('bi-heart', 'text-secondary');
+                            cardBtnIcon.title = 'Добавить в избранное';
+                        }
+                    }
+                } catch (err) {
+                    alert('Не удалось обновить избранное: ' + err);
+                }
+            };
+
+        @* Редактирование/удаление, если есть права *@
         @if (authService.HasPermission(Permission.CanManageButtons))
         {
             <text>
-                        document.getElementById('modalEditBtn').onclick = () => {
-                            window.location.href = `@Url.Action("EditButton", "Button")/${buttonId}`;
-                        };
-                        document.getElementById('modalDeleteBtn').onclick = () => {
-                            if (!confirm('Вы уверены, что хотите удалить эту кнопку?')) return;
-                            // Создаём и отправляем POST-форму с __RequestVerificationToken и id=buttonId
-                            const form = document.createElement('form');
-                            form.method = 'post';
-                            form.action = `@Url.Action("DeleteButton", "Button")`;
-                            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-                            if (tokenInput) {
-                                const hiddenToken = document.createElement('input');
-                                hiddenToken.type = 'hidden';
-                                hiddenToken.name = '__RequestVerificationToken';
-                                hiddenToken.value = tokenInput.value;
-                                form.appendChild(hiddenToken);
-                            }
-                            const idInput = document.createElement('input');
-                            idInput.type = 'hidden';
-                            idInput.name = 'id';
-                            idInput.value = buttonId;
-                            form.appendChild(idInput);
-                            document.body.appendChild(form);
-                            form.submit();
-                        };
+                        var editBtn       = document.getElementById('modalEditBtn');
+                        var deleteForm    = document.getElementById('modalDeleteForm');
+                        var deleteIdInput = document.getElementById('modalDeleteId');
+
+                        // Настраиваем ссылку «Редактировать»
+                        editBtn.href        = '@Url.Action("EditButton", "Button")/' + buttonId;
+
+                        // Привязываем id к форме удаления
+                        deleteIdInput.value = buttonId;
             </text>
         }
 
-            const modalElement = document.getElementById('buttonDetailModal');
-            const bsModal = new bootstrap.Modal(modalElement);
+            // Показываем модалку
+            var modalEl = document.getElementById('buttonDetailModal');
+            var bsModal = new bootstrap.Modal(modalEl);
             bsModal.show();
         }
 
-        // Навешиваем клик на всю карточку
+        // Навешиваем событие клика по всей карточке
         document.querySelectorAll('.card[data-button-id]').forEach(card => {
             card.addEventListener('click', function(e) {
-                // Если кликнули по кнопке «Скачать код», выходим
-                if (e.target.tagName === 'BUTTON') return;
-                const id = this.getAttribute('data-button-id');
+                // Если кликнули на саму кнопку «Скачать» или на «сердечко» – не открываем модалку
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'I') return;
+                var id = this.getAttribute('data-button-id');
                 openButtonModal(id);
             });
         });
