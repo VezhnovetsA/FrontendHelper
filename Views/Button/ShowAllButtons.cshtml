@@ -30,35 +30,40 @@
     @foreach (var btn in Model)
     {
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card h-100 shadow-sm position-relative">
+            @* Перенесли data-button-* на саму карточку *@
+            <div class="card h-100 shadow-sm position-relative"
+                 style="cursor:pointer;"
+                 data-button-id="@btn.Id"
+                 data-button-name="@btn.Name"
+                 data-button-topic="@btn.Topic"
+                 data-button-file="@btn.ButtonCode">
 
-                @* 1) Превью: iframe расположен сверху, с закруглёнными углами *@
-                <div style="height: 100px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: flex-start;      /* прижато к левому краю */
-                            background: var(--bg-alt);
-                            padding: 0.5rem;
-                            border-top-left-radius: 12px;
-                            border-top-right-radius: 12px;
-                            overflow: hidden;">
+                @* 1) Превью: iframe сверху *@
+                <div style="
+                        height: 100px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: flex-start;
+                        background: var(--bg-alt);
+                        padding: 0.5rem;
+                        border-top-left-radius: 12px;
+                        border-top-right-radius: 12px;
+                        overflow: hidden;">
+                    @* Добавили pointer-events:none, чтобы iframe не «ловил» клики *@
                     <iframe src="@Url.Content($"~/buttons/{btn.ButtonCode}")"
-                            style="border: none;
-                                   width: auto;
-                                   height: 100%;
-                                   max-width: 100%;"
+                            style="
+                                border: none;
+                                width: auto;
+                                height: 100%;
+                                max-width: 100%;
+                                pointer-events: none;
+                                "
                             scrolling="no">
                     </iframe>
                 </div>
 
-                @* 2) Тело карточки: при клике — открывается модалка; внизу слева — кнопка «Скачать код» *@
-                <div class="card-body d-flex flex-column"
-                     style="cursor: pointer;"
-                     data-button-id="@btn.Id"
-                     data-button-name="@btn.Name"
-                     data-button-topic="@btn.Topic"
-                     data-button-file="@btn.ButtonCode">
-
+                @* 2) Тело карточки *@
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-truncate"
                         title="@btn.Name"
                         style="font-size:1.1rem;">
@@ -91,18 +96,20 @@
             </div>
 
             <div class="modal-body text-center">
-                @* Preview: iframe прижат к левому краю, высота уменьшена до 200px *@
+                @* Preview: iframe высотой 200px, pointer-events:none *@
                 <div id="modalButtonPreview"
                      class="mb-3"
-                     style="width:100%;
-                            height:200px;                        /* уменьшили высоту */
-                            display:flex;
-                            align-items:center;
-                            justify-content:flex-start;          /* прижато к левому краю */
-                            background: var(--bg-alt);
-                            border-top-left-radius: 12px;
-                            border-top-right-radius: 12px;
-                            overflow:hidden;">
+                     style="
+                        width:100%;
+                        height:200px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:flex-start;
+                        background: var(--bg-alt);
+                        border-top-left-radius: 12px;
+                        border-top-right-radius: 12px;
+                        overflow:hidden;
+                     ">
                     <!-- JS вставит сюда <iframe src="/buttons/{ButtonCode}"> -->
                 </div>
                 <h5 id="modalButtonName" class="mb-1"></h5>
@@ -110,7 +117,6 @@
             </div>
 
             <div class="modal-footer d-flex justify-content-center">
-                @* Кнопки выровнены по центру футера *@
                 <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
                     <i class="bi bi-download"></i> Скачать код
                 </button>
@@ -120,17 +126,15 @@
                     <button id="modalEditBtn" class="btn btn-outline-secondary me-2">
                         <i class="bi bi-pencil"></i> Редактировать
                     </button>
-                    <button id="modalDeleteBtn" class="btn"
-                            style="background: linear-gradient(90deg, #E64A19, #D84315);
-                                   color: #FFF;
-                                   border: none;
-                                   padding: 0.5rem 1rem;
-                                   border-radius: 50px;
-                                   transition: transform 0.2s, box-shadow 0.2s;">
-                        <i class="bi bi-trash"></i> Удалить
-                    </button>
+                    @* ОБЕРНУЛИ кнопку «Удалить» в form#modalDeleteForm, чтобы подхватить стили *@
+                    <form id="modalDeleteForm" style="display:inline;">
+                        <button id="modalDeleteBtn" type="button" class="btn">
+                            <i class="bi bi-trash"></i> Удалить
+                        </button>
+                    </form>
                 }
             </div>
+
         </div>
     </div>
 </div>
@@ -146,7 +150,8 @@
         }
 
         function openButtonModal(buttonId) {
-            const triggerEl = document.querySelector(`[data-button-id='${buttonId}']`);
+            // Находим карточку (теперь она сама содержит data-button-id)
+            const triggerEl = document.querySelector(`.card[data-button-id='${buttonId}']`);
             if (!triggerEl) return;
 
             const name  = triggerEl.getAttribute('data-button-name');
@@ -157,13 +162,17 @@
             document.getElementById('modalButtonName').innerText  = name;
             document.getElementById('modalButtonTopic').innerText = "Категория: " + topic;
 
+            // Вставляем iframe с pointer-events: none
             const container = document.getElementById('modalButtonPreview');
             container.innerHTML = "";
             const iframe = document.createElement('iframe');
             iframe.src = previewUrl;
-            iframe.style.width  = "auto";
-            iframe.style.height = "100%";
-            iframe.frameBorder  = "0";
+            iframe.style.cssText = `
+                width: auto;
+                height: 100%;
+                border: none;
+                pointer-events: none;
+            `;
             container.appendChild(iframe);
 
             document.getElementById('modalDownloadBtn').onclick = () => {
@@ -173,33 +182,31 @@
         @if (authService.HasPermission(Permission.CanManageButtons))
         {
             <text>
-                    document.getElementById('modalEditBtn').onclick = () => {
-                        window.location.href = `@Url.Action("EditButton", "Button")/${buttonId}`;
-                    };
-                    document.getElementById('modalDeleteBtn').onclick = () => {
-                        if (!confirm('Вы уверены, что хотите удалить эту кнопку?')) return;
-                        const form = document.createElement('form');
-                        form.method = 'post';
-                        form.action = `@Url.Action("DeleteButton", "Button")`;
-
-                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-                        if (tokenInput) {
-                            const hiddenToken = document.createElement('input');
-                            hiddenToken.type = 'hidden';
-                            hiddenToken.name = '__RequestVerificationToken';
-                            hiddenToken.value = tokenInput.value;
-                            form.appendChild(hiddenToken);
-                        }
-
-                        const idInput = document.createElement('input');
-                        idInput.type = 'hidden';
-                        idInput.name = 'id';
-                        idInput.value = buttonId;
-                        form.appendChild(idInput);
-
-                        document.body.appendChild(form);
-                        form.submit();
-                    };
+                        document.getElementById('modalEditBtn').onclick = () => {
+                            window.location.href = `@Url.Action("EditButton", "Button")/${buttonId}`;
+                        };
+                        document.getElementById('modalDeleteBtn').onclick = () => {
+                            if (!confirm('Вы уверены, что хотите удалить эту кнопку?')) return;
+                            // Создаём и отправляем POST-форму с __RequestVerificationToken и id=buttonId
+                            const form = document.createElement('form');
+                            form.method = 'post';
+                            form.action = `@Url.Action("DeleteButton", "Button")`;
+                            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                            if (tokenInput) {
+                                const hiddenToken = document.createElement('input');
+                                hiddenToken.type = 'hidden';
+                                hiddenToken.name = '__RequestVerificationToken';
+                                hiddenToken.value = tokenInput.value;
+                                form.appendChild(hiddenToken);
+                            }
+                            const idInput = document.createElement('input');
+                            idInput.type = 'hidden';
+                            idInput.name = 'id';
+                            idInput.value = buttonId;
+                            form.appendChild(idInput);
+                            document.body.appendChild(form);
+                            form.submit();
+                        };
             </text>
         }
 
@@ -208,8 +215,10 @@
             bsModal.show();
         }
 
-        document.querySelectorAll('.card-body[data-button-id]').forEach(div => {
-            div.addEventListener('click', function(e) {
+        // Навешиваем клик на всю карточку
+        document.querySelectorAll('.card[data-button-id]').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Если кликнули по кнопке «Скачать код», выходим
                 if (e.target.tagName === 'BUTTON') return;
                 const id = this.getAttribute('data-button-id');
                 openButtonModal(id);
