@@ -1,19 +1,19 @@
-﻿@model IEnumerable<FrontendHelper.Models.FormViewModel>
+﻿@model IEnumerable<FrontendHelper.Models.FormGroupViewModel>
 @using FhEnums
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    ViewData["Title"] = "Все формы";
+    ViewData["Title"] = "Группы форм";
 }
 
-<h2 class="mb-4">Все формы</h2>
+<h2 class="mb-4">Группы форм</h2>
 
-<!-- Кнопка «Группы форм» -->
+<!-- Кнопка «Все формы» -->
 <div class="mb-4">
     <a class="btn btn-sm btn-outline-primary btn-view-all"
-       asp-action="ShowGroupsOfForms"
+       asp-action="ShowAllForms"
        asp-controller="Form">
-        ← Группы форм
+        ← Все формы
     </a>
 </div>
 
@@ -22,78 +22,92 @@
     <a class="btn-create-icon mb-3"
        asp-controller="Form"
        asp-action="CreateForm">
-        <i class="bi bi-plus-lg"></i> Добавить форму
+        <i class="bi bi-plus-lg"></i> Создать форму
     </a>
 }
 
-<div class="row gx-3 gy-4">
-    @foreach (var form in Model)
-    {
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card h-100 shadow-sm position-relative"
-                 style="cursor:pointer; height:600px;"
-                 data-form-id="@form.Id"
-                 data-form-name="@form.Name"
-                 data-form-topic="@form.Topic"
-                 data-form-file="@form.FormCode">
-                <!-- Превью: контейнер 300px + overflow-y:auto -->
-                <div style="
-                        height:300px;
-                        overflow-y:auto;
-                        display:flex;
-                        align-items:flex-start;
-                        justify-content:flex-start;
-                        background: var(--bg-alt);
-                        padding:0.5rem;
-                        border-top-left-radius:12px;
-                        border-top-right-radius:12px;">
-                    <iframe src="@Url.Content($"~/forms/{form.FormCode}")"
-                            style="
-                                border:none;
-                                width:100%;
-                                height:1000px; /* фиксированная высота, контейнер скроллится */
-                                pointer-events:none;
-                                "
-                            scrolling="no">
-                    </iframe>
-                </div>
+@foreach (var group in Model)
+{
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="text-capitalize mb-0">@group.Topic</h3>
+            <a class="btn btn-sm btn-outline-primary btn-view-all"
+               asp-action="ShowAllFormsOnTheTopic"
+               asp-controller="Form"
+               asp-route-topic="@group.Topic">
+                Смотреть все →
+            </a>
+        </div>
 
-                <!-- Тело карточки -->
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-truncate"
-                        title="@form.Name"
-                        style="font-size:1.1rem;">
-                        @form.Name
-                    </h5>
-                    <p class="card-text text-muted small mb-2">Категория: @form.Topic</p>
+        <div class="row gx-3 gy-4">
+            @foreach (var form in group.Forms)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm position-relative"
+                         style="cursor: pointer; height:600px;"
+                         data-form-id="@form.Id"
+                         data-form-name="@form.Name"
+                         data-form-topic="@form.Topic"
+                         data-form-file="@form.FormCode">
+                        <!-- Превью: контейнер 300px + overflow-y:auto -->
+                        <div style="
+                                height:300px;
+                                overflow-y:auto;
+                                display:flex;
+                                align-items:flex-start;
+                                justify-content:flex-start;
+                                background: var(--bg-alt);
+                                padding:0.5rem;
+                                border-top-left-radius:12px;
+                                border-top-right-radius:12px;">
+                            <iframe src="@Url.Content($"~/forms/{form.FormCode}")"
+                                    style="
+                                        border:none;
+                                        width:100%;
+                                        height:1000px;
+                                        pointer-events:none;
+                                                    "
+                                    scrolling="no">
+                            </iframe>
+                        </div>
 
-                    <div class="mt-auto d-flex justify-content-between align-items-center">
-                        <button class="btn btn-sm btn-outline-primary"
-                                onclick="event.stopPropagation(); downloadCode('@Url.Action("DownloadCode","Form", new { id = form.Id })')">
-                            Скачать код
-                        </button>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-truncate"
+                                title="@form.Name"
+                                style="font-size:1.1rem;">
+                                @form.Name
+                            </h5>
+                            <p class="card-text text-muted small mb-2">Категория: @form.Topic</p>
 
-                        <button class="favorite-toggle-btn"
-                                data-asset-type="Form"
-                                data-asset-id="@form.Id"
-                                style="background:none; border:none;">
-                            @if (form.IsFavorited)
-                            {
-                                <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
-                            }
-                            else
-                            {
-                                <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
-                            }
-                        </button>
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        onclick="event.stopPropagation(); downloadCode('@Url.Action("DownloadCode","Form", new { id = form.Id })')">
+                                    Скачать код
+                                </button>
+
+                                <button class="favorite-toggle-btn"
+                                        data-asset-type="Form"
+                                        data-asset-id="@form.Id"
+                                        style="background:none; border:none;">
+                                    @if (form.IsFavorited)
+                                    {
+                                        <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                                    }
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
         </div>
-    }
-</div>
+    </div>
+}
 
-<!-- Модальное окно «Детали формы» с классом modal-lg -->
+<!-- Модал «Детали формы» (modal-lg, контейнер 400px) -->
 <div class="modal fade" id="formDetailModal" tabindex="-1" aria-labelledby="formDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -213,14 +227,14 @@
             document.getElementById('modalFormName').innerText  = name;
             document.getElementById('modalFormTopic').innerText = "Категория: " + topic;
 
-            // Вставляем iframe с фиксированной большой высотой (1000px)
+            // Вставляем iframe
             var container = document.getElementById('modalFormPreview');
             container.innerHTML = "";
             var iframe = document.createElement('iframe');
             iframe.src = previewUrl;
             iframe.style.cssText = `
                 width: 100%;
-                height: 1000px;  /* высота > контейнера, контейнер скроллится */
+                height: 1000px;
                 border: none;
                 pointer-events: none;
             `;

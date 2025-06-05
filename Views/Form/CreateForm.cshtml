@@ -1,0 +1,74 @@
+﻿@model FrontendHelper.Models.CreateFormViewModel
+@using FhEnums
+
+@{
+    ViewData["Title"] = "Добавить новую форму";
+}
+
+<h2 class="mb-4">Добавить новую форму</h2>
+
+<div class="form-container">
+    <div class="form-card card p-4 mb-5">
+        <form asp-action="CreateForm" asp-controller="Form" method="post" enctype="multipart/form-data" class="generic-form">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Название</label>
+                <input asp-for="Name" class="form-control" placeholder="Введите название формы" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Topic" class="form-label">Категория</label>
+                <input asp-for="Topic" class="form-control" placeholder="Например: Контакты, Регистрация..." />
+                <span asp-validation-for="Topic" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FormFile" class="form-label">HTML-файл (например: myForm.html)</label>
+                <input asp-for="FormFile" type="file" class="form-control" />
+                <span asp-validation-for="FormFile" class="text-danger small"></span>
+            </div>
+
+            @* Список существующих фильтров *@
+            @if (Model.AvailableFilters.Any())
+            {
+                <div class="mb-3">
+                    <label class="form-label">Выберите существующие фильтры</label>
+                    <div>
+                        @foreach (var filter in Model.AvailableFilters)
+                        {
+                            var fid = int.Parse(filter.Value);
+                            <div class="form-check form-check-inline me-3">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="SelectedFilterIds"
+                                       value="@filter.Value"
+                                @(Model.SelectedFilterIds.Contains(fid) ? "checked" : "") />
+                                <label class="form-check-label">@filter.Text</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Новые фильтры через запятую *@
+            <div class="mb-3">
+                <label asp-for="NewFilterNames" class="form-label">
+                    Новые фильтры (через запятую)
+                </label>
+                <input asp-for="NewFilterNames"
+                       class="form-control"
+                       placeholder="Например: Обратная связь, Подписка" />
+                <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить форму</button>
+            <a asp-action="ShowAllForms" class="btn btn-secondary ms-2">Отмена</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

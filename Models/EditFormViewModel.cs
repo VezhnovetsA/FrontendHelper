@@ -1,5 +1,7 @@
 ﻿// FrontendHelper/Models/EditFormViewModel.cs
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Models
@@ -8,14 +10,21 @@ namespace FrontendHelper.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [MaxLength(100)]
+        [Required, MaxLength(100)]
         public string Name { get; set; }
 
-        // Имя уже существующего форм-файла
-        public string ExistingCode { get; set; }
+        [Required, MaxLength(100)]
+        public string Topic { get; set; }
 
-        [FileExtensions(Extensions = "html,htm", ErrorMessage = "Поддерживаются только HTML файлы (.html, .htm).")]
+        [BindNever]
+        public string ExistingFileName { get; set; }
+
         public IFormFile? FormFile { get; set; }
+
+        public List<int> SelectedFilterIds { get; set; } = new List<int>();
+        public List<SelectListItem> AvailableFilters { get; set; } = new List<SelectListItem>();
+
+        [Display(Name = "Новые фильтры (через запятую)")]
+        public string? NewFilterNames { get; set; }
     }
 }
