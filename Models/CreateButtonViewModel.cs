@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Models
 {
@@ -13,5 +13,12 @@ namespace FrontendHelper.Models
 
         [Required]
         public IFormFile HtmlFile { get; set; }
+
+        // Новые фильтры, аналогично иконкам:
+        public List<int> SelectedFilterIds { get; set; } = new List<int>();
+        public List<SelectListItem> AvailableFilters { get; set; } = new List<SelectListItem>();
+
+        [Display(Name = "Новые фильтры (через запятую)")]
+        public string? NewFilterNames { get; set; }
     }
 }

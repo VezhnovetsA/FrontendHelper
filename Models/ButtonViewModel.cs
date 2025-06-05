@@ -9,5 +9,8 @@
         public string ButtonCode { get; set; }
 
         public string Topic { get; set; }    // ← категория/тема
+
+        public bool IsFavorited { get; set; }
+        public string FilterIdsCsv { get; set; }
     }
 }
