@@ -3,26 +3,23 @@
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    ViewData["Title"] = "Все формы";
+    ViewData["Title"] = $"Формы: {ViewBag.Topic}";
 }
 
-<h2 class="mb-4">Все формы</h2>
+<h2 class="mb-4">Формы: @ViewBag.Topic</h2>
 
-<!-- Кнопка «Группы форм» -->
-<div class="mb-4">
-    <a class="btn btn-sm btn-outline-primary btn-view-all"
-       asp-action="ShowGroupsOfForms"
-       asp-controller="Form">
-        ← Группы форм
-    </a>
-</div>
+<a class="btn btn-outline-primary btn-view-all mb-3"
+   asp-action="ShowGroupsOfForms"
+   asp-controller="Form">
+    ← Назад к категориям
+</a>
 
 @if (authService.HasPermission(Permission.CanManageForms))
 {
     <a class="btn-create-icon mb-3"
        asp-controller="Form"
        asp-action="CreateForm">
-        <i class="bi bi-plus-lg"></i> Добавить форму
+        <i class="bi bi-plus-lg"></i> Создать форму
     </a>
 }
 
@@ -31,12 +28,12 @@
     {
         <div class="col-sm-6 col-md-4 col-lg-3">
             <div class="card h-100 shadow-sm position-relative"
-                 style="cursor:pointer; height: 350px;"
+                 style="cursor: pointer; height: 350px;"
                  data-form-id="@form.Id"
                  data-form-name="@form.Name"
                  data-form-topic="@form.Topic"
                  data-form-file="@form.FormCode">
-                <!-- Превью: iframe сверху, pointer-events: none, плюс прокрутка -->
+                <!-- Превью (iframe с прокруткой) -->
                 <div style="
                         height: 150px;
                         overflow-y: auto;
@@ -54,7 +51,7 @@
                                 height: auto;
                                 max-height: 100%;
                                 pointer-events: none;
-                                    "
+                                        "
                             scrolling="yes">
                     </iframe>
                 </div>
@@ -66,7 +63,6 @@
                         style="font-size:1.1rem;">
                         @form.Name
                     </h5>
-                    <p class="card-text text-muted small mb-2">Категория: @form.Topic</p>
 
                     <div class="mt-auto d-flex justify-content-between align-items-center">
                         <button class="btn btn-sm btn-outline-primary"
@@ -94,7 +90,7 @@
     }
 </div>
 
-<!-- Модальное окно «Детали формы» -->
+<!-- Модал «Детали формы» (тот же самый, что и в ShowAllForms) -->
 <div class="modal fade" id="formDetailModal" tabindex="-1" aria-labelledby="formDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -105,7 +101,6 @@
             </div>
 
             <div class="modal-body text-center">
-                <!-- Preview: iframe высотой 200px с прокруткой -->
                 <div id="modalFormPreview"
                      class="mb-3"
                      style="
@@ -116,6 +111,7 @@
                         align-items:flex-start;
                         justify-content:flex-start;
                         background: var(--bg-alt);
+                        overflow:hidden;
                      ">
                     <!-- JS вставит сюда <iframe> -->
                 </div>
@@ -154,7 +150,6 @@
 
 @section Scripts {
     <script>
-        // Скачиваем HTML-файл формы
         function downloadCode(url) {
             const link = document.createElement('a');
             link.href = url;
@@ -163,19 +158,15 @@
             document.body.removeChild(link);
         }
 
-        // Получаем антифальсификационный токен
         function getAntiForgeryToken() {
             const input = document.querySelector('input[name="__RequestVerificationToken"]');
             return input ? input.value : '';
         }
 
-        // Toggle “Избранное” в самой карточке
         document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function (e) {
-                // Останавливаем распространение, чтобы не открывать модалку
                 e.stopPropagation();
-
-                const assetType = this.dataset.assetType; // "Form"
+                const assetType = this.dataset.assetType;
                 const assetId   = parseInt(this.dataset.assetId, 10);
                 const iconEl    = this.querySelector('i');
 
@@ -206,7 +197,6 @@
             });
         });
 
-        // Открыть модалку “Детали формы”
         function openFormModal(formId) {
             var triggerEl = document.querySelector(`.card[data-form-id='${formId}']`);
             if (!triggerEl) return;
@@ -219,7 +209,6 @@
             document.getElementById('modalFormName').innerText  = name;
             document.getElementById('modalFormTopic').innerText = "Категория: " + topic;
 
-            // Вставляем iframe с прокруткой
             var container = document.getElementById('modalFormPreview');
             container.innerHTML = "";
             var iframe = document.createElement('iframe');
@@ -232,16 +221,12 @@
             `;
             container.appendChild(iframe);
 
-            // Кнопка «Скачать»
             document.getElementById('modalDownloadBtn').onclick = () => {
                 downloadCode(`@Url.Action("DownloadCode", "Form")/${formId}`);
             };
 
-            // Кнопка «Добавить/убрать из избранного» в модалке
             var favIcon = document.getElementById('modalFavIcon');
             var favBtn  = document.getElementById('modalFavBtn');
-
-            // Считываем текущее состояние «сердечка» прямо из карточки:
             var cardIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${formId}"] i`);
             var isFavCard = cardIcon && cardIcon.classList.contains('bi-heart-fill');
 
@@ -266,16 +251,14 @@
                     if (!response.ok) throw new Error('Ошибка от сервера: ' + response.status);
                     const result = await response.json();
 
-                    // Переключаем иконку в модалке
                     if (result.favorited) {
                         favIcon.className = 'bi bi-heart-fill text-danger';
-                        favBtn.title     = 'Убрать из избранного';
+                        favBtn.title      = 'Убрать из избранного';
                     } else {
                         favIcon.className = 'bi bi-heart text-secondary';
-                        favBtn.title     = 'Добавить в избранное';
+                        favBtn.title      = 'Добавить в избранное';
                     }
 
-                    // А теперь на карточке тоже обновляем «сердечко»
                     var cardBtnIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${formId}"] i`);
                     if (cardBtnIcon) {
                         if (result.favorited) {
@@ -293,7 +276,6 @@
                 }
             };
 
-        @* Редактирование/удаление, если есть права *@
         @if (authService.HasPermission(Permission.CanManageForms))
         {
             <text>
@@ -301,24 +283,18 @@
                         var deleteForm    = document.getElementById('modalDeleteForm');
                         var deleteIdInput = document.getElementById('modalDeleteId');
 
-                        // Настраиваем ссылку «Редактировать»
                         editBtn.href        = '@Url.Action("EditForm", "Form")/' + formId;
-
-                        // Привязываем id к форме удаления
                         deleteIdInput.value = formId;
             </text>
         }
 
-            // Показываем модалку
             var modalEl = document.getElementById('formDetailModal');
             var bsModal = new bootstrap.Modal(modalEl);
             bsModal.show();
         }
 
-        // Навешиваем событие клика по всей карточке
         document.querySelectorAll('.card[data-form-id]').forEach(card => {
             card.addEventListener('click', function(e) {
-                // Если кликнули на саму кнопку «Скачать» или на «сердечко» – не открываем модалку
                 if (e.target.tagName === 'BUTTON' || e.target.tagName === 'I') return;
                 var id = this.getAttribute('data-form-id');
                 openFormModal(id);
