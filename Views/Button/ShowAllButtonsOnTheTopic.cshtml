@@ -3,26 +3,23 @@
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    ViewData["Title"] = "Все кнопки";
+    ViewData["Title"] = $"Кнопки: {ViewBag.Topic}";
 }
 
-<h2 class="mb-4">Все кнопки</h2>
+<h2 class="mb-4">Кнопки: @ViewBag.Topic</h2>
 
-@* Кнопка «Группы кнопок» *@
-<div class="mb-4">
-    <a class="btn btn-sm btn-outline-primary btn-view-all"
-       asp-action="ShowGroupsOfButtons"
-       asp-controller="Button">
-        ← Группы кнопок
-    </a>
-</div>
+<a class="btn btn-outline-primary btn-view-all mb-3"
+   asp-action="ShowGroupsOfButtons"
+   asp-controller="Button">
+    ← Назад к категориям
+</a>
 
 @if (authService.HasPermission(Permission.CanManageButtons))
 {
     <a class="btn-create-icon mb-3"
        asp-controller="Button"
        asp-action="CreateButton">
-        <i class="bi bi-plus-lg"></i> Добавить кнопку
+        <i class="bi bi-plus-lg"></i> Создать кнопку
     </a>
 }
 
@@ -32,28 +29,25 @@
         <div class="col-sm-6 col-md-4 col-lg-3">
             <div class="card h-100 shadow-sm position-relative">
 
-                @* 1) Превью: iframe расположен сверху, с закруглёнными углами *@
+                @* 1) Превью: iframe, прижат к левому краю, высота 100px *@
                 <div style="height: 100px;
                             display: flex;
                             align-items: center;
-                            justify-content: flex-start;      /* прижато к левому краю */
+                            justify-content: flex-start;    /* прижали к левому краю */
                             background: var(--bg-alt);
-                            padding: 0.5rem;
-                            border-top-left-radius: 12px;
-                            border-top-right-radius: 12px;
-                            overflow: hidden;">
+                            padding: 0.5rem;">
                     <iframe src="@Url.Content($"~/buttons/{btn.ButtonCode}")"
-                            style="border: none;
-                                   width: auto;
-                                   height: 100%;
-                                   max-width: 100%;"
+                            style="border:none;
+                                   width:auto;
+                                   height:100%;
+                                   max-width:100%;"
                             scrolling="no">
                     </iframe>
                 </div>
 
-                @* 2) Тело карточки: при клике — открывается модалка; внизу слева — кнопка «Скачать код» *@
+                @* 2) Тело карточки (открывает модалку), внизу слева «Скачать» *@
                 <div class="card-body d-flex flex-column"
-                     style="cursor: pointer;"
+                     style="cursor:pointer;"
                      data-button-id="@btn.Id"
                      data-button-name="@btn.Name"
                      data-button-topic="@btn.Topic"
@@ -64,7 +58,6 @@
                         style="font-size:1.1rem;">
                         @btn.Name
                     </h5>
-                    <p class="card-text text-muted small mb-2">Категория: @btn.Topic</p>
 
                     <div class="mt-auto d-flex justify-content-start">
                         <button class="btn btn-sm btn-outline-primary"
@@ -78,55 +71,40 @@
     }
 </div>
 
-@* =======================================
-   Модальное окно «Детали кнопки»
-   ======================================= *@
+@* Тот же #buttonDetailModal, но без класса modal-lg *@
 <div class="modal fade" id="buttonDetailModal" tabindex="-1" aria-labelledby="buttonDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-
             <div class="modal-header">
                 <h5 class="modal-title" id="buttonDetailModalLabel">Детали кнопки</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-
             <div class="modal-body text-center">
-                @* Preview: iframe прижат к левому краю, высота уменьшена до 200px *@
+                @* Preview прижат к левому краю, высота 200px *@
                 <div id="modalButtonPreview"
                      class="mb-3"
                      style="width:100%;
-                            height:200px;                        /* уменьшили высоту */
+                            height:200px;
                             display:flex;
                             align-items:center;
-                            justify-content:flex-start;          /* прижато к левому краю */
-                            background: var(--bg-alt);
-                            border-top-left-radius: 12px;
-                            border-top-right-radius: 12px;
-                            overflow:hidden;">
+                            justify-content:flex-start;  /* прижали к левому краю */
+                            overflow:hidden;
+                            border:1px solid #e0e0e0;">
                     <!-- JS вставит сюда <iframe src="/buttons/{ButtonCode}"> -->
                 </div>
                 <h5 id="modalButtonName" class="mb-1"></h5>
                 <p id="modalButtonTopic" class="text-muted small mb-3"></p>
             </div>
-
             <div class="modal-footer d-flex justify-content-center">
-                @* Кнопки выровнены по центру футера *@
                 <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
                     <i class="bi bi-download"></i> Скачать код
                 </button>
-
                 @if (authService.HasPermission(Permission.CanManageButtons))
                 {
                     <button id="modalEditBtn" class="btn btn-outline-secondary me-2">
                         <i class="bi bi-pencil"></i> Редактировать
                     </button>
-                    <button id="modalDeleteBtn" class="btn"
-                            style="background: linear-gradient(90deg, #E64A19, #D84315);
-                                   color: #FFF;
-                                   border: none;
-                                   padding: 0.5rem 1rem;
-                                   border-radius: 50px;
-                                   transition: transform 0.2s, box-shadow 0.2s;">
+                    <button id="modalDeleteBtn" class="btn btn-outline-danger">
                         <i class="bi bi-trash"></i> Удалить
                     </button>
                 }

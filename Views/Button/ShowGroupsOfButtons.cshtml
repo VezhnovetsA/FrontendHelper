@@ -1,19 +1,19 @@
-﻿@model IEnumerable<FrontendHelper.Models.ButtonViewModel>
+﻿@model IEnumerable<FrontendHelper.Models.ButtonGroupViewModel>
 @using FhEnums
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    ViewData["Title"] = "Все кнопки";
+    ViewData["Title"] = "Группы кнопок";
 }
 
-<h2 class="mb-4">Все кнопки</h2>
+<h2 class="mb-4">Группы кнопок</h2>
 
-@* Кнопка «Группы кнопок» *@
+@* Кнопка «Все кнопки» *@
 <div class="mb-4">
     <a class="btn btn-sm btn-outline-primary btn-view-all"
-       asp-action="ShowGroupsOfButtons"
+       asp-action="ShowAllButtons"
        asp-controller="Button">
-        ← Группы кнопок
+        ← Все кнопки
     </a>
 </div>
 
@@ -22,83 +22,94 @@
     <a class="btn-create-icon mb-3"
        asp-controller="Button"
        asp-action="CreateButton">
-        <i class="bi bi-plus-lg"></i> Добавить кнопку
+        <i class="bi bi-plus-lg"></i> Создать кнопку
     </a>
 }
 
-<div class="row gx-3 gy-4">
-    @foreach (var btn in Model)
-    {
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card h-100 shadow-sm position-relative">
+@foreach (var group in Model)
+{
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="text-capitalize mb-0">@group.Topic</h3>
+            <a class="btn btn-sm btn-outline-primary btn-view-all"
+               asp-action="ShowAllButtonsOnTheTopic"
+               asp-controller="Button"
+               asp-route-topic="@group.Topic">
+                Смотреть все →
+            </a>
+        </div>
 
-                @* 1) Превью: iframe расположен сверху, с закруглёнными углами *@
-                <div style="height: 100px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: flex-start;      /* прижато к левому краю */
-                            background: var(--bg-alt);
-                            padding: 0.5rem;
-                            border-top-left-radius: 12px;
-                            border-top-right-radius: 12px;
-                            overflow: hidden;">
-                    <iframe src="@Url.Content($"~/buttons/{btn.ButtonCode}")"
-                            style="border: none;
-                                   width: auto;
-                                   height: 100%;
-                                   max-width: 100%;"
-                            scrolling="no">
-                    </iframe>
-                </div>
+        <div class="row gx-3 gy-4">
+            @foreach (var btn in group.Buttons)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm position-relative">
 
-                @* 2) Тело карточки: при клике — открывается модалка; внизу слева — кнопка «Скачать код» *@
-                <div class="card-body d-flex flex-column"
-                     style="cursor: pointer;"
-                     data-button-id="@btn.Id"
-                     data-button-name="@btn.Name"
-                     data-button-topic="@btn.Topic"
-                     data-button-file="@btn.ButtonCode">
+                        @* 1) Превью: iframe сверху, закруглённые углы + отступы *@
+                        <div style="height: 100px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: flex-start;    /* прижато к левому краю */
+                                    background: var(--bg-alt);
+                                    padding: 0.5rem;
+                                    border-top-left-radius: 12px;
+                                    border-top-right-radius: 12px;
+                                    overflow: hidden;">
+                            <iframe src="@Url.Content($"~/buttons/{btn.ButtonCode}")"
+                                    style="border: none;
+                                           width: auto;
+                                           height: 100%;
+                                           max-width: 100%;"
+                                    scrolling="no">
+                            </iframe>
+                        </div>
 
-                    <h5 class="card-title text-truncate"
-                        title="@btn.Name"
-                        style="font-size:1.1rem;">
-                        @btn.Name
-                    </h5>
-                    <p class="card-text text-muted small mb-2">Категория: @btn.Topic</p>
+                        @* 2) Тело карточки: при клике — открывается модалка; внизу «Скачать код» *@
+                        <div class="card-body d-flex flex-column"
+                             style="cursor: pointer;"
+                             data-button-id="@btn.Id"
+                             data-button-name="@btn.Name"
+                             data-button-topic="@btn.Topic"
+                             data-button-file="@btn.ButtonCode">
 
-                    <div class="mt-auto d-flex justify-content-start">
-                        <button class="btn btn-sm btn-outline-primary"
-                                onclick="event.stopPropagation(); downloadCode('@Url.Action("DownloadCode","Button", new { id = btn.Id })')">
-                            Скачать код
-                        </button>
+                            <h5 class="card-title text-truncate"
+                                title="@btn.Name"
+                                style="font-size:1.1rem;">
+                                @btn.Name
+                            </h5>
+                            <p class="card-text text-muted small mb-2">Категория: @btn.Topic</p>
+
+                            <div class="mt-auto d-flex justify-content-start">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        onclick="event.stopPropagation(); downloadCode('@Url.Action("DownloadCode","Button", new { id = btn.Id })')">
+                                    Скачать код
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
         </div>
-    }
-</div>
+    </div>
+}
 
-@* =======================================
-   Модальное окно «Детали кнопки»
-   ======================================= *@
+@* Тот же модал «buttonDetailModal», без класса modal-lg *@
 <div class="modal fade" id="buttonDetailModal" tabindex="-1" aria-labelledby="buttonDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-
             <div class="modal-header">
                 <h5 class="modal-title" id="buttonDetailModalLabel">Детали кнопки</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-
             <div class="modal-body text-center">
-                @* Preview: iframe прижат к левому краю, высота уменьшена до 200px *@
+                @* Preview: iframe высотой 200px *@
                 <div id="modalButtonPreview"
                      class="mb-3"
                      style="width:100%;
-                            height:200px;                        /* уменьшили высоту */
+                            height:200px;
                             display:flex;
                             align-items:center;
-                            justify-content:flex-start;          /* прижато к левому краю */
+                            justify-content:flex-start;  /* прижато к левому краю */
                             background: var(--bg-alt);
                             border-top-left-radius: 12px;
                             border-top-right-radius: 12px;
@@ -108,13 +119,10 @@
                 <h5 id="modalButtonName" class="mb-1"></h5>
                 <p id="modalButtonTopic" class="text-muted small mb-3"></p>
             </div>
-
-            <div class="modal-footer d-flex justify-content-center">
-                @* Кнопки выровнены по центру футера *@
+            <div class="modal-footer justify-content-center">
                 <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
                     <i class="bi bi-download"></i> Скачать код
                 </button>
-
                 @if (authService.HasPermission(Permission.CanManageButtons))
                 {
                     <button id="modalEditBtn" class="btn btn-outline-secondary me-2">

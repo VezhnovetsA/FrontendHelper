@@ -1,0 +1,47 @@
+﻿@* EditButton.cshtml *@
+@model FrontendHelper.Models.EditButtonViewModel
+
+@{
+    ViewData["Title"] = "Редактировать кнопку";
+}
+
+<h2 class="mb-4">Редактировать кнопку</h2>
+
+<div class="form-container">
+    <div class="form-card card p-4 mb-5">
+        <form asp-action="EditButton" asp-controller="Button" method="post" enctype="multipart/form-data" class="generic-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Название</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Topic" class="form-label">Категория</label>
+                <input asp-for="Topic" class="form-control" />
+                <span asp-validation-for="Topic" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Существующий файл</label>
+                <div><small class="text-muted">@Model.ExistingFileName</small></div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="HtmlFile" class="form-label">Новый HTML-файл (по желанию)</label>
+                <input asp-for="HtmlFile" type="file" class="form-control" />
+                <span asp-validation-for="HtmlFile" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary me-2">Сохранить изменения</button>
+            <a asp-action="ShowAllButtons" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

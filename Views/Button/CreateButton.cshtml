@@ -1,0 +1,41 @@
+﻿@* CreateButton.cshtml *@
+@model FrontendHelper.Models.CreateButtonViewModel
+
+@{
+    ViewData["Title"] = "Добавить новую кнопку";
+}
+
+<h2 class="mb-4">Добавить новую кнопку</h2>
+
+<div class="form-container">
+    <div class="form-card card p-4 mb-5">
+        <form asp-action="CreateButton" asp-controller="Button" method="post" enctype="multipart/form-data" class="generic-form">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Название</label>
+                <input asp-for="Name" class="form-control" placeholder="Введите название кнопки" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Topic" class="form-label">Категория</label>
+                <input asp-for="Topic" class="form-control" placeholder="Например: Блоки, Навигация..." />
+                <span asp-validation-for="Topic" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="HtmlFile" class="form-label">HTML-файл (например: myButton.html)</label>
+                <input asp-for="HtmlFile" type="file" class="form-control" />
+                <span asp-validation-for="HtmlFile" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a asp-action="ShowAllButtons" class="btn btn-secondary ms-2">Отмена</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
