@@ -6,41 +6,38 @@
     ViewData["Title"] = "Шрифты";
 }
 
-@* ───────────────────────────────────────────────────────────────────────────────
-   1) Подключаем внешние CSS-шрифты (те, у которых LinkOrLocalUrl НЕ
-      начинается с "/fonts/") один раз.
-   ─────────────────────────────────────────────────────────────────────────────── *@
-
-@foreach (var f in Model.Fonts)
-{
-    @if (!string.IsNullOrEmpty(f.LinkOrLocalUrl) && !f.LinkOrLocalUrl.StartsWith("/fonts/"))
+@* ─── Секция Head: внешний CSS и @font-face для локальных файлов ─── *@
+@section Head {
+    <!-- 1) Внешние CSS-шрифты (Google Fonts, Adobe Fonts и т.п.) -->
+    @foreach (var f in Model.Fonts.Where(x =>
+                 !string.IsNullOrEmpty(x.LinkOrLocalUrl) &&
+                 !x.LinkOrLocalUrl.StartsWith("/fonts/")))
     {
         <link rel="stylesheet" href="@f.LinkOrLocalUrl" />
     }
-}
 
-@* ───────────────────────────────────────────────────────────────────────────────
-   2) Объявляем все локальные шрифты одним блоком <style>.
-      Здесь используем уникальное «CssFontFamily» вместо «FontFamily».
-   ─────────────────────────────────────────────────────────────────────────────── *@
-
-<style>
-@foreach (var f in Model.Fonts.Where(x => x.LinkOrLocalUrl?.StartsWith("/fonts/") == true))
-{
-    <text>
-    @@font-face {
-        font-family: '@f.CssFontFamily';
-        src: url('@f.LinkOrLocalUrl') format('truetype');
-        font-display: swap;
+    <!-- 2) Локальные файлы .ttf/.woff2: единожды объявляем font-face -->
+    <style>
+    @foreach (var f in Model.Fonts.Where(x =>
+                 !string.IsNullOrEmpty(x.LinkOrLocalUrl) &&
+                 x.LinkOrLocalUrl.StartsWith("/fonts/")))
+    {
+        <text>
+        @@font-face {
+          font-family: '@f.CssFontFamily';
+          src: url('@f.LinkOrLocalUrl') format('truetype');
+          font-display: swap;
+        }
+        </text>
     }
-    </text>
+    </style>
 }
-</style>
 
+@* ─── «Тело» страницы ─── *@
 <div class="container py-4">
     <h2 class="mb-4">Шрифты</h2>
 
-    @* Кнопка «Добавить шрифт» *@
+    @* Кнопка «Добавить шрифт» (для тех, у кого есть право) *@
     @if (authService.HasPermission(Permission.CanManageFonts))
     {
         <div class="mb-4">
@@ -52,7 +49,7 @@
         </div>
     }
 
-    <!-- Поле для предпросмотра -->
+    @* Поле для предпросмотра введённого текста *@
     <div class="mb-4">
         <label for="inputText" class="form-label">Введите текст для предпросмотра</label>
         <textarea id="inputText"
@@ -61,7 +58,7 @@
                   placeholder="Пример: Привет, мир!">@Model.InputText</textarea>
     </div>
 
-    <!-- Панель фильтров, если есть -->
+    @* Панель фильтров (если есть) *@
     @if (Model.AvailableFilters.Any())
     {
         <div class="filter-bar mb-4">
@@ -80,7 +77,7 @@
         </div>
     }
 
-    <!-- Таблица со списком шрифтов -->
+    @* Таблица со списком шрифтов *@
     <div class="card p-3 mb-5">
         <div class="table-responsive">
             <table class="table align-middle mb-0">
@@ -172,7 +169,7 @@
                 }
             }
 
-            // Выбор строки
+            // Выбор строки (шрифта) кликом
             fontRows.forEach(row => {
                 row.addEventListener('click', () => {
                     document.querySelectorAll('.font-row.selected')
@@ -190,9 +187,9 @@
 
                 fontRows.forEach(row => {
                     const rowFilterIds = row.dataset.filterIds
-                        ? row.dataset.filterIds.split(',').map(x => parseInt(x, 10))
+                        ? row.dataset.filterIds.split(',').map(id => parseInt(id, 10))
                         : [];
-                    if (!checkedIds.length) {
+                    if (checkedIds.length === 0) {
                         row.style.display = '';
                     } else {
                         const inter = rowFilterIds.filter(i => checkedIds.includes(i));
@@ -200,15 +197,17 @@
                     }
                 });
 
+                // Если выбранная строка скрылась, сбрасываем выбор и предпросмотр
                 const sel = document.querySelector('.font-row.selected');
                 if (sel && sel.style.display === 'none') {
                     sel.classList.remove('selected');
                     input.style.fontFamily = '';
                 }
             }
+
             filterBoxes.forEach(cb => cb.addEventListener('change', applyFilters));
 
-            // Toggle «Избранное»
+            // Toggle «Избранное» для шрифта
             document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
                 btn.addEventListener('click', async e => {
                     e.stopPropagation();
