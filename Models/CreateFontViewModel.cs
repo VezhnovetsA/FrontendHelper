@@ -15,7 +15,6 @@ namespace FrontendHelper.Models
         [Url]
         public string? Link { get; set; }
 
-        [FileExtensions(Extensions = "ttf,otf,woff,woff2", ErrorMessage = "Неподдерживаемый формат шрифта.")]
         public IFormFile? FontFile { get; set; }
     }
 }

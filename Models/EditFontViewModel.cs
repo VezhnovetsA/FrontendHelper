@@ -19,8 +19,7 @@ namespace FrontendHelper.Models
         [MaxLength(300)]
         public string? Link { get; set; }
 
-        // Добавим поле для замены/загрузки нового файла
-        [FileExtensions(Extensions = "ttf,otf,woff,woff2", ErrorMessage = "Неподдерживаемый формат шрифта.")]
+
         public IFormFile? FontFile { get; set; }
 
         // Храним имя уже существующего файла (чтобы показать в представлении и/или не затерять его, если новый не пришёл)

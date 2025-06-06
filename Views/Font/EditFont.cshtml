@@ -1,0 +1,59 @@
+﻿@model FrontendHelper.Models.EditFontViewModel
+
+@{
+    ViewData["Title"] = "Редактировать шрифт";
+}
+
+<h2 class="mb-4">Редактировать шрифт</h2>
+
+<div class="form-container">
+    <div class="form-card card p-4 mb-5">
+        <form asp-action="EditFont" asp-controller="Font" method="post" enctype="multipart/form-data" class="generic-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Название</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FontFamily" class="form-label">CSS-семейство шрифта</label>
+                <input asp-for="FontFamily" class="form-control" />
+                <span asp-validation-for="FontFamily" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Link" class="form-label">Ссылка на внешний шрифт (URL)</label>
+                <input asp-for="Link" class="form-control" />
+                <span asp-validation-for="Link" class="text-danger small"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ExistingFileName))
+            {
+                <div class="mb-3">
+                    <label class="form-label">Текущий локальный файл</label>
+                    <div><small class="text-muted">@Model.ExistingFileName</small></div>
+                </div>
+            }
+
+            <div class="mb-3">
+                <label asp-for="FontFile" class="form-label">Загрузить новый файл (заменит существующий)</label>
+                <input asp-for="FontFile" type="file" class="form-control" />
+                <span asp-validation-for="FontFile" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                <a asp-action="ShowFonts" asp-controller="Font" class="btn btn-secondary ms-2">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
