@@ -6,22 +6,30 @@
     ViewData["Title"] = "Шрифты";
 }
 
-@* 1) Подключаем внешние стили (Google Fonts и т.п.) *@
+@* ───────────────────────────────────────────────────────────────────────────────
+   1) Подключаем внешние CSS-шрифты (те, у которых LinkOrLocalUrl НЕ
+      начинается с "/fonts/") один раз.
+   ─────────────────────────────────────────────────────────────────────────────── *@
+
 @foreach (var f in Model.Fonts)
 {
-    if (!string.IsNullOrEmpty(f.LinkOrLocalUrl) && !f.LinkOrLocalUrl.StartsWith("/fonts/"))
+    @if (!string.IsNullOrEmpty(f.LinkOrLocalUrl) && !f.LinkOrLocalUrl.StartsWith("/fonts/"))
     {
         <link rel="stylesheet" href="@f.LinkOrLocalUrl" />
     }
 }
 
-@* 2) Объявляем все локальные файлы под уникальными именами *@
+@* ───────────────────────────────────────────────────────────────────────────────
+   2) Объявляем все локальные шрифты одним блоком <style>.
+      Здесь используем уникальное «CssFontFamily» вместо «FontFamily».
+   ─────────────────────────────────────────────────────────────────────────────── *@
+
 <style>
 @foreach (var f in Model.Fonts.Where(x => x.LinkOrLocalUrl?.StartsWith("/fonts/") == true))
 {
     <text>
     @@font-face {
-        font-family: '@f.FontFamily';
+        font-family: '@f.CssFontFamily';
         src: url('@f.LinkOrLocalUrl') format('truetype');
         font-display: swap;
     }
@@ -32,6 +40,7 @@
 <div class="container py-4">
     <h2 class="mb-4">Шрифты</h2>
 
+    @* Кнопка «Добавить шрифт» *@
     @if (authService.HasPermission(Permission.CanManageFonts))
     {
         <div class="mb-4">
@@ -52,7 +61,7 @@
                   placeholder="Пример: Привет, мир!">@Model.InputText</textarea>
     </div>
 
-    <!-- Панель фильтров (если есть) -->
+    <!-- Панель фильтров, если есть -->
     @if (Model.AvailableFilters.Any())
     {
         <div class="filter-bar mb-4">
@@ -71,7 +80,7 @@
         </div>
     }
 
-    <!-- Таблица -->
+    <!-- Таблица со списком шрифтов -->
     <div class="card p-3 mb-5">
         <div class="table-responsive">
             <table class="table align-middle mb-0">
@@ -91,7 +100,7 @@
                     {
                         <tr class="font-row"
                             data-filter-ids="@string.Join(',', f.FilterIds)"
-                            data-font-family="@f.FontFamily">
+                            data-font-family="@f.CssFontFamily">
                             <td>
                                 <button type="button"
                                         class="btn btn-sm btn-outline-secondary favorite-toggle-btn"
@@ -108,7 +117,7 @@
                                     }
                                 </button>
                             </td>
-                            <td style="font-family: '@f.FontFamily', sans-serif;">
+                            <td style="font-family: '@f.CssFontFamily', sans-serif;">
                                 @f.Name
                             </td>
                             <td>
@@ -152,7 +161,7 @@
             const fontRows    = document.querySelectorAll('.font-row');
             const filterBoxes = document.querySelectorAll('.filter-checkbox');
 
-            // Обновление предпросмотра
+            // Обновление предпросмотра выбранного шрифта
             function refreshPreview() {
                 const sel = document.querySelector('.font-row.selected');
                 if (sel) {
@@ -163,6 +172,7 @@
                 }
             }
 
+            // Выбор строки
             fontRows.forEach(row => {
                 row.addEventListener('click', () => {
                     document.querySelectorAll('.font-row.selected')
@@ -172,7 +182,7 @@
                 });
             });
 
-            // Фильтры
+            // Применение фильтров
             function applyFilters() {
                 const checkedIds = Array.from(filterBoxes)
                     .filter(cb => cb.checked)
@@ -196,7 +206,6 @@
                     input.style.fontFamily = '';
                 }
             }
-
             filterBoxes.forEach(cb => cb.addEventListener('change', applyFilters));
 
             // Toggle «Избранное»
@@ -206,6 +215,7 @@
                     const assetType = btn.dataset.assetType;
                     const assetId   = parseInt(btn.dataset.assetId, 10);
                     const iconEl    = btn.querySelector('i');
+
                     try {
                         const response = await fetch('/Favorites/Toggle', {
                             method: 'POST',

@@ -22,5 +22,8 @@ namespace FrontendHelper.Models
         public string LinkOrLocalUrl { get; set; }  // либо внешняя ссылка, либо Url("~/fonts/xxx.ttf")
         public List<int> FilterIds { get; set; } = new();
         public bool IsFavorited { get; set; }
+
+        // Новое свойство для «искусственного» имени
+        public string CssFontFamily { get; set; }
     }
 }

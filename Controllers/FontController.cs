@@ -83,7 +83,11 @@ namespace FrontendHelper.Controllers
                     FontFamily = f.FontFamily,
                     LinkOrLocalUrl = src,
                     FilterIds = filterIds,
-                    IsFavorited = userFavFontIds.Contains(f.Id)
+                    IsFavorited = userFavFontIds.Contains(f.Id),
+
+                    // В качестве CSS-family используем «Фамилия» + «_» + Id
+                    CssFontFamily = $"{f.FontFamily}_{f.Id}"
+
                 });
             }
 
