@@ -8,37 +8,51 @@
 
 <div class="form-container">
     <div class="form-card card p-4 mb-5">
-        <form asp-action="AddFont" asp-controller="Font" method="post" enctype="multipart/form-data" class="generic-form">
+        <form asp-action="AddFont"
+              asp-controller="Font"
+              method="post"
+              enctype="multipart/form-data"
+              class="generic-form">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="mb-3">
                 <label asp-for="Name" class="form-label">Название</label>
-                <input asp-for="Name" class="form-control" placeholder="Введите понятное имя шрифта" />
+                <input asp-for="Name"
+                       class="form-control"
+                       placeholder="Введите понятное имя шрифта" />
                 <span asp-validation-for="Name" class="text-danger small"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="FontFamily" class="form-label">CSS-семейство шрифта</label>
-                <input asp-for="FontFamily" class="form-control" placeholder="Например: 'MyCustomFont', sans-serif" />
+                <input asp-for="FontFamily"
+                       class="form-control"
+                       placeholder="Например: 'MyCustomFont', sans-serif" />
                 <span asp-validation-for="FontFamily" class="text-danger small"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Link" class="form-label">Ссылка на внешний шрифт (URL)</label>
-                <input asp-for="Link" class="form-control" placeholder="https://..." />
+                <input asp-for="Link"
+                       class="form-control"
+                       placeholder="https://..." />
                 <span asp-validation-for="Link" class="text-danger small"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="FontFile" class="form-label">Загрузить локальный файл</label>
-                <input asp-for="FontFile" type="file" class="form-control" />
+                <input asp-for="FontFile"
+                       type="file"
+                       class="form-control" />
                 <span asp-validation-for="FontFile" class="text-danger small"></span>
             </div>
 
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">Сохранить</button>
-                <a asp-action="ShowFonts" asp-controller="Font" class="btn btn-secondary ms-2">Отмена</a>
+                <a asp-action="ShowFonts"
+                   asp-controller="Font"
+                   class="btn btn-secondary ms-2">Отмена</a>
             </div>
         </form>
     </div>

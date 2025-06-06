@@ -8,7 +8,11 @@
 
 <div class="form-container">
     <div class="form-card card p-4 mb-5">
-        <form asp-action="EditFont" asp-controller="Font" method="post" enctype="multipart/form-data" class="generic-form">
+        <form asp-action="EditFont"
+              asp-controller="Font"
+              method="post"
+              enctype="multipart/form-data"
+              class="generic-form">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
 
@@ -42,13 +46,17 @@
 
             <div class="mb-3">
                 <label asp-for="FontFile" class="form-label">Загрузить новый файл (заменит существующий)</label>
-                <input asp-for="FontFile" type="file" class="form-control" />
+                <input asp-for="FontFile"
+                       type="file"
+                       class="form-control" />
                 <span asp-validation-for="FontFile" class="text-danger small"></span>
             </div>
 
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-                <a asp-action="ShowFonts" asp-controller="Font" class="btn btn-secondary ms-2">Отмена</a>
+                <a asp-action="ShowFonts"
+                   asp-controller="Font"
+                   class="btn btn-secondary ms-2">Отмена</a>
             </div>
         </form>
     </div>
