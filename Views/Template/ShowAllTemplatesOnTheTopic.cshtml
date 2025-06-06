@@ -3,17 +3,17 @@
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    ViewData["Title"] = "Все шаблоны";
+    ViewData["Title"] = $"Шаблоны: {ViewBag.Topic}";
 }
 
-<h2 class="mb-4">Все шаблоны</h2>
+<h2 class="mb-4">Шаблоны: @ViewBag.Topic</h2>
 
-<!-- Кнопка «Группы шаблонов» -->
+<!-- Кнопка «Назад к группам» -->
 <div class="mb-4">
     <a class="btn btn-sm btn-outline-primary btn-view-all"
        asp-action="ShowGroupsOfTemplates"
        asp-controller="Template">
-        ← Группы шаблонов
+        ← Назад к группам
     </a>
 </div>
 
@@ -45,7 +45,7 @@
                         padding: 0.5rem;
                         border-top-left-radius: 12px;
                         border-top-right-radius: 12px;
-                         ">
+                             ">
                     <div style="width:100%; height:100%; position: relative;">
                         <iframe src="@Url.Content($"~/templates/{tpl.TemplateCode}")"
                                 style="
@@ -55,10 +55,10 @@
                                     width: 2000px;
                                     height: 2000px;
                                     transform-origin: top left;
-                                    transform: scale(0.43); /* сохранён прежний масштаб в карточке */
+                                    transform: scale(0.43); /* масштаб в карточке */
                                     border: none;
                                     pointer-events: none;
-                                    "
+                                        "
                                 scrolling="no">
                         </iframe>
                     </div>
@@ -104,7 +104,6 @@
     <!-- Класс modal-xl для максимально большой ширины -->
     <div class="modal-dialog modal-dialog-centered modal-xl"
          style="max-width: 90vw;">
-        <!-- Можно настроить ширину, например, 90vw -->
         <div class="modal-content">
 
             <div class="modal-header">
@@ -113,7 +112,7 @@
             </div>
 
             <div class="modal-body text-center">
-                <!-- Фиксированная высота 800px, прокрутка, НЕТ масштабирования -->
+                <!-- Фиксированная высота 800px, прокрутка, без масштабирования -->
                 <div id="modalTemplatePreview"
                      class="mb-3"
                      style="
@@ -123,7 +122,7 @@
                         background: var(--bg-alt);
                         padding: 0.5rem;
                      ">
-                    <!-- JS вставит сюда iframe без transform -->
+                    <!-- JS вставит сюда iframe -->
                 </div>
                 <h5 id="modalTemplateName" class="mb-1"></h5>
                 <p id="modalTemplateTopic" class="text-muted small mb-3"></p>
@@ -166,7 +165,7 @@
 
 @section Scripts {
     <script>
-        // Скачиваем HTML-файл шаблона
+        // Функция для скачивания HTML-файла шаблона
         function downloadCode(url) {
             const link = document.createElement('a');
             link.href = url;
@@ -187,7 +186,7 @@
                 e.stopPropagation();
                 const assetType = this.dataset.assetType; // "Template"
                 const assetId   = parseInt(this.dataset.assetId, 10);
-                const iconEl = this.querySelector('i');
+                const iconEl    = this.querySelector('i');
 
                 try {
                     const response = await fetch('/Favorites/Toggle', {
@@ -235,7 +234,6 @@
 
             var iframe = document.createElement('iframe');
             iframe.src = previewUrl;
-            // Ширина 100% контейнера, высота — автоматическая (внутри появится скролл, если контент выше)
             iframe.style.cssText = `
                 width: 100%;
                 height: 100%;
@@ -246,23 +244,23 @@
 
             container.appendChild(iframe);
 
-            // Кнопка «Скачать»
+            // Привязываем скачивание
             document.getElementById('modalDownloadBtn').onclick = () => {
                 downloadCode(`@Url.Action("DownloadCode", "Template")/${templateId}`);
             };
 
-            // «Избранное» в модалке
-            var favIcon = document.getElementById('modalFavIcon');
-            var favBtn = document.getElementById('modalFavBtn');
+            // Toggle «Избранное» в модалке
+            var favIcon  = document.getElementById('modalFavIcon');
+            var favBtn   = document.getElementById('modalFavBtn');
             var cardIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${templateId}"] i`);
             var isFavCard = cardIcon && cardIcon.classList.contains('bi-heart-fill');
 
             if (isFavCard) {
                 favIcon.className = 'bi bi-heart-fill text-danger';
-                favBtn.title = 'Убрать из избранного';
+                favBtn.title      = 'Убрать из избранного';
             } else {
                 favIcon.className = 'bi bi-heart text-secondary';
-                favBtn.title = 'Добавить в избранное';
+                favBtn.title      = 'Добавить в избранное';
             }
 
             favBtn.onclick = async () => {
@@ -280,10 +278,10 @@
 
                     if (result.favorited) {
                         favIcon.className = 'bi bi-heart-fill text-danger';
-                        favBtn.title = 'Убрать из избранного';
+                        favBtn.title      = 'Убрать из избранного';
                     } else {
                         favIcon.className = 'bi bi-heart text-secondary';
-                        favBtn.title = 'Добавить в избранное';
+                        favBtn.title      = 'Добавить в избранное';
                     }
 
                     // Обновляем «сердечко» в карточке
@@ -307,12 +305,12 @@
         @if (authService.HasPermission(Permission.CanManageTemplates))
         {
             <text>
-                        var editBtn = document.getElementById('modalEditBtn');
-                        var deleteForm = document.getElementById('modalDeleteForm');
-                        var deleteIdInput = document.getElementById('modalDeleteId');
+                            var editBtn       = document.getElementById('modalEditBtn');
+                            var deleteForm    = document.getElementById('modalDeleteForm');
+                            var deleteIdInput = document.getElementById('modalDeleteId');
 
-                        editBtn.href = '@Url.Action("EditTemplate", "Template")/' + templateId;
-                        deleteIdInput.value = templateId;
+                            editBtn.href        = '@Url.Action("EditTemplate", "Template")/' + templateId;
+                            deleteIdInput.value = templateId;
             </text>
         }
 

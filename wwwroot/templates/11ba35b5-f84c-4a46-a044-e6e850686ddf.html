@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Лэндинг-шаблон</title>
+    <style>
+        /* Сброс отступов */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #6B73FF, #000DFF);
+            color: #fff;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        nav {
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+        }
+        nav li {
+            margin: 0 15px;
+        }
+        nav a {
+            display: block;
+            padding: 15px 0;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #000DFF;
+        }
+        .hero {
+            max-width: 900px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        .hero button {
+            margin-top: 20px;
+            background: #000DFF;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .hero button:hover {
+            background: #6B73FF;
+        }
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 60px 20px;
+        }
+        .feature-card {
+            flex: 1 1 250px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .feature-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #000DFF;
+        }
+        .feature-card p {
+            font-size: 0.95rem;
+            color: #555;
+        }
+        footer {
+            background: #000DFF;
+            color: #fff;
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+        footer p {
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Добро пожаловать на наш продукт</h1>
+        <p>Удобное решение для ваших задач. Узнайте больше!</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#features">Функции</a></li>
+            <li><a href="#pricing">Цены</a></li>
+            <li><a href="#contact">Контакты</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero" id="hero">
+        <h2>Современный UI/UX шаблон для бизнеса</h2>
+        <p>Лёгкий старт: минимализм, скорость и удобство.</p>
+        <button>Начать бесплатно</button>
+    </section>
+
+    <section class="features" id="features">
+        <div class="feature-card">
+            <h3>Быстрое развертывание</h3>
+            <p>Установите и настройте проект за считанные минуты.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Адаптивный дизайн</h3>
+            <p>Отлично выглядит на любом устройстве — от мобильного до десктопа.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Лёгкая кастомизация</h3>
+            <p>Меняйте цвета, шрифты и компоненты без усилий.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Подробная документация</h3>
+            <p>Пошаговые инструкции и примеры кода для быстрого старта.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Компания «Пример». Все права защищены.</p>
+    </footer>
+</body>
+</html>

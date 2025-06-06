@@ -1,5 +1,6 @@
 ﻿// FrontendHelper/Models/EditTemplateViewModel.cs
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Models
@@ -12,10 +13,21 @@ namespace FrontendHelper.Models
         [MaxLength(100)]
         public string Name { get; set; }
 
+        [Required]
+        [MaxLength(100)]
+        public string Topic { get; set; }
+
         // Имя уже сохранённого HTML-файла
         public string ExistingCode { get; set; }
 
-        [FileExtensions(Extensions = "html,htm", ErrorMessage = "Поддерживаются только HTML файлы (.html, .htm).")]
+        // Новый файл (необязательно)
         public IFormFile? HtmlFile { get; set; }
+
+        // Фильтры
+        public List<int> SelectedFilterIds { get; set; } = new List<int>();
+        public List<SelectListItem> AvailableFilters { get; set; } = new List<SelectListItem>();
+
+        [Display(Name = "Новые фильтры (через запятую)")]
+        public string? NewFilterNames { get; set; }
     }
 }
