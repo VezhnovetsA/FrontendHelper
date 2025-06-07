@@ -3,182 +3,258 @@ using FHDatabase.Repositories;
 using FhEnums;
 using FrontendHelper.Controllers.AuthorizationAttributes;
 using FrontendHelper.Models;
+using FrontendHelper.Services;
+using FrontendHelper.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.IO;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace FrontendHelper.Controllers
 {
     public class PaletteController : Controller
     {
-        private readonly PaletteRepository _paletteRepository;
+        private readonly PaletteRepository _paletteRepo;
+        private readonly ColorRepository _colorRepo;
+        private readonly FilterRepository _filterRepo;
+        private readonly FavoriteRepository _favRepo;
+        private readonly AuthService _auth;
 
-        public PaletteController(PaletteRepository paletteRepository)
+        public PaletteController(
+            PaletteRepository paletteRepo,
+            ColorRepository colorRepo,
+            FilterRepository filterRepo,
+            FavoriteRepository favRepo,
+            AuthService auth
+        )
         {
-            _paletteRepository = paletteRepository;
-        }
-
-        // ===========================
-        // ПРОСМОТР (CanViewPalettes)
-        // ===========================
-
-        [HasPermission(Permission.CanViewPalettes)]
-        public IActionResult ShowAllPalettes()
-        {
-            var data = _paletteRepository.GetAllPalettes();
-            var vms = data.Select(PassDataToViewModel).ToList();
-            return View(vms);
-        }
-
-        [HasPermission(Permission.CanViewPalettes)]
-        public IActionResult ShowOnePalette(int id)
-        {
-            var data = _paletteRepository.GetOnePalette(id);
-            if (data == null) return NotFound();
-
-            var vm = PassDataToViewModel(data);
-            return View(vm);
+            _paletteRepo = paletteRepo;
+            _colorRepo = colorRepo;
+            _filterRepo = filterRepo;
+            _favRepo = favRepo;
+            _auth = auth;
         }
 
         [HasPermission(Permission.CanViewPalettes)]
-        [HttpGet]
-        public IActionResult DownloadPalette(int id)
+        public IActionResult ShowPalettes()
         {
-            var data = _paletteRepository.GetOnePalette(id);
-            if (data == null) return NotFound();
+            var userId = _auth.IsAuthenticated() ? _auth.GetUserId() : (int?)null;
 
-            var dto = new
+            // 1) Available filters
+            var filters = _filterRepo.GetFiltersByCategory("Palette")
+                .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                .ToList();
+
+            // 2) All palettes
+            var palData = _paletteRepo.GetAllPalettes();
+            var palVm = palData.Select(p =>
             {
-                data.Id,
-                data.Title,
-                Colors = data.Colors.Select(c => new { c.Id, c.Name, c.Hex })
-            };
-            var json = JsonConvert.SerializeObject(dto, Formatting.Indented);
-            var bytes = System.Text.Encoding.UTF8.GetBytes(json);
-            var fileName = $"palette_{data.Id}.json";
-            return File(bytes, "application/json; charset=utf-8", fileName);
+                var isFav = userId.HasValue
+                    && _favRepo.GetFavoriteElementByUser(userId.Value)
+                        .Any(f => f.AssetType == "Palette" && f.AssetId == p.Id);
+
+                return new PaletteListItem
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    ColorHexes = p.Colors.Select(c => c.Hex).ToList(),
+                    FilterIds = _filterRepo.GetFiltersForAsset("Palette", p.Id).Select(f => f.Id).ToList(),
+                    IsFavorited = isFav
+                };
+            }).ToList();
+
+            return View(new PaletteIndexViewModel
+            {
+                AvailableFilters = filters,
+                Palettes = palVm
+            });
         }
 
-        // ===========================
-        // СОЗДАНИЕ (CanManagePalettes)
-        // ===========================
-
+        // GET: показать форму создания
         [HasPermission(Permission.CanManagePalettes)]
         [HttpGet]
         public IActionResult CreatePalette()
         {
-            return View(new CreatePaletteViewModel());
-            // CreatePaletteViewModel: { string Title; List<PaletteColorViewModel> Colors; }
-        }
-
-        [HasPermission(Permission.CanManagePalettes)]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CreatePalette(CreatePaletteViewModel vm)
-        {
-            if (!ModelState.IsValid) return View(vm);
-
-            // Предположим, что PaletteData имеет навигацию Colors
-            var entity = new PaletteData
+            var vm = new CreatePaletteViewModel
             {
-                Title = vm.Title,
-                Colors = vm.Colors.Select(c => new ColorData
-                {
-                    Name = c.Name,
-                    Hex = c.Hex
-                }).ToList()
-            };
-            _paletteRepository.AddAsset(entity);
-            return RedirectToAction(nameof(ShowAllPalettes));
-        }
-
-        // ===========================
-        // РЕДАКТИРОВАНИЕ (CanManagePalettes)
-        // ===========================
-
-        [HasPermission(Permission.CanManagePalettes)]
-        [HttpGet]
-        public IActionResult EditPalette(int id)
-        {
-            var data = _paletteRepository.GetOnePalette(id);
-            if (data == null) return NotFound();
-
-            var vm = new EditPaletteViewModel
-            {
-                Id = data.Id,
-                Title = data.Title,
-                Colors = data.Colors.Select(c => new PaletteColorViewModel
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Hex = c.Hex
-                }).ToList()
+                AvailableFilters = _filterRepo
+                    .GetFiltersByCategory("Palette")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList(),
+                AvailableColors = _colorRepo.Query()
+                    .Select(c => new SelectListItem(c.Hex, c.Id.ToString()))
+                    .ToList()
             };
             return View(vm);
         }
 
+        // POST: сохранить новую палитру
         [HasPermission(Permission.CanManagePalettes)]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult EditPalette(EditPaletteViewModel vm)
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult CreatePalette(CreatePaletteViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
-
-            var data = _paletteRepository.GetOnePalette(vm.Id);
-            if (data == null) return NotFound();
-
-            data.Title = vm.Title;
-
-            // Сбросим текущие цвета и создадим новые
-            data.Colors.Clear();
-            foreach (var c in vm.Colors)
+            if (!ModelState.IsValid)
             {
-                data.Colors.Add(new ColorData
+                // восстановим списки в модели
+                vm.AvailableFilters = _filterRepo
+                    .GetFiltersByCategory("Palette")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList();
+                vm.AvailableColors = _colorRepo.Query()
+                    .Select(c => new SelectListItem(c.Hex, c.Id.ToString()))
+                    .ToList();
+                return View(vm);
+            }
+
+            // 1) Создаём и сохраняем новую палитру (теперь она tracked)
+            var pal = new PaletteData { Title = vm.Title };
+            _paletteRepo.AddAsset(pal);
+
+            // 2) Обрабатываем новые цвета
+            foreach (var nc in vm.NewColors)
+            {
+                // сперва ищем в базе (AsNoTracking), но для добавления в навигацию будем брать через GetAsset
+                var exist = _colorRepo.Query().FirstOrDefault(c => c.Hex == nc.Hex);
+                ColorData color;
+                if (exist != null)
                 {
-                    Name = c.Name,
-                    Hex = c.Hex
+                    // берём tracked-экземпляр
+                    color = _colorRepo.GetAsset(exist.Id);
+                }
+                else
+                {
+                    color = new ColorData { Name = nc.Hex, Hex = nc.Hex };
+                    _colorRepo.AddAsset(color);
+                }
+                pal.Colors.Add(color);
+            }
+
+            // 3) Обрабатываем выбор уже существующих
+            foreach (var cid in vm.SelectedColorIds.Distinct())
+            {
+                var c = _colorRepo.GetAsset(cid);  // tracked
+                pal.Colors.Add(c);
+            }
+
+            // 4) Привязываем фильтры
+            foreach (var fid in vm.SelectedFilterIds.Distinct())
+            {
+                _filterRepo.AddAssetFilter(new AssetFilter
+                {
+                    AssetType = "Palette",
+                    AssetId = pal.Id,
+                    FilterId = fid
                 });
             }
 
-            _paletteRepository.UpdateAsset(data);
-            return RedirectToAction(nameof(ShowAllPalettes));
+            // 5) Сохраняем изменения в самой палитре
+            _paletteRepo.SaveTracked(pal);
+
+            return RedirectToAction(nameof(ShowPalettes));
         }
 
-        // ===========================
-        // УДАЛЕНИЕ (CanManagePalettes)
-        // ===========================
+
+        // PaletteController.cs
+
+        [HttpGet]
+        public IActionResult EditPalette(int id)
+        {
+            var pal = _paletteRepo.GetOnePalette(id); // это tracked-entity
+            if (pal == null) return NotFound();
+
+            var existFilterIds = _filterRepo.GetFiltersForAsset("Palette", id)
+                                            .Select(f => f.Id).ToList();
+
+            // готовим ViewModel, включая все доступные фильтры
+            var vm = new EditPaletteViewModel
+            {
+                Id = pal.Id,
+                Title = pal.Title,
+                SelectedColorIds = pal.Colors.Select(c => c.Id).ToList(),
+                NewColors = new List<PaletteColorViewModel>(),
+                SelectedFilterIds = existFilterIds,
+                AvailableFilters = _filterRepo.GetFiltersByCategory("Palette")
+                                              .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                                              .ToList(),
+                // подгружаем список всех существующих цветов для чекбоксов
+                AvailableColors = _colorRepo.Query()    // уберите AsNoTracking, чтобы были tracked 
+                                        .Select(c => new SelectListItem(c.Hex, c.Id.ToString()))
+                                        .ToList()
+            };
+            return View(vm);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult EditPalette(EditPaletteViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                // восстанавливаем AvailableFilters и AvailableColors
+                vm.AvailableFilters = _filterRepo.GetFiltersByCategory("Palette")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList();
+                vm.AvailableColors = _colorRepo.Query()
+                    .Select(c => new SelectListItem(c.Hex, c.Id.ToString()))
+                    .ToList();
+                return View(vm);
+            }
+
+            var pal = _paletteRepo.GetOnePalette(vm.Id); // tracked
+            if (pal == null) return NotFound();
+
+            pal.Title = vm.Title;
+
+            // сбрасываем цвета
+            pal.Colors.Clear();
+
+            // 1) новые
+            foreach (var nc in vm.NewColors)
+            {
+                var color = _colorRepo.Query().FirstOrDefault(c => c.Hex == nc.Hex)
+                            ?? new ColorData { Name = nc.Hex, Hex = nc.Hex };
+                if (color.Id == 0) _colorRepo.AddAsset(color);
+                pal.Colors.Add(color);
+            }
+
+            // 2) уже существующие — ЗАГРУЖАЕМ ЧЕРЕЗ GetAsset, чтобы они были tracked
+            foreach (var cid in vm.SelectedColorIds)
+            {
+                var color = _colorRepo.GetAsset(cid);
+                pal.Colors.Add(color);
+            }
+
+            // обновляем фильтры
+            var currentFids = _filterRepo.GetFiltersForAsset("Palette", vm.Id).Select(f => f.Id).ToList();
+            foreach (var old in currentFids.Except(vm.SelectedFilterIds))
+                _filterRepo.RemoveAssetFilter("Palette", vm.Id, old);
+            foreach (var fid in vm.SelectedFilterIds.Except(currentFids))
+                _filterRepo.AddAssetFilter(new AssetFilter
+                {
+                    AssetType = "Palette",
+                    AssetId = vm.Id,
+                    FilterId = fid
+                });
+
+            // НЕ вызываем UpdateAsset, просто сохраняем уже-трекед палитру:
+            _paletteRepo.SaveTracked(pal);
+
+            return RedirectToAction(nameof(ShowPalettes));
+        }
+
+
 
         [HasPermission(Permission.CanManagePalettes)]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public IActionResult DeletePalette(int id)
         {
-            var data = _paletteRepository.GetOnePalette(id);
-            if (data == null) return NotFound();
+            var pal = _paletteRepo.GetOnePalette(id);
+            if (pal == null) return NotFound();
 
-            _paletteRepository.RemoveAsset(id);
-            return RedirectToAction(nameof(ShowAllPalettes));
-        }
+            // удаляем связи с фильтрами
+            foreach (var f in _filterRepo.GetFiltersForAsset("Palette", id))
+                _filterRepo.RemoveAssetFilter("Palette", id, f.Id);
 
-        // ===========================
-        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        // ===========================
-
-        private PaletteViewModel PassDataToViewModel(PaletteData d)
-        {
-            return new PaletteViewModel
-            {
-                Id = d.Id,
-                Title = d.Title,
-                Colors = d.Colors.Select(c => new ColorViewModel
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Hex = c.Hex
-                }).ToList()
-            };
+            _paletteRepo.RemoveAsset(id);
+            return RedirectToAction(nameof(ShowPalettes));
         }
     }
 }

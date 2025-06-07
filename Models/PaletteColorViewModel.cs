@@ -1,18 +1,12 @@
-﻿// FrontendHelper/Models/PaletteColorViewModel.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Models
 {
     public class PaletteColorViewModel
     {
-        public int? Id { get; set; }
-
-        [Required]
-        [MaxLength(50)]
-        public string Name { get; set; }
-
-        [Required]
-        [RegularExpression("^#([0-9A-Fa-f]{6})$", ErrorMessage = "HEX-код должен быть в формате #RRGGBB.")]
-        public string Hex { get; set; }
+        public int? Id { get; set; }           // для уже существующих цветов
+        [Required, MaxLength(7)]
+        [RegularExpression("^#([0-9A-Fa-f]{6})$", ErrorMessage = "Неверный формат HEX")]
+        public string Hex { get; set; }        // для новых или существующих
     }
 }

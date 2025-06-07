@@ -1,0 +1,158 @@
+﻿@model FrontendHelper.Models.PaletteIndexViewModel
+@using FhEnums
+@inject FrontendHelper.Services.AuthService authService
+
+@{
+    ViewData["Title"] = "Палитры";
+}
+
+<h2 class="mb-4">Палитры</h2>
+
+<div class="sticky-top bg-white pb-3" style="z-index:10;">
+    @if (authService.HasPermission(Permission.CanManagePalettes))
+    {
+        <a asp-action="CreatePalette" class="btn-create-icon mb-3">
+            <i class="bi bi-plus-lg"></i> Создать палитру
+        </a>
+    }
+    <div class="filter-bar mb-2">
+        @foreach (var filt in Model.AvailableFilters)
+        {
+            <div class="form-check form-check-inline">
+                <input class="form-check-input filter-checkbox"
+                       type="checkbox"
+                       value="@filt.Value"
+                       id="filter-@filt.Value" />
+                <label class="filter-label form-check-label"
+                       for="filter-@filt.Value">
+                    @filt.Text
+                </label>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row gx-3 gy-4" id="paletteList">
+    @foreach (var pal in Model.Palettes)
+    {
+        <div class="col-sm-6 col-md-4 col-lg-3 palette-item"
+             data-filter-ids="@string.Join(',', pal.FilterIds)">
+            <div class="card h-100 shadow-sm p-3 d-flex flex-column">
+                <h5 class="card-title">@pal.Title</h5>
+                <div class="palette-grid d-flex flex-wrap mb-3">
+                    @foreach (var hex in pal.ColorHexes)
+                    {
+                        <div class="palette-swatch"
+                             title="Нажмите, чтобы скопировать HEX"
+                             style="flex:1 0 30%;padding-top:30%;background:@hex;position:relative;cursor:pointer"
+                             onclick="copyColorHex('@hex')">
+                            <span class="swatch-hex">@hex</span>
+                        </div>
+                    }
+                </div>
+                <div class="mt-auto d-flex justify-content-between align-items-center">
+                    <button class="btn btn-sm btn-outline-secondary favorite-toggle-btn"
+                            data-asset-type="Palette"
+                            data-asset-id="@pal.Id"
+                            style="background:none;border:none;">
+                        @if (pal.IsFavorited)
+                        {
+                            <i class="bi bi-heart-fill text-danger"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-heart text-secondary"></i>
+                        }
+                    </button>
+                    @if (authService.HasPermission(Permission.CanManagePalettes))
+                    {
+                        <div>
+                            <a asp-action="EditPalette"
+                               asp-route-id="@pal.Id"
+                               class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form asp-action="DeletePalette"
+                                  asp-route-id="@pal.Id"
+                                  method="post"
+                                  class="d-inline"
+                                  onsubmit="return confirm('Удалить палитру?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const items   = document.querySelectorAll('.palette-item');
+            const boxes   = document.querySelectorAll('.filter-checkbox');
+
+            function applyFilters() {
+                const checked = Array.from(boxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => parseInt(cb.value, 10));
+
+                items.forEach(it => {
+                    const fids = it.dataset.filterIds
+                        ? it.dataset.filterIds.split(',').map(x => parseInt(x, 10))
+                        : [];
+                    it.style.display = (!checked.length || checked.every(id => fids.includes(id)))
+                        ? '' : 'none';
+                });
+            }
+            boxes.forEach(cb => cb.addEventListener('change', applyFilters));
+
+            // Toggle «Избранное»
+            document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', async e => {
+                    e.stopPropagation();
+                    const assetType = btn.dataset.assetType;
+                    const assetId   = parseInt(btn.dataset.assetId, 10);
+                    const iconEl    = btn.querySelector('i');
+                    try {
+                        const res = await fetch('/Favorites/Toggle', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify({ assetType, assetId })
+                        });
+                        if (!res.ok) throw new Error('Ошибка сети');
+                        const json = await res.json();
+                        if (json.favorited) {
+                            iconEl.classList.replace('bi-heart', 'bi-heart-fill');
+                            iconEl.classList.add('text-danger');
+                        } else {
+                            iconEl.classList.replace('bi-heart-fill', 'bi-heart');
+                            iconEl.classList.remove('text-danger');
+                        }
+                    } catch (err) {
+                        alert('Не удалось обновить «Избранное»: ' + err);
+                    }
+                });
+            });
+        });
+
+        // Копирование HEX
+        function copyColorHex(hex) {
+            if (!navigator.clipboard) {
+                alert('Clipboard API не поддерживается этим браузером.');
+                return;
+            }
+            navigator.clipboard.writeText(hex)
+                .then(() => alert('HEX-код скопирован: ' + hex))
+                .catch(err => alert('Ошибка копирования: ' + err));
+        }
+    </script>
+}
