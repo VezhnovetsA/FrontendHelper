@@ -49,7 +49,7 @@
                         <input name="NewColors[0].Hex"
                                class="form-control"
                                placeholder="#AABBCC"
-                               required pattern="^#([0-9A-Fa-f]{6})$" />
+                               pattern="^#([0-9A-Fa-f]{6})$" />
                         <button type="button" class="btn btn-outline-danger remove-color-btn">–</button>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
             <!-- Фильтры -->
             <div class="mb-3">
                 <label class="form-label">Фильтры</label>
-                <div class="filter-bar">
+                <div class="filter-list">
                     @foreach (var filt in Model.AvailableFilters)
                     {
                         var sel = Model.SelectedFilterIds.Contains(int.Parse(filt.Value));
@@ -80,6 +80,15 @@
                 </div>
             </div>
 
+            <div class="mb-3">
+                <label for="NewFilterNames" class="form-label">Добавить новые фильтры</label>
+                <input asp-for="NewFilterNames"
+                       id="NewFilterNames"
+                       class="form-control"
+                       placeholder="Например: пастельные, яркие, монохром" />
+                <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
+            </div>
+
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <a asp-action="ShowPalettes" class="btn btn-secondary ms-2">Отмена</a>
@@ -90,7 +99,7 @@
 
 @section Scripts {
     <script>
-        document.getElementById('add-color-btn').addEventListener('click', () => {
+                document.getElementById('add-color-btn').addEventListener('click', () => {
           const ctr = document.getElementById('new-colors-container');
           const idx = ctr.querySelectorAll('.input-group').length;
           const row = document.createElement('div');
@@ -99,11 +108,12 @@
             <input name="NewColors[${idx}].Hex"
                    class="form-control"
                    placeholder="#AABBCC"
-                   required pattern="^#([0-9A-Fa-f]{6})$" />
+                   pattern="^#([0-9A-Fa-f]{6})$" />
             <button type="button" class="btn btn-outline-danger remove-color-btn">–</button>
           `;
           ctr.appendChild(row);
         });
+
         document.getElementById('new-colors-container')
                 .addEventListener('click', e => {
           if (e.target.matches('.remove-color-btn'))

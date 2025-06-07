@@ -18,10 +18,13 @@ namespace FrontendHelper.Models
         public List<SelectListItem> AvailableColors { get; set; } = new();
 
         // Новые цвета
-        public List<PaletteColorViewModel> NewColors { get; set; } = new();
+        public List<PaletteColorViewModel>? NewColors { get; set; } = new();
 
         // Фильтры
         public List<int> SelectedFilterIds { get; set; } = new();
         public List<SelectListItem> AvailableFilters { get; set; } = new();
+
+        [Display(Name = "Новые фильтры (через запятую)")]
+        public string? NewFilterNames { get; set; } = "";
     }
 }
