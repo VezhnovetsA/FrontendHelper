@@ -745,6 +745,391 @@
 
 
 
+/* ==============================================
+   Дополнительные правки для страницы “Шрифты” (КОМПАКТНЫЙ ВАРИАНТ)
+   ============================================== */
+
+/* 1) Стилизация поля textarea (предпросмотр):
+   - Немного уменьшили скруглённые углы и внутренний отступ
+   - Убрали синий outline при фокусе
+   ============================================== */
+#inputText {
+    border-radius: 8px;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+    #inputText:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+/* Тёмная тема для textarea */
+:root[data-theme="dark"] #inputText {
+    background: rgba(30, 30, 30, 0.9);
+    color: var(--surface);
+    border-color: var(--text-secondary);
+}
+
+    :root[data-theme="dark"] #inputText:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+/* ==============================================
+   2) Hover/Active-эффекты для строк таблицы
+   ============================================== */
+
+/* При наведении на строку: приглушённый фон */
+.font-row:hover {
+    background: var(--bg-alt);
+}
+
+/* При клике/зажатии: более “тёплый” фон */
+.font-row:active {
+    background: var(--accent-bg);
+}
+
+/* Выбранная строка: accent-фон и accent-цвет текста */
+.font-row.selected {
+    background: var(--accent-bg);
+    border-left: 3px solid var(--accent);
+}
+
+    /* Цвет названия в выбранной строке делаем акцентным */
+    .font-row.selected td:nth-child(2) {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+/* Тёмная тема: корректируем стили hover/selected */
+:root[data-theme="dark"] .font-row:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="dark"] .font-row:active {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .font-row.selected {
+    background: rgba(255, 255, 255, 0.06);
+    border-left-color: var(--accent);
+}
+
+    :root[data-theme="dark"] .font-row.selected td:nth-child(2) {
+        color: var(--accent);
+    }
+
+/* ==============================================
+   3) Убираем outline/box-shadow у кнопки “сердечко”
+   ============================================== */
+.favorite-toggle-btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* ==============================================
+   4) Уменьшаем отступы и скругления в таблице
+   ============================================== */
+.table tbody tr {
+    border-radius: 6px;
+    margin-bottom: 0.4rem;
+}
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0 0.4rem;
+}
+
+    /* Заголовки столбцов: уменьшили padding и шрифт */
+    .table thead th {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Ячейки строк: уменьшили padding, шрифт и скругление фона */
+    .table tbody td {
+        border: none;
+        padding: 0.6rem 0.8rem;
+        vertical-align: middle;
+        background: var(--surface);
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+/* Тёмная тема для ячеек */
+:root[data-theme="dark"] .table tbody td {
+    background: rgba(30, 30, 30, 0.9);
+}
+
+/* ==============================================
+   5) Уменьшаем высоту прокручиваемой области таблицы
+   ============================================== */
+.font-table-wrapper {
+    max-height: 20vh; /* компактнее */
+    overflow-y: auto;
+    padding: 0.4rem;
+}
+
+    /* Стилизуем скроллбар */
+    .font-table-wrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .font-table-wrapper::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 3px;
+    }
+
+/* ==============================================
+   6) Скрываем “белую” область под .sticky-top в темной теме
+   ============================================== */
+:root[data-theme="dark"] .sticky-top {
+    background: var(--surface);
+}
+
+/* ================================
+   Дополнительно для тёмной темы
+   ================================ */
+
+/* 1) Фон фиксированной верхней панели */
+:root[data-theme="dark"] .sticky-top {
+    background: var(--surface) !important;
+}
+
+/* 2) В тёмной теме делаем текст во всех ячейках таблицы белым */
+:root[data-theme="dark"] .table thead th,
+:root[data-theme="dark"] .table tbody td,
+:root[data-theme="dark"] .font-row td,
+:root[data-theme="dark"] #inputText {
+    color: #FFF;
+}
+
+/* 3) В тёмной теме делаем фон фильтров и поля предпросмотра тёмным */
+:root[data-theme="dark"] .filter-bar,
+:root[data-theme="dark"] #inputText {
+    background: rgba(30, 30, 30, 0.85);
+}
+
+/* 4) Фон “карточки” (контейнера таблицы) тоже тёмный */
+:root[data-theme="dark"] .card {
+    background: rgba(30, 30, 30, 0.9);
+}
+
+/* 5) Корректируем фон заголовков таблицы (thead) и цвет */
+:root[data-theme="dark"] .table thead th {
+    background: rgba(30, 30, 30, 0.9);
+    color: var(--text-secondary);
+    border-bottom-color: var(--text-secondary);
+}
+
+/* 6) Если где-то остался белый фон у .sticky-top — пусть станет тёмным */
+:root[data-theme="dark"] .sticky-top.bg-white {
+    background: var(--surface) !important;
+}
+
+/* 7) Убираем “белые” промежутки между строками */
+:root[data-theme="dark"] .table tbody tr td {
+    background: rgba(30, 30, 30, 0.9);
+}
+
+/* 8) В тёмной теме делаем текст лейблов и placeholder белым */
+:root[data-theme="dark"] .form-label,
+:root[data-theme="dark"] #inputText::placeholder {
+    color: #DDD;
+}
+
+/* 9) Скрываем контрастные белые обводки кнопок и ссылок */
+:root[data-theme="dark"] .btn-create-icon,
+:root[data-theme="dark"] .btn-outline-primary,
+:root[data-theme="dark"] .btn-outline-secondary,
+:root[data-theme="dark"] .btn-outline-danger {
+    filter: brightness(0.9);
+}
+
+/* ==============================================
+   7) Скругляем углы у .sticky-top (верхней панели)
+   ============================================== */
+.sticky-top.bg-white {
+    border-radius: 8px;
+}
+
+:root[data-theme="dark"] .sticky-top.bg-white {
+    background: var(--surface) !important;
+    border-radius: 8px;
+}
+
+/* ==============================================
+   8) Новый блок для чек-боксов в формах (компактнее)
+   ============================================== */
+
+/* Контейнер для списка чек-боксов в форме */
+.filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+    /* Чек-боксы внутри .filter-list становятся видимыми */
+    .filter-list .form-check-input {
+        position: static !important; /* отменяем absolute */
+        opacity: 1 !important; /* отменяем opacity:0 */
+        pointer-events: auto !important;
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.4rem;
+        vertical-align: middle;
+    }
+
+    /* Отступы и выравнивание у label внутри .filter-list */
+    .filter-list .form-check-label {
+        cursor: pointer;
+        user-select: none;
+        margin-right: 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    /* Выравнивание блока .form-check */
+    .filter-list .form-check {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+
+/* Тёмная тема: чуть приглушаем чек-боксы */
+:root[data-theme="dark"] .filter-list .form-check-input {
+    filter: brightness(0.9);
+}
+
+
+/* ==============================================
+   Уточнённые правки для “Шрифты”: уменьшаем высоту верхней панели
+   ============================================== */
+
+/* 1) Уменьшаем отступы у .sticky-top (верхней панели) */
+.sticky-top {
+    padding-top: 0.5rem; /* вместо ранее более крупных отступов */
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem; /* чуть меньше отступ вниз */
+}
+
+    /* 2) Сокращаем промежутки внутри кнопки “Добавить шрифт” */
+    .sticky-top .btn-create-icon {
+        padding: 0.4rem 1rem; /* чуть меньше по вертикали */
+        font-size: 0.95rem; /* чуть уменьшили текст */
+        margin-bottom: 0.5rem; /* сокращаем отступ от следующего элемента */
+    }
+
+    /* 3) Компактнее label и textarea в верхней панели */
+    .sticky-top .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem; /* менее “воздуха” между label и textarea */
+    }
+
+#inputText {
+    margin-bottom: 0.5rem; /* сократили пространство под textarea */
+    font-size: 0.9rem; /* чуть меньше шрифт */
+}
+
+/* 4) Сжали панель фильтров: уменьшаем padding и gap */
+.filter-bar {
+    padding: 0.3rem 0.6rem; /* поменьше вокруг чекбоксов */
+    gap: 0.4rem; /* более плотная сетка */
+    margin-bottom: 0; /* устраняем лишний отступ */
+}
+
+    .filter-bar .form-check-label {
+        font-size: 0.85rem; /* чуть компактнее текст */
+        padding: 0.3rem 0.6rem; /* сокращаем внутренний отступ */
+    }
+
+/* 5) Убираем лишний margin у .sticky-top.bg-white в тёмной теме */
+:root[data-theme="dark"] .sticky-top.bg-white {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* 6) Компактнее иконка “сердечко” в .sticky-top */
+.sticky-top .favorite-toggle-btn {
+    margin-right: 0.2rem; /* если она когда-то использовалась там */
+}
+
+/* 7) Сводим к минимуму любые дополнительные пустоты */
+.sticky-top h2 {
+    margin-bottom: 0.4rem; /* сокращаем заголовок “Шрифты” */
+    font-size: 1.3rem; /* чуть меньше размер заголовка */
+}
+
+/* 8) Дополнительно: минимальный отступ для контейнера .container сверху */
+.container.py-4 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+/* ==============================================
+   Сводные компактные стили остаются прежними
+   (остальная часть – без изменений, как в предыдущем ответе)
+   ============================================== */
+
+/* ============================================
+   1) Стили для «подсвеченного» фильтра через :checked + label
+   ============================================ */
+.filter-checkbox {
+    /* Скрываем стандартное чекбокс-окружение (можно кастомизировать) */
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+    /* Если чекбокс отмечен — делаем лейбл «активным» */
+    .filter-checkbox:checked + .filter-label {
+        background: var(--accent);
+        color: var(--surface);
+        box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+        /* Чтобы при наведении цвет не перекрывал «чекнутые» фильтры */
+        .filter-checkbox:checked + .filter-label:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+/* При этом сам .filter-label до проверки :checked можно оставить в исходном виде:
+   (например у вас уже есть .filter-label { background: var(--bg-alt); ... } ) */
+
+
+/* Добавь в конец viewStyle.css */
+.btn-outline-secondary {
+    color: #7798AB;
+    border-color: #7798AB;
+    border-radius: 50px;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+
+    .btn-outline-secondary:hover {
+        background: linear-gradient(90deg, #7798AB, #383F51);
+        color: var(--surface);
+        box-shadow: 0 0 12px var(--accent-glow);
+        transform: scale(1.05);
+        border-radius: 50px;
+    }
+
+:root[data-theme="dark"] .filter-checkbox:checked + .filter-label {
+    background: var(--accent);
+    color: var(--surface);
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+    :root[data-theme="dark"] .filter-checkbox:checked + .filter-label:hover {
+        background: var(--accent-hover);
+        box-shadow: 0 0 10px var(--accent-glow);
+    }
+
 /* ===========================================
    Конец дополнительных стилей
    =========================================== */

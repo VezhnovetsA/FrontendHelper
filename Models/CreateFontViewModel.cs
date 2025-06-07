@@ -1,4 +1,5 @@
 ﻿using FrontendHelper.Models.CustomValidationAttributes;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Models
@@ -15,7 +16,15 @@ namespace FrontendHelper.Models
         [Url]
         public string? Link { get; set; }
 
-        [FileExtensions(Extensions = "ttf,otf,woff,woff2", ErrorMessage = "Неподдерживаемый формат шрифта.")]
         public IFormFile? FontFile { get; set; }
+
+        // Список доступных фильтров (CheckboxList)
+        public List<SelectListItem> AvailableFilters { get; set; } = new();
+
+        // Список ID отмеченных фильтров
+        public List<int> SelectedFilterIds { get; set; } = new();
+
+        // Новые фильтры, вводимые строкой через запятую
+        public string? NewFilterNames { get; set; }
     }
 }

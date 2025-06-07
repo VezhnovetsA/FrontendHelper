@@ -22,6 +22,9 @@
     <link rel="stylesheet" href="~/css/layoutStyle.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/viewStyle.css" asp-append-version="true" />
+
+    @RenderSection("Head", required: false)
+
 </head>
 <body class="d-flex flex-column h-100">
     <header class="top-navbar">

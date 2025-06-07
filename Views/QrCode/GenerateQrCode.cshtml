@@ -1,23 +1,83 @@
 ﻿@model QrCodeViewModel
 
-<h2>Генератор QR-кода</h2>
+@{
+    ViewData["Title"] = "Генератор QR-кода";
+}
 
-<form asp-action="GenerateQrCode" method="post" class="mb-3">
-    <div class="input-group">
-        <input asp-for="Resource" class="form-control" placeholder="Вставьте URL или текст" />
-        <button class="btn btn-primary">Сгенерировать</button>
-    </div>
-</form>
+<h2 class="mb-4">Генератор QR-кода</h2>
 
-@if (!string.IsNullOrEmpty(Model.QrCodeImage))
-{
-    <div class="mb-3">
-        <img src="@Model.QrCodeImage" alt="QR Code" class="img-fluid" style="max-width:200px; height:auto;"/>
+<div class="form-container" style="max-width: 800px; margin: 0 auto;">
+    <div class="form-card card p-5 mb-5">
+        <form asp-action="GenerateQrCode" method="post" class="generic-form">
+            @Html.AntiForgeryToken()
+
+            <!-- Поле ввода URL/текста -->
+            <div class="mb-4">
+                <label asp-for="Resource" class="form-label" style="font-size:1.1rem;">
+                    Введите URL или текст
+                </label>
+                <input asp-for="Resource"
+                       class="form-control form-control-lg"
+                       placeholder="https://example.com или любой текст"
+                       style="border-radius: 1rem; padding: 0.75rem; width: 100%;" />
+
+                @* Показываем валидацию только после POST *@
+                @if (ViewContext.HttpContext.Request.Method == "POST")
+                {
+                    <span asp-validation-for="Resource" class="text-danger small"></span>
+                }
+            </div>
+
+            @* Если QR-код уже сгенерирован *@
+            @if (!string.IsNullOrEmpty(Model.QrCodeImage))
+            {
+                <div class="mb-4 d-flex justify-content-center">
+                    <div class="card shadow-sm" style="width: 400px; border-radius: 12px; background: var(--surface);">
+                        <div class="card-body d-flex flex-column align-items-center p-4">
+                            <h5 class="card-title mb-3 text-center" style="font-size:1.25rem;">
+                                Ваш QR-код
+                            </h5>
+                            <img src="@Model.QrCodeImage"
+                                 alt="QR Code"
+                                 class="existing-preview"
+                                 style="max-width: 320px; height: auto;" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body d-flex justify-content-center gap-3 mb-4">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            style="padding: 0.75rem 1.5rem; font-size:1rem; border-radius:50px;"
+                            onclick="location.href='@Model.QrCodeImage';">
+                        <i class="bi bi-download me-1"></i> Скачать
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            style="padding: 0.75rem 1.5rem; font-size:1rem; border-radius:50px;"
+                            onclick="navigator.clipboard.writeText('@Model.QrCodeImage')">
+                        <i class="bi bi-clipboard me-1"></i> Копировать
+                    </button>
+                </div>
+            }
+
+            <!-- Кнопка «Сгенерировать» под результатом -->
+            <div class="card-body text-center">
+                <button type="submit"
+                        class="btn btn-primary"
+                        style="
+                            padding: 0.75rem 2rem;
+                            font-size: 1rem;
+                            border-radius: 50px;
+                        ">
+                    Сгенерировать
+                </button>
+            </div>
+        </form>
     </div>
-    <a href="@Model.QrCodeImage" download="qrcode.png" class="btn btn-outline-success me-2">
-        Скачать
-    </a>
-    <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText('@Model.QrCodeImage')">
-        Копировать в буфер
-    </button>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

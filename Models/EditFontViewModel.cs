@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace FrontendHelper.Models
 {
@@ -14,16 +15,22 @@ namespace FrontendHelper.Models
         [MaxLength(200)]
         public string FontFamily { get; set; }
 
-        // Новой строкой добавляем свойство Link
         [Url]
         [MaxLength(300)]
         public string? Link { get; set; }
 
-        // Добавим поле для замены/загрузки нового файла
-        [FileExtensions(Extensions = "ttf,otf,woff,woff2", ErrorMessage = "Неподдерживаемый формат шрифта.")]
         public IFormFile? FontFile { get; set; }
 
-        // Храним имя уже существующего файла (чтобы показать в представлении и/или не затерять его, если новый не пришёл)
+        // Имя уже существующего локального файла
         public string? ExistingFileName { get; set; }
+
+        // Список доступных фильтров (CheckboxList)
+        public List<SelectListItem> AvailableFilters { get; set; } = new();
+
+        // Список ID отмеченных фильтров
+        public List<int> SelectedFilterIds { get; set; } = new();
+
+        // Новые фильтры (через запятую)
+        public string? NewFilterNames { get; set; }
     }
 }

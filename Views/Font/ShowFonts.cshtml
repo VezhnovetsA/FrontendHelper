@@ -1,108 +1,272 @@
-﻿@model FrontendHelper.Models.FontViewModel
-@using System.IO
-@* ужас *@
-@inject FHDatabase.Repositories.FontRepository fontRepository 
-
+﻿@model FrontendHelper.Models.FontIndexViewModel
+@using FhEnums
+@inject FrontendHelper.Services.AuthService authService
 
 @{
-    //все шрифты из репозитория
-    var fonts = fontRepository.GetAssets();
+    ViewData["Title"] = "Шрифты";
 }
 
-@* подключение внешних шрифтов *@
-@foreach (var f in fonts.Where(x => !string.IsNullOrEmpty(x.Link)))
-{
-    <link rel="stylesheet" href="@f.Link" />
-}
-
-@* объявление локальных шрифтов через @font-face *@
-<style>
-@foreach (var f in fonts.Where(x => !string.IsNullOrEmpty(x.LocalFileName)))
-{
-    <text>
-    @@font-face {
-        font-family: '@f.FontFamily';
-        src: url('/fonts/@f.LocalFileName');
-        font-display: swap;
+@section Head {
+    <!-- Подключаем внешние внешние CSS-шрифты -->
+    @foreach (var f in Model.Fonts.Where(x =>
+                 !string.IsNullOrEmpty(x.LinkOrLocalUrl) &&
+                 !x.LinkOrLocalUrl.StartsWith("/fonts/")))
+    {
+        <link rel="stylesheet" href="@f.LinkOrLocalUrl" />
     }
-    </text>
+
+    <!-- Объявляем локальные font-face -->
+    <style>
+    @foreach (var f in Model.Fonts.Where(x =>
+                 !string.IsNullOrEmpty(x.LinkOrLocalUrl) &&
+                 x.LinkOrLocalUrl.StartsWith("/fonts/")))
+    {
+        <text>
+        @@font-face {
+          font-family: '@f.CssFontFamily';
+          src: url('@f.LinkOrLocalUrl') format('truetype');
+          font-display: swap;
+        }
+        </text>
+    }
+    </style>
 }
-</style>
-
-
-
-
-
 
 <div class="container py-4">
-  <h2 class="mb-4">Демонстрация шрифтов</h2>
+    <h2 class="mb-4">Шрифты</h2>
 
-
-  <div class="mb-3">
-    <label asp-for="InputText" class="form-label">Введите текст</label>
-    <textarea asp-for="InputText" id="inputText" class="form-control" rows="3"></textarea>
-  </div>
-
-
-
-  <div class="d-flex align-items-end mb-3">
-    <div class="flex-grow-1 me-2">
-      <label asp-for="SelectedFont" class="form-label">Выберите шрифт</label>
-      <select asp-for="SelectedFont"
-              id="fontSelect"
-              class="form-select">
-        <option value="">— По умолчанию —</option>
-        @foreach (var f in fonts)
+    @* ─── Фиксированная верхняя панель ─── *@
+    <div class="sticky-top bg-white pb-3 px-3" style="z-index: 10; border-radius:12px;">
+        @* Кнопка “Добавить шрифт” *@
+        @if (authService.HasPermission(Permission.CanManageFonts))
         {
-
-            <option value="@f.FontFamily"
-                    style="font-family: '@f.FontFamily', sans-serif;">
-                @f.Name
-            </option> 
+            <div class="mb-2">
+                <a asp-action="AddFont"
+                   asp-controller="Font"
+                   class="btn-create-icon">
+                    <i class="bi bi-plus-lg"></i> Добавить шрифт
+                </a>
+            </div>
         }
-      </select>
 
+        @* Поле предпросмотра + кнопка копирования со стилем *@
+        <div class="d-flex align-items-start mb-2">
+            <div class="flex-grow-1 me-2">
+                <label for="inputText" class="form-label">Введите текст для предпросмотра</label>
+                <textarea id="inputText"
+                          class="form-control mb-1"
+                          rows="3"
+                          placeholder="Пример: Привет, мир!">@Model.InputText</textarea>
+            </div>
+            <div class="mt-4">
+              <button id="copyStyledBtn" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-clipboard me-1"></i>
+                     Копировать со стилем
+              </button>
+            </div>
+        </div>
+
+        @* Панель фильтров *@
+        @if (Model.AvailableFilters.Any())
+        {
+            <div class="filter-bar mb-2">
+                @foreach (var filt in Model.AvailableFilters)
+                {
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input filter-checkbox"
+                               type="checkbox"
+                               value="@filt.Value"
+                               id="filter-@filt.Value" />
+                        <label class="filter-label form-check-label" for="filter-@filt.Value">
+                            @filt.Text
+                        </label>
+                    </div>
+                }
+            </div>
+        }
     </div>
-    <div>
-      <a asp-action="AddFont" class="btn btn-outline-primary mb-1">+ Добавить шрифт</a>
+
+    @* ─── Основной контент: прокручиваемая таблица ─── *@
+    <div class="card mb-5">
+        <div class="card-body p-0">
+            <div class="font-table-wrapper">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 5rem;">Изб.</th>
+                            <th>Название шрифта</th>
+                            <th>CSS-семейство</th>
+                            @if (authService.HasPermission(Permission.CanManageFonts))
+                            {
+                                <th style="width: 8rem;">Действия</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody id="fontList">
+                        @foreach (var f in Model.Fonts)
+                        {
+                            <tr class="font-row"
+                                data-filter-ids="@string.Join(',', f.FilterIds)"
+                                data-font-family="@f.CssFontFamily">
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary favorite-toggle-btn"
+                                            data-asset-type="Font"
+                                            data-asset-id="@f.Id"
+                                            style="background:none; border:none;">
+                                        @if (f.IsFavorited)
+                                        {
+                                            <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                                        }
+                                    </button>
+                                </td>
+                                <td style="font-family: '@f.CssFontFamily', sans-serif;">
+                                    @f.Name
+                                </td>
+                                <td>@f.FontFamily</td>
+                                @if (authService.HasPermission(Permission.CanManageFonts))
+                                {
+                                    <td>
+                                        <a asp-action="EditFont"
+                                           asp-route-id="@f.Id"
+                                           class="btn btn-sm btn-outline-primary me-1"
+                                           title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-action="Delete"
+                                              asp-route-id="@f.Id"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Удалить этот шрифт?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    title="Удалить">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
-
-
-  <div class="mb-4">
-    <label class="form-label">Результат</label>
-    <div id="outputText" class="p-3 border" style="min-height:60px; white-space: pre-wrap;">
-      @Model.InputText
-    </div>
-  </div>
-
 </div>
 
-
-
-
-
 @section Scripts {
-<script>
-  const input   = document.getElementById('inputText');
-  const select  = document.getElementById('fontSelect');
-  const output  = document.getElementById('outputText');
-  const copyBtn = document.getElementById('copyBtn');
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input        = document.getElementById('inputText');
+        const copyBtn      = document.getElementById('copyStyledBtn');
+        const fontRows     = Array.from(document.querySelectorAll('.font-row'));
+        const filterBoxes  = Array.from(document.querySelectorAll('.filter-checkbox'));
 
-  function refreshPreview() {
-    output.textContent      = input.value;
-    output.style.fontFamily = select.value || '';
-  }
+        // --- Copy with style ---
+        copyBtn.addEventListener('click', async () => {
+            const text = input.value;
+            const font = window.getComputedStyle(input).fontFamily;
+            const html = `<span style="font-family:${font};">${ 
+                text
+                  .replace(/&/g, "&amp;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/\n/g, "<br>")
+            }</span>`;
 
-  input.addEventListener('input', refreshPreview);
-  select.addEventListener('change', refreshPreview);
+            try {
+                await navigator.clipboard.write([
+                  new ClipboardItem({
+                    'text/plain': new Blob([text],   { type: 'text/plain' }),
+                    'text/html':  new Blob([html],   { type: 'text/html' })
+                  })
+                ]);
+                alert('Скопировано со стилем!');
+            } catch (err) {
+                alert('Ошибка копирования: ' + err);
+            }
+        });
 
-  copyBtn.addEventListener('click', () =>
-    navigator.clipboard.writeText(output.textContent)
-             .then(() => alert('Скопировано!'))
-             .catch(() => alert('Ошибка копирования'))
-  );
+        // --- Preview refresh ---
+        function refreshPreview() {
+            const sel = document.querySelector('.font-row.selected');
+            input.style.fontFamily = sel
+              ? sel.dataset.fontFamily + ', sans-serif'
+              : '';
+        }
 
-  refreshPreview();
-</script>
+        // --- Row selection & hover ---
+        fontRows.forEach(row => {
+            row.addEventListener('click', () => {
+                fontRows.forEach(r => r.classList.remove('selected'));
+                row.classList.add('selected');
+                refreshPreview();
+            });
+            row.addEventListener('mouseenter', () => row.classList.add('hovered'));
+            row.addEventListener('mouseleave', () => row.classList.remove('hovered'));
+        });
+
+        // --- Filter “AND” logic ---
+        function applyFilters() {
+            const checked = filterBoxes
+              .filter(cb => cb.checked)
+              .map(cb => parseInt(cb.value, 10));
+
+            fontRows.forEach(row => {
+                if (!checked.length) {
+                    row.style.display = '';
+                    return;
+                }
+                const ids = row.dataset.filterIds
+                  .split(',').map(x => parseInt(x,10));
+                row.style.display = checked.every(id => ids.includes(id))
+                  ? '' : 'none';
+            });
+            const sel = document.querySelector('.font-row.selected');
+            if (sel && sel.style.display === 'none') {
+                sel.classList.remove('selected');
+                input.style.fontFamily = '';
+            }
+        }
+        filterBoxes.forEach(cb => cb.addEventListener('change', applyFilters));
+
+        // --- Toggle favorites ---
+        document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', async e => {
+                e.stopPropagation();
+                const { assetType, assetId } = btn.dataset;
+                const icon = btn.querySelector('i');
+                try {
+                    const res = await fetch('/Favorites/Toggle', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({ assetType, assetId: +assetId })
+                    });
+                    if (!res.ok) throw new Error(res.status);
+                    const { favorited } = await res.json();
+                    if (favorited) {
+                        icon.classList.replace('bi-heart','bi-heart-fill');
+                        icon.classList.add('text-danger');
+                        icon.title = 'Убрать из избранного';
+                    } else {
+                        icon.classList.replace('bi-heart-fill','bi-heart');
+                        icon.classList.remove('text-danger');
+                        icon.title = 'Добавить в избранное';
+                    }
+                } catch (err) {
+                    alert('Не удалось обновить избранное: ' + err);
+                }
+            });
+        });
+    });
+    </script>
 }
