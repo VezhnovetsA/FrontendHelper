@@ -35,22 +35,27 @@
 <div class="row gx-3 gy-4" id="paletteList">
     @foreach (var pal in Model.Palettes)
     {
-        <div class="col-sm-6 col-md-4 col-lg-3 palette-item"
-             data-filter-ids="@string.Join(',', pal.FilterIds)">
-            <div class="card h-100 shadow-sm p-3 d-flex flex-column">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100 shadow-sm p-3 d-flex flex-column palette-item js-palette-card"
+                 data-filter-ids="@string.Join(',', pal.FilterIds)"
+                 data-palette-id="@pal.Id"
+                 data-palette-title="@pal.Title"
+                 data-palette-colors="@string.Join(',', pal.ColorHexes)"
+                 data-palette-favorited="@(pal.IsFavorited.ToString().ToLower())">
+
                 <h5 class="card-title">@pal.Title</h5>
                 <div class="palette-grid d-flex flex-wrap mb-3">
                     @foreach (var hex in pal.ColorHexes)
                     {
                         <div class="palette-swatch"
                              title="Нажмите, чтобы скопировать HEX"
-                             style="flex:1 0 30%;padding-top:30%;background:@hex;position:relative;cursor:pointer"
-                             onclick="copyColorHex('@hex')">
+                             style="flex:1 0 30%;padding-top:30%;background:@hex;position:relative;cursor:pointer;">
                             <span class="swatch-hex">@hex</span>
                         </div>
                     }
                 </div>
-                <div class="mt-auto d-flex justify-content-between align-items-center">
+
+                <div class="mt-auto d-flex justify-content-end">
                     <button class="btn btn-sm btn-outline-secondary favorite-toggle-btn"
                             data-asset-type="Palette"
                             data-asset-id="@pal.Id"
@@ -64,95 +69,218 @@
                             <i class="bi bi-heart text-secondary"></i>
                         }
                     </button>
-                    @if (authService.HasPermission(Permission.CanManagePalettes))
-                    {
-                        <div>
-                            <a asp-action="EditPalette"
-                               asp-route-id="@pal.Id"
-                               class="btn btn-sm btn-outline-primary me-1">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form asp-action="DeletePalette"
-                                  asp-route-id="@pal.Id"
-                                  method="post"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Удалить палитру?');">
-                                @Html.AntiForgeryToken()
-                                <button type="submit"
-                                        class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    }
                 </div>
             </div>
         </div>
     }
 </div>
 
+<!-- Модалка деталей палитры -->
+<div class="modal fade" id="paletteDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Детали палитры</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <h5 id="modalPaletteTitle" class="mb-3"></h5>
+                <div id="modalPaletteGrid" class="palette-grid d-flex flex-wrap mb-3"></div>
+                <div class="d-flex justify-content-center mb-3">
+                    <button id="modalFavBtn" class="btn btn-outline-danger me-2">
+                        <i id="modalFavIcon" class="bi"></i> Избранное
+                    </button>
+                </div>
+                @if (authService.HasPermission(Permission.CanManagePalettes))
+                {
+                    <div class="d-flex justify-content-center">
+                        <a id="modalEditBtn" class="btn btn-sm btn-outline-primary me-2" href="#">
+                            <i class="bi bi-pencil"></i> Редактировать
+                        </a>
+                        <form id="modalDeleteForm"
+                              method="post"
+                              asp-action="DeletePalette"
+                              onsubmit="return confirm('Удалить эту палитру?');">
+                            <input type="hidden" id="modalDeleteId" name="id" value="" />
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> Удалить
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const items   = document.querySelectorAll('.palette-item');
-            const boxes   = document.querySelectorAll('.filter-checkbox');
+        document.addEventListener('DOMContentLoaded', function() {
+          // Инициализируем Bootstrap‐модалку
+          const modalEl = document.getElementById('paletteDetailModal');
+          const modal = new bootstrap.Modal(modalEl);
 
-            function applyFilters() {
-                const checked = Array.from(boxes)
-                    .filter(cb => cb.checked)
-                    .map(cb => parseInt(cb.value, 10));
-
-                items.forEach(it => {
-                    const fids = it.dataset.filterIds
-                        ? it.dataset.filterIds.split(',').map(x => parseInt(x, 10))
-                        : [];
-                    it.style.display = (!checked.length || checked.every(id => fids.includes(id)))
-                        ? '' : 'none';
-                });
-            }
-            boxes.forEach(cb => cb.addEventListener('change', applyFilters));
-
-            // Toggle «Избранное»
-            document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
-                btn.addEventListener('click', async e => {
-                    e.stopPropagation();
-                    const assetType = btn.dataset.assetType;
-                    const assetId   = parseInt(btn.dataset.assetId, 10);
-                    const iconEl    = btn.querySelector('i');
-                    try {
-                        const res = await fetch('/Favorites/Toggle', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                            },
-                            body: JSON.stringify({ assetType, assetId })
-                        });
-                        if (!res.ok) throw new Error('Ошибка сети');
-                        const json = await res.json();
-                        if (json.favorited) {
-                            iconEl.classList.replace('bi-heart', 'bi-heart-fill');
-                            iconEl.classList.add('text-danger');
-                        } else {
-                            iconEl.classList.replace('bi-heart-fill', 'bi-heart');
-                            iconEl.classList.remove('text-danger');
-                        }
-                    } catch (err) {
-                        alert('Не удалось обновить «Избранное»: ' + err);
-                    }
-                });
-            });
-        });
-
-        // Копирование HEX
-        function copyColorHex(hex) {
+          // Функция копирования HEX
+          function copyColorHex(hex) {
             if (!navigator.clipboard) {
-                alert('Clipboard API не поддерживается этим браузером.');
-                return;
+              return alert('Clipboard API не поддерживается этим браузером.');
             }
             navigator.clipboard.writeText(hex)
-                .then(() => alert('HEX-код скопирован: ' + hex))
-                .catch(err => alert('Ошибка копирования: ' + err));
+              .then(() => alert('HEX-код скопирован: ' + hex))
+              .catch(err => alert('Ошибка копирования: ' + err));
+          }
+
+          // Обработчик клика по карточке — открывает модалку, если клик не на свотч и не на сердце
+          document.querySelectorAll('.js-palette-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+              // НЕ открывать модалку, если клик внутри свотча или кнопки избранного
+              if (e.target.closest('.palette-swatch') || e.target.closest('.favorite-toggle-btn')) {
+                return;
+              }
+
+              const id     = card.dataset.paletteId;
+              const title  = card.dataset.paletteTitle;
+              const colors = (card.dataset.paletteColors || '').split(',');
+              const fav    = card.dataset.paletteFavorited === 'true';
+
+              // Заполняем заголовок
+              document.getElementById('modalPaletteTitle').innerText = title;
+
+              // Заполняем сетку цветов внутри модалки
+              const grid = document.getElementById('modalPaletteGrid');
+              grid.innerHTML = '';
+              colors.forEach(hex => {
+                const sw = document.createElement('div');
+                sw.className = 'palette-swatch';
+                Object.assign(sw.style, {
+                  flex: '1 0 20%',
+                  paddingTop: '20%',
+                  background: hex,
+                  margin: '2px',
+                  position: 'relative',
+                  cursor: 'pointer'
+                });
+                sw.title = hex;
+                sw.addEventListener('click', ev => {
+                  ev.stopPropagation();
+                  copyColorHex(hex);
+                });
+                const lbl = document.createElement('span');
+                lbl.className = 'swatch-hex';
+                lbl.innerText = hex;
+                sw.append(lbl);
+                grid.append(sw);
+              });
+
+              // Настраиваем кнопку избранного внутри модалки
+              const favIcon = document.getElementById('modalFavIcon');
+              const favBtn  = document.getElementById('modalFavBtn');
+              favIcon.className = fav
+                ? 'bi bi-heart-fill text-danger'
+                : 'bi bi-heart text-secondary';
+              favBtn.onclick = async () => {
+                try {
+                  const res = await fetch('/Favorites/Toggle', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ assetType: 'Palette', assetId: Number(id) })
+                  });
+                  if (!res.ok) throw new Error(res.statusText);
+                  const json = await res.json();
+                  const isFav = json.favorited;
+                  favIcon.className = isFav
+                    ? 'bi bi-heart-fill text-danger'
+                    : 'bi bi-heart text-secondary';
+                  // Обновляем иконку на самой карточке
+                  const cardFavIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${id}"] i`);
+                  if (cardFavIcon) {
+                    cardFavIcon.className = isFav
+                      ? 'bi bi-heart-fill text-danger'
+                      : 'bi bi-heart text-secondary';
+                  }
+                  // Синхронизируем флаг
+                  card.dataset.paletteFavorited = isFav;
+                } catch (err) {
+                  alert('Не удалось обновить «Избранное»: ' + err);
+                }
+              };
+
+              // Если есть права — меняем ссылки Edit/Delete
+        @if (authService.HasPermission(Permission.CanManagePalettes))
+        {
+            <text>
+                  document.getElementById('modalEditBtn').href   = '@Url.Action("EditPalette", "Palette")/' + id;
+                  document.getElementById('modalDeleteId').value = id;
+            </text>
         }
+
+              // Показываем модалку
+              modal.show();
+            });
+          });
+
+          // Обработчик «сердечка» на карточке
+          document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+              e.stopPropagation();
+              const assetType = this.dataset.assetType;
+              const assetId   = Number(this.dataset.assetId);
+              const iconEl    = this.querySelector('i');
+              try {
+                const res = await fetch('/Favorites/Toggle', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                  },
+                  body: JSON.stringify({ assetType, assetId })
+                });
+                if (!res.ok) throw new Error(res.statusText);
+                const json = await res.json();
+                if (json.favorited) {
+                  iconEl.className = 'bi bi-heart-fill text-danger';
+                } else {
+                  iconEl.className = 'bi bi-heart text-secondary';
+                }
+                // Обновляем dataset карточки
+                const card = document.querySelector(`.js-palette-card[data-palette-id="${assetId}"]`);
+                if (card) card.dataset.paletteFavorited = json.favorited;
+              } catch (err) {
+                alert('Не удалось обновить «Избранное»: ' + err);
+              }
+            });
+          });
+
+          // Обработчик копирования на свотчах карточки
+          document.querySelectorAll('.palette-swatch').forEach(sw => {
+            sw.addEventListener('click', function(e) {
+              e.stopPropagation();
+              copyColorHex(this.title);
+            });
+          });
+
+          // Фильтрация карточек
+          const items = document.querySelectorAll('.js-palette-card');
+          const boxes = document.querySelectorAll('.filter-checkbox');
+          function applyFilters() {
+            const checked = Array.from(boxes)
+              .filter(cb => cb.checked)
+              .map(cb => parseInt(cb.value, 10));
+            items.forEach(card => {
+              const col = card.closest('.col-sm-6') || card.parentElement;
+              const fids = card.dataset.filterIds
+                ? card.dataset.filterIds.split(',').map(x => +x)
+                : [];
+              col.style.display = (!checked.length || checked.every(id => fids.includes(id)))
+                ? '' : 'none';
+            });
+          }
+          boxes.forEach(cb => cb.addEventListener('change', applyFilters));
+
+        });
     </script>
 }
