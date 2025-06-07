@@ -1,0 +1,141 @@
+﻿@model FrontendHelper.Models.CreatePaletteViewModel
+
+@{
+    ViewData["Title"] = "Создать палитру";
+}
+
+<h2 class="mb-4">Новая палитра</h2>
+
+<div class="form-container">
+    <div class="form-card p-4">
+        <form asp-action="CreatePalette" method="post" class="generic-form">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- Название -->
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Название</label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <!-- Существующие цвета -->
+            <div class="mb-3">
+                <label class="form-label">Существующие цвета</label>
+                <div class="filter-list">
+                    @foreach (var color in Model.AvailableColors)
+                    {
+                        var isChecked = Model.SelectedColorIds.Contains(int.Parse(color.Value));
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="SelectedColorIds"
+                                   value="@color.Value"
+                                   id="col-@color.Value"
+                            @(isChecked ? "checked" : "") />
+                            <label class="form-check-label" for="col-@color.Value">
+                                <span class="swatch-hex"
+                                      style="background:@color.Text; color:#fff; padding:2px 6px; border-radius:4px;">
+                                    @color.Text
+                                </span>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Новые цвета -->
+            <div class="mb-3">
+                <label class="form-label">Добавить новые цвета (HEX)</label>
+                <div id="new-colors-container">
+                    <div class="input-group mb-2">
+                        <input name="NewColors[0].Hex"
+                               class="form-control"
+                               placeholder="#AABBCC"
+                               pattern="^#([0-9A-Fa-f]{6})$" />
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger remove-color-btn"
+                                title="Удалить цвет">
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="button"
+                        id="add-color-btn"
+                        class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-lg"></i> Добавить цвет
+                </button>
+            </div>
+
+            <!-- Фильтры -->
+            <div class="mb-3">
+                <label class="form-label">Фильтры</label>
+                <div class="filter-list">
+                    @foreach (var filt in Model.AvailableFilters)
+                    {
+                        var sel = Model.SelectedFilterIds.Contains(int.Parse(filt.Value));
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="SelectedFilterIds"
+                                   value="@filt.Value"
+                                   id="filter-@filt.Value"
+                            @(sel ? "checked" : "") />
+                            <label class="form-check-label" for="filter-@filt.Value">
+                                @filt.Text
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Новые фильтры -->
+            <div class="mb-3">
+                <label asp-for="NewFilterNames" class="form-label">Добавить новые фильтры</label>
+                <input asp-for="NewFilterNames"
+                       class="form-control"
+                       placeholder="Например: пастельные, яркие, монохром" />
+                <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a asp-action="ShowPalettes"
+                   class="btn btn-secondary ms-2">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('add-color-btn').addEventListener('click', () => {
+            const ctr = document.getElementById('new-colors-container');
+            const idx = ctr.querySelectorAll('.input-group').length;
+            const row = document.createElement('div');
+            row.className = 'input-group mb-2';
+            row.innerHTML = `
+                <input name="NewColors[${idx}].Hex"
+                       class="form-control"
+                       placeholder="#AABBCC"
+                       pattern="^#([0-9A-Fa-f]{6})$" />
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger remove-color-btn"
+                        title="Удалить цвет">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+            `;
+            ctr.appendChild(row);
+        });
+
+        document.getElementById('new-colors-container')
+                .addEventListener('click', e => {
+            if (e.target.closest('.remove-color-btn')) {
+                e.target.closest('.input-group').remove();
+            }
+        });
+    </script>
+}
