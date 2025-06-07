@@ -1,9 +1,11 @@
 ﻿@model FrontendHelper.Models.CreatePaletteViewModel
+
 @{
     ViewData["Title"] = "Создать палитру";
 }
 
 <h2 class="mb-4">Новая палитра</h2>
+
 <div class="form-container">
     <div class="form-card p-4">
         <form asp-action="CreatePalette" method="post" class="generic-form">
@@ -17,6 +19,7 @@
                 <span asp-validation-for="Title" class="text-danger small"></span>
             </div>
 
+            <!-- Существующие цвета -->
             <div class="mb-3">
                 <label class="form-label">Существующие цвета</label>
                 <div class="filter-list">
@@ -50,11 +53,17 @@
                                class="form-control"
                                placeholder="#AABBCC"
                                pattern="^#([0-9A-Fa-f]{6})$" />
-                        <button type="button" class="btn btn-outline-danger remove-color-btn">–</button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger remove-color-btn"
+                                title="Удалить цвет">
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
                     </div>
                 </div>
-                <button type="button" id="add-color-btn" class="btn btn-sm btn-outline-primary">
-                    + Добавить цвет
+                <button type="button"
+                        id="add-color-btn"
+                        class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-lg"></i> Добавить цвет
                 </button>
             </div>
 
@@ -72,7 +81,7 @@
                                    value="@filt.Value"
                                    id="filter-@filt.Value"
                             @(sel ? "checked" : "") />
-                            <label class="filter-label form-check-label" for="filter-@filt.Value">
+                            <label class="form-check-label" for="filter-@filt.Value">
                                 @filt.Text
                             </label>
                         </div>
@@ -80,18 +89,22 @@
                 </div>
             </div>
 
+            <!-- Новые фильтры -->
             <div class="mb-3">
-                <label for="NewFilterNames" class="form-label">Добавить новые фильтры</label>
+                <label asp-for="NewFilterNames" class="form-label">Добавить новые фильтры</label>
                 <input asp-for="NewFilterNames"
-                       id="NewFilterNames"
                        class="form-control"
                        placeholder="Например: пастельные, яркие, монохром" />
                 <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
             </div>
 
+            <!-- Кнопки -->
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">Сохранить</button>
-                <a asp-action="ShowPalettes" class="btn btn-secondary ms-2">Отмена</a>
+                <a asp-action="ShowPalettes"
+                   class="btn btn-secondary ms-2">
+                    Отмена
+                </a>
             </div>
         </form>
     </div>
@@ -99,25 +112,30 @@
 
 @section Scripts {
     <script>
-                document.getElementById('add-color-btn').addEventListener('click', () => {
-          const ctr = document.getElementById('new-colors-container');
-          const idx = ctr.querySelectorAll('.input-group').length;
-          const row = document.createElement('div');
-          row.className = 'input-group mb-2';
-          row.innerHTML = `
-            <input name="NewColors[${idx}].Hex"
-                   class="form-control"
-                   placeholder="#AABBCC"
-                   pattern="^#([0-9A-Fa-f]{6})$" />
-            <button type="button" class="btn btn-outline-danger remove-color-btn">–</button>
-          `;
-          ctr.appendChild(row);
+        document.getElementById('add-color-btn').addEventListener('click', () => {
+            const ctr = document.getElementById('new-colors-container');
+            const idx = ctr.querySelectorAll('.input-group').length;
+            const row = document.createElement('div');
+            row.className = 'input-group mb-2';
+            row.innerHTML = `
+                <input name="NewColors[${idx}].Hex"
+                       class="form-control"
+                       placeholder="#AABBCC"
+                       pattern="^#([0-9A-Fa-f]{6})$" />
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger remove-color-btn"
+                        title="Удалить цвет">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+            `;
+            ctr.appendChild(row);
         });
 
         document.getElementById('new-colors-container')
                 .addEventListener('click', e => {
-          if (e.target.matches('.remove-color-btn'))
-            e.target.closest('.input-group').remove();
+            if (e.target.closest('.remove-color-btn')) {
+                e.target.closest('.input-group').remove();
+            }
         });
     </script>
 }
