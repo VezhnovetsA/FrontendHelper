@@ -7,7 +7,7 @@
 }
 
 @section Head {
-    <!-- Подключаем внешние шрифты -->
+    <!-- Подключаем внешние внешние CSS-шрифты -->
     @foreach (var f in Model.Fonts.Where(x =>
                  !string.IsNullOrEmpty(x.LinkOrLocalUrl) &&
                  !x.LinkOrLocalUrl.StartsWith("/fonts/")))
@@ -35,12 +35,12 @@
 <div class="container py-4">
     <h2 class="mb-4">Шрифты</h2>
 
-    @* ─── Фиксированная верхняя панель: Добавление + предпросмотр текста + фильтры ─── *@
-    <div class="sticky-top bg-white pb-3" style="z-index: 10;">
+    @* ─── Фиксированная верхняя панель ─── *@
+    <div class="sticky-top bg-white pb-3 px-3" style="z-index: 10; border-radius:12px;">
         @* Кнопка “Добавить шрифт” *@
         @if (authService.HasPermission(Permission.CanManageFonts))
         {
-            <div class="mb-3">
+            <div class="mb-2">
                 <a asp-action="AddFont"
                    asp-controller="Font"
                    class="btn-create-icon">
@@ -49,13 +49,21 @@
             </div>
         }
 
-        @* Поле для предпросмотра *@
-        <div class="mb-3">
-            <label for="inputText" class="form-label">Введите текст для предпросмотра</label>
-            <textarea id="inputText"
-                      class="form-control mb-2"
-                      rows="3"
-                      placeholder="Пример: Привет, мир!">@Model.InputText</textarea>
+        @* Поле предпросмотра + кнопка копирования со стилем *@
+        <div class="d-flex align-items-start mb-2">
+            <div class="flex-grow-1 me-2">
+                <label for="inputText" class="form-label">Введите текст для предпросмотра</label>
+                <textarea id="inputText"
+                          class="form-control mb-1"
+                          rows="3"
+                          placeholder="Пример: Привет, мир!">@Model.InputText</textarea>
+            </div>
+            <div class="mt-4">
+              <button id="copyStyledBtn" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-clipboard me-1"></i>
+                     Копировать со стилем
+              </button>
+            </div>
         </div>
 
         @* Панель фильтров *@
@@ -119,9 +127,7 @@
                                 <td style="font-family: '@f.CssFontFamily', sans-serif;">
                                     @f.Name
                                 </td>
-                                <td>
-                                    @f.FontFamily
-                                </td>
+                                <td>@f.FontFamily</td>
                                 @if (authService.HasPermission(Permission.CanManageFonts))
                                 {
                                     <td>
@@ -156,91 +162,111 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const input       = document.getElementById('inputText');
-            const fontRows    = document.querySelectorAll('.font-row');
-            const filterBoxes = document.querySelectorAll('.filter-checkbox');
+    document.addEventListener('DOMContentLoaded', () => {
+        const input        = document.getElementById('inputText');
+        const copyBtn      = document.getElementById('copyStyledBtn');
+        const fontRows     = Array.from(document.querySelectorAll('.font-row'));
+        const filterBoxes  = Array.from(document.querySelectorAll('.filter-checkbox'));
 
-            // Обновление предпросмотра выбранного шрифта
-            function refreshPreview() {
-                const sel = document.querySelector('.font-row.selected');
-                if (sel) {
-                    input.style.fontFamily = sel.dataset.fontFamily + ', sans-serif';
-                } else {
-                    input.style.fontFamily = '';
-                }
+        // --- Copy with style ---
+        copyBtn.addEventListener('click', async () => {
+            const text = input.value;
+            const font = window.getComputedStyle(input).fontFamily;
+            const html = `<span style="font-family:${font};">${ 
+                text
+                  .replace(/&/g, "&amp;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/\n/g, "<br>")
+            }</span>`;
+
+            try {
+                await navigator.clipboard.write([
+                  new ClipboardItem({
+                    'text/plain': new Blob([text],   { type: 'text/plain' }),
+                    'text/html':  new Blob([html],   { type: 'text/html' })
+                  })
+                ]);
+                alert('Скопировано со стилем!');
+            } catch (err) {
+                alert('Ошибка копирования: ' + err);
             }
+        });
 
-            // Выбор и hover строки
-            fontRows.forEach(row => {
-                row.addEventListener('click', () => {
-                    document.querySelectorAll('.font-row.selected')
-                            .forEach(r => r.classList.remove('selected'));
-                    row.classList.add('selected');
-                    refreshPreview();
-                });
-                row.addEventListener('mouseenter', () => row.classList.add('hovered'));
-                row.addEventListener('mouseleave', () => row.classList.remove('hovered'));
+        // --- Preview refresh ---
+        function refreshPreview() {
+            const sel = document.querySelector('.font-row.selected');
+            input.style.fontFamily = sel
+              ? sel.dataset.fontFamily + ', sans-serif'
+              : '';
+        }
+
+        // --- Row selection & hover ---
+        fontRows.forEach(row => {
+            row.addEventListener('click', () => {
+                fontRows.forEach(r => r.classList.remove('selected'));
+                row.classList.add('selected');
+                refreshPreview();
             });
+            row.addEventListener('mouseenter', () => row.classList.add('hovered'));
+            row.addEventListener('mouseleave', () => row.classList.remove('hovered'));
+        });
 
-            // Применение фильтров
-            function applyFilters() {
-                const checkedIds = Array.from(filterBoxes)
-                    .filter(cb => cb.checked)
-                    .map(cb => parseInt(cb.value, 10));
+        // --- Filter “AND” logic ---
+        function applyFilters() {
+            const checked = filterBoxes
+              .filter(cb => cb.checked)
+              .map(cb => parseInt(cb.value, 10));
 
-                fontRows.forEach(row => {
-                    const rowFilterIds = row.dataset.filterIds
-                        ? row.dataset.filterIds.split(',').map(id => parseInt(id, 10))
-                        : [];
-                    row.style.display = (
-                        !checkedIds.length
-                        || rowFilterIds.some(i => checkedIds.includes(i))
-                    ) ? '' : 'none';
-                });
-
-                const sel = document.querySelector('.font-row.selected');
-                if (sel && sel.style.display === 'none') {
-                    sel.classList.remove('selected');
-                    input.style.fontFamily = '';
+            fontRows.forEach(row => {
+                if (!checked.length) {
+                    row.style.display = '';
+                    return;
                 }
+                const ids = row.dataset.filterIds
+                  .split(',').map(x => parseInt(x,10));
+                row.style.display = checked.every(id => ids.includes(id))
+                  ? '' : 'none';
+            });
+            const sel = document.querySelector('.font-row.selected');
+            if (sel && sel.style.display === 'none') {
+                sel.classList.remove('selected');
+                input.style.fontFamily = '';
             }
-            filterBoxes.forEach(cb => cb.addEventListener('change', applyFilters));
+        }
+        filterBoxes.forEach(cb => cb.addEventListener('change', applyFilters));
 
-            // Toggle “Избранное”
-            document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
-                btn.addEventListener('click', async e => {
-                    e.stopPropagation();
-                    const assetType = btn.dataset.assetType;
-                    const assetId   = parseInt(btn.dataset.assetId, 10);
-                    const iconEl    = btn.querySelector('i');
-
-                    try {
-                        const response = await fetch('/Favorites/Toggle', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                            },
-                            body: JSON.stringify({ assetType, assetId })
-                        });
-                        if (!response.ok) throw new Error('Сетевая ошибка');
-                        const result = await response.json();
-
-                        if (result.favorited) {
-                            iconEl.classList.replace('bi-heart', 'bi-heart-fill');
-                            iconEl.classList.add('text-danger');
-                            iconEl.title = 'Убрать из избранного';
-                        } else {
-                            iconEl.classList.replace('bi-heart-fill', 'bi-heart');
-                            iconEl.classList.remove('text-danger');
-                            iconEl.title = 'Добавить в избранное';
-                        }
-                    } catch (err) {
-                        alert('Не удалось обновить «Избранное»: ' + err);
+        // --- Toggle favorites ---
+        document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', async e => {
+                e.stopPropagation();
+                const { assetType, assetId } = btn.dataset;
+                const icon = btn.querySelector('i');
+                try {
+                    const res = await fetch('/Favorites/Toggle', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({ assetType, assetId: +assetId })
+                    });
+                    if (!res.ok) throw new Error(res.status);
+                    const { favorited } = await res.json();
+                    if (favorited) {
+                        icon.classList.replace('bi-heart','bi-heart-fill');
+                        icon.classList.add('text-danger');
+                        icon.title = 'Убрать из избранного';
+                    } else {
+                        icon.classList.replace('bi-heart-fill','bi-heart');
+                        icon.classList.remove('text-danger');
+                        icon.title = 'Добавить в избранное';
                     }
-                });
+                } catch (err) {
+                    alert('Не удалось обновить избранное: ' + err);
+                }
             });
         });
+    });
     </script>
 }

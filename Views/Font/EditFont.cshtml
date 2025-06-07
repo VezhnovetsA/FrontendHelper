@@ -46,17 +46,47 @@
 
             <div class="mb-3">
                 <label asp-for="FontFile" class="form-label">Загрузить новый файл (заменит существующий)</label>
-                <input asp-for="FontFile"
-                       type="file"
-                       class="form-control" />
+                <input asp-for="FontFile" type="file" class="form-control" />
                 <span asp-validation-for="FontFile" class="text-danger small"></span>
+            </div>
+
+            @* ================================
+               Существующие фильтры (чек-боксы)
+               ================================ *@
+            @if (Model.AvailableFilters.Any())
+            {
+                <div class="mb-3">
+                    <label class="form-label">Существующие фильтры</label>
+                    <div class="filter-list">
+                        @foreach (var filt in Model.AvailableFilters)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="SelectedFilterIds"
+                                       value="@filt.Value"
+                                       id="filter_@filt.Value"
+                                @(Model.SelectedFilterIds.Contains(int.Parse(filt.Value)) ? "checked" : "") />
+                                <label class="form-check-label" for="filter_@filt.Value">
+                                    @filt.Text
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="mb-3">
+                <label class="form-label">Новые фильтры (через запятую)</label>
+                <input asp-for="NewFilterNames"
+                       class="form-control"
+                       placeholder="Например: гротеск, рукописные" />
+                <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
             </div>
 
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-                <a asp-action="ShowFonts"
-                   asp-controller="Font"
-                   class="btn btn-secondary ms-2">Отмена</a>
+                <a asp-action="ShowFonts" asp-controller="Font" class="btn btn-secondary ms-2">Отмена</a>
             </div>
         </form>
     </div>

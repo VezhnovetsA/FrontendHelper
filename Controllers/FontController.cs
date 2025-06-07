@@ -1,5 +1,4 @@
-﻿// FrontendHelper/Controllers/FontController.cs
-using FHDatabase.Models;
+﻿using FHDatabase.Models;
 using FHDatabase.Repositories;
 using FhEnums;
 using FrontendHelper.Controllers.AuthorizationAttributes;
@@ -8,10 +7,6 @@ using FrontendHelper.Services;
 using FrontendHelper.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FrontendHelper.Controllers
 {
@@ -22,9 +17,6 @@ namespace FrontendHelper.Controllers
         private readonly FavoriteRepository _favoriteRepository;
         private readonly AuthService _authService;
         private readonly IFileService _fileService;
-
-        // Допустимые расширения для локальных файлов
-        private readonly string[] _allowedExtensions = new[] { ".ttf", ".otf", ".woff", ".woff2" };
 
         public FontController(
             FontRepository fontRepository,
@@ -46,17 +38,14 @@ namespace FrontendHelper.Controllers
         [HasPermission(Permission.CanViewFonts)]
         public IActionResult ShowFonts()
         {
-            // 1) Получаем все записи из репозитория шрифтов
             var fonts = _fontRepository.GetAssets().ToList();
-
-            // 2) Формируем список доступных фильтров (для панели фильтрации)
             var allFilters = _filterRepository.GetFiltersByCategory("Font").ToList();
+
+            // Формируем SelectListItem для панели фильтров
             var filterSelectItems = allFilters
                 .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                 .ToList();
 
-            // 3) Узнаём ID текущего пользователя (если он авторизован), 
-            //    чтобы пометить уже добавленные в избранное шрифты
             int? userId = _authService.IsAuthenticated() ? _authService.GetUserId() : null;
             var userFavFontIds = new List<int>();
             if (userId.HasValue)
@@ -68,28 +57,18 @@ namespace FrontendHelper.Controllers
                     .ToList();
             }
 
-            // 4) Собираем список моделей для представления (FontListItem).
-            //    В частности, для локальных файлов (LocalFileName != null) 
-            //    генерируем CSS-имя вида "FontFamily_<Id>", 
-            //    а для внешних ссылок просто "FontFamily".
             var fontItems = new List<FontListItem>();
             foreach (var f in fonts)
             {
-                // 4.1) Решаем, откуда брать контент: внешняя ссылка (Google Fonts и т.п.)
-                //      или локальный файл (~/fonts/...)
                 string src = !string.IsNullOrEmpty(f.Link)
                     ? f.Link
                     : Url.Content($"~/fonts/{f.LocalFileName}");
 
-                // 4.2) Список ID фильтров, привязанных к этому шрифту
                 var filterIds = _filterRepository
                     .GetFiltersForAsset("Font", f.Id)
                     .Select(x => x.Id)
                     .ToList();
 
-                // 4.3) Определяем, под каким "CSS-именем" регистрировать font-face:
-                //      • если LocalFileName не пустой → локальный файл → присоединяем "_{Id}"
-                //      • если LocalFileName пустой, но есть f.Link → внешний CSS → оставляем оригинальное f.FontFamily
                 bool isLocalFile = !string.IsNullOrEmpty(f.LocalFileName);
                 string cssName = isLocalFile
                     ? $"{f.FontFamily}_{f.Id}"
@@ -99,15 +78,14 @@ namespace FrontendHelper.Controllers
                 {
                     Id = f.Id,
                     Name = f.Name,
-                    FontFamily = f.FontFamily,     // оригинальное имя (отображаем в колонке "CSS-семейство")
-                    LinkOrLocalUrl = src,               // или внешний URL, или "/fonts/имя_файла"
+                    FontFamily = f.FontFamily,
+                    LinkOrLocalUrl = src,
                     FilterIds = filterIds,
                     IsFavorited = userFavFontIds.Contains(f.Id),
-                    CssFontFamily = cssName            // именно это имя будет использоваться в <font-face> и style="font-family: …"
+                    CssFontFamily = cssName
                 });
             }
 
-            // 5) Собираем ViewModel и возвращаем представление
             var vm = new FontIndexViewModel
             {
                 AvailableFilters = filterSelectItems,
@@ -118,8 +96,6 @@ namespace FrontendHelper.Controllers
             return View(vm);
         }
 
-
-
         // ========================================
         // Добавление нового шрифта
         // ========================================
@@ -127,7 +103,16 @@ namespace FrontendHelper.Controllers
         [HttpGet]
         public IActionResult AddFont()
         {
-            return View(new CreateFontViewModel());
+            // Подготовим модель с пустым списком фильтров
+            var vm = new CreateFontViewModel
+            {
+                AvailableFilters = _filterRepository
+                    .GetFiltersByCategory("Font")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList()
+            };
+
+            return View(vm);
         }
 
         [HasPermission(Permission.CanManageFonts)]
@@ -135,8 +120,15 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddFont(CreateFontViewModel viewModel)
         {
+            // Если модель некорректна, вернём её с доступными фильтрами
             if (!ModelState.IsValid)
+            {
+                viewModel.AvailableFilters = _filterRepository
+                    .GetFiltersByCategory("Font")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList();
                 return View(viewModel);
+            }
 
             var font = new FontData
             {
@@ -144,13 +136,12 @@ namespace FrontendHelper.Controllers
                 FontFamily = viewModel.FontFamily
             };
 
-            // Если пришла ссылка, то явно сбрасываем LocalFileName
+            // Обрабатываем внешний Link / файл
             if (!string.IsNullOrEmpty(viewModel.Link))
             {
                 font.Link = viewModel.Link;
                 font.LocalFileName = null;
             }
-            // Если же загрузили файл, то сбрасываем Link и сохраняем только файл
             if (viewModel.FontFile != null)
             {
                 font.Link = null;
@@ -158,11 +149,62 @@ namespace FrontendHelper.Controllers
                 font.LocalFileName = fileName;
             }
 
+            // Сохраняем шрифт
             _fontRepository.AddAsset(font);
+
+            // === Обрабатываем существующие фильтры ===
+            var toBindFilterIds = viewModel.SelectedFilterIds.Distinct().ToList();
+            foreach (var fid in toBindFilterIds)
+            {
+                _filterRepository.AddAssetFilter(new AssetFilter
+                {
+                    FilterId = fid,
+                    AssetType = "Font",
+                    AssetId = font.Id
+                });
+            }
+
+            // === Обрабатываем новые фильтры (если заданы) ===
+            var newNames = (viewModel.NewFilterNames ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var name in newNames)
+            {
+                // Если такой фильтр уже есть — не дублируем
+                var already = _filterRepository
+                    .GetFiltersByCategory("Font")
+                    .FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+                int newFid;
+                if (already != null)
+                {
+                    newFid = already.Id;
+                }
+                else
+                {
+                    var newFilter = new FilterData { Name = name, AssetType = "Font" };
+                    _filterRepository.AddAsset(newFilter);
+                    newFid = newFilter.Id;
+                }
+
+                // В любом случае привяжем к новому шрифту, если ещё не привязано
+                if (!toBindFilterIds.Contains(newFid))
+                {
+                    _filterRepository.AddAssetFilter(new AssetFilter
+                    {
+                        FilterId = newFid,
+                        AssetType = "Font",
+                        AssetId = font.Id
+                    });
+                }
+            }
+
             return RedirectToAction(nameof(ShowFonts));
         }
-
-
 
         // ========================================
         // Редактирование шрифта
@@ -174,6 +216,7 @@ namespace FrontendHelper.Controllers
             var font = _fontRepository.GetAsset(id);
             if (font == null) return NotFound();
 
+            // Собираем ViewModel
             var vm = new EditFontViewModel
             {
                 Id = font.Id,
@@ -182,6 +225,19 @@ namespace FrontendHelper.Controllers
                 Link = font.Link,
                 ExistingFileName = font.LocalFileName
             };
+
+            // Заполняем список всех фильтров
+            vm.AvailableFilters = _filterRepository
+                .GetFiltersByCategory("Font")
+                .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                .ToList();
+
+            // Помечаем уже привязанные к этому шрифту фильтры
+            vm.SelectedFilterIds = _filterRepository
+                .GetFiltersForAsset("Font", id)
+                .Select(f => f.Id)
+                .ToList();
+
             return View(vm);
         }
 
@@ -191,58 +247,112 @@ namespace FrontendHelper.Controllers
         public async Task<IActionResult> EditFont(EditFontViewModel viewModel)
         {
             if (!ModelState.IsValid)
+            {
+                // Если ошибка валидации, снова подгружаем AvailableFilters
+                viewModel.AvailableFilters = _filterRepository
+                    .GetFiltersByCategory("Font")
+                    .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
+                    .ToList();
                 return View(viewModel);
+            }
 
             var font = _fontRepository.GetAsset(viewModel.Id);
-            if (font == null)
-                return NotFound();
+            if (font == null) return NotFound();
 
-            // 1) Если пришёл новый внешний URL, то сбрасываем локальный файл.
+            // 1) Обрабатываем внешний Link → сбрасываем старый локальный файл
             if (!string.IsNullOrEmpty(viewModel.Link))
             {
-                // Если ранее был загружен файл, удаляем его с диска
                 if (!string.IsNullOrEmpty(font.LocalFileName))
                 {
                     _fileService.DeleteFile(font.LocalFileName, "fonts");
                     font.LocalFileName = null;
                 }
-
-                // Обновляем только поле Link
                 font.Link = viewModel.Link;
-                // (Оставляем font.FontFamily и font.Name, их обновим ниже)
             }
 
-            // 2) Если пользователь загрузил новый файл (FontFile), то сбросим Link и сохраним файл
+            // 2) Обрабатываем новый загруженный файл → сбрасываем Link и старый файл
             if (viewModel.FontFile != null)
             {
-                // Если до этого у записи был внешний URL, то сбросим его
                 if (!string.IsNullOrEmpty(font.Link))
-                {
                     font.Link = null;
-                }
 
-                // И если уже лежал локальный файл — удалим сначала его
                 if (!string.IsNullOrEmpty(font.LocalFileName))
-                {
                     _fileService.DeleteFile(font.LocalFileName, "fonts");
-                }
-                // Сохраняем новый загруженный файл:
+
                 var newFileName = await _fileService.SaveFileAsync(viewModel.FontFile, "fonts");
                 font.LocalFileName = newFileName;
             }
 
-            // 3) Обновляем остальные поля (Name, FontFamily).  
-            //    Это делаем уже после обработки “Link / LocalFileName”, чтобы не затирать их.
+            // 3) Обновляем остальные поля
             font.Name = viewModel.Name;
             font.FontFamily = viewModel.FontFamily;
-
-            // 4) Записываем изменения
             _fontRepository.UpdateAsset(font);
+
+            // ===== Работа с фильтрами =====
+
+            // 3.1) Удаляем те связи «Font–Filter», которые больше не отмечены
+            var currentFilterIds = _filterRepository
+                .GetFiltersForAsset("Font", viewModel.Id)
+                .Select(f => f.Id)
+                .ToList();
+
+            foreach (var oldFid in currentFilterIds)
+            {
+                if (!viewModel.SelectedFilterIds.Contains(oldFid))
+                {
+                    _filterRepository.RemoveAssetFilter("Font", viewModel.Id, oldFid);
+                }
+            }
+
+            // 3.2) Привязываем выбранные в форме + новые
+            // Сначала обрабатываем новые фильтры из строки
+            var newNames = (viewModel.NewFilterNames ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var newFilterIds = new List<int>();
+            foreach (var name in newNames)
+            {
+                var already = _filterRepository
+                    .GetFiltersByCategory("Font")
+                    .FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+                if (already != null)
+                {
+                    newFilterIds.Add(already.Id);
+                }
+                else
+                {
+                    var newFilter = new FilterData { Name = name, AssetType = "Font" };
+                    _filterRepository.AddAsset(newFilter);
+                    newFilterIds.Add(newFilter.Id);
+                }
+            }
+
+            // Собираем окончательный список: выбранные + только что созданные
+            var finalFilterIds = viewModel.SelectedFilterIds
+                .Concat(newFilterIds)
+                .Distinct()
+                .ToList();
+
+            foreach (var fid in finalFilterIds)
+            {
+                if (!currentFilterIds.Contains(fid))
+                {
+                    _filterRepository.AddAssetFilter(new AssetFilter
+                    {
+                        FilterId = fid,
+                        AssetType = "Font",
+                        AssetId = font.Id
+                    });
+                }
+            }
 
             return RedirectToAction(nameof(ShowFonts));
         }
-
-
 
         // ========================================
         // Удаление шрифта
@@ -256,9 +366,7 @@ namespace FrontendHelper.Controllers
             if (font == null) return NotFound();
 
             if (!string.IsNullOrEmpty(font.LocalFileName))
-            {
                 _fileService.DeleteFile(font.LocalFileName, "fonts");
-            }
 
             _fontRepository.RemoveAsset(id);
             return RedirectToAction(nameof(ShowFonts));
