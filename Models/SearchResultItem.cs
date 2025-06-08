@@ -20,5 +20,7 @@
 
         // Для палитры: список цветов (Hex)
         public List<SearchColorViewModel>? PaletteColors { get; set; }
+
+        public bool IsFavorited { get; set; } = false;
     }
 }

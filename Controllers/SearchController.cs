@@ -2,9 +2,11 @@
 using FHDatabase.Models;
 using FHDatabase.Repositories;
 using FrontendHelper.Models;
+using FrontendHelper.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Security.Claims;
 
 namespace FrontendHelper.Controllers
 {
@@ -19,6 +21,8 @@ namespace FrontendHelper.Controllers
         private readonly FontRepository _fontRepo;
         private readonly PaletteRepository _paletteRepo;
         private readonly FilterRepository _filterRepo;
+        private readonly FavoriteRepository _favoriteRepo;
+        private readonly AuthService _authService;
 
         public SearchController(
             IconRepository iconRepo,
@@ -29,7 +33,9 @@ namespace FrontendHelper.Controllers
             FormRepository formRepo,
             FontRepository fontRepo,
             PaletteRepository paletteRepo,
-            FilterRepository filterRepo
+            FilterRepository filterRepo,
+            FavoriteRepository favoriteRepo,
+            AuthService authService
         )
         {
             _iconRepo = iconRepo;
@@ -41,6 +47,8 @@ namespace FrontendHelper.Controllers
             _fontRepo = fontRepo;
             _paletteRepo = paletteRepo;
             _filterRepo = filterRepo;
+            _favoriteRepo = favoriteRepo;
+            _authService = authService;
         }
 
         [HttpGet]
@@ -257,6 +265,21 @@ namespace FrontendHelper.Controllers
                     .OrderBy(r => r.ResourceType)
                     .ThenBy(r => r.Name)
                     .ToList();
+
+                //  Получаем текущего пользователя
+                int userId = 0;
+                if (_authService.IsAuthenticated())
+                {
+                    userId = _authService.GetUserId();
+                }
+
+                //  Проставляем флаг IsFavorited
+                foreach (var item in vm.Results)
+                {
+                    item.IsFavorited = (userId > 0)
+                        ? _favoriteRepo.IsFavorited(userId, item.ResourceType, item.Id)
+                        : false;
+                }
 
                 // ** 4) После формирования vm.Results, для каждого элемента "Palette" 
                 // загружаем цвета из БД и заполняем PaletteColors **
