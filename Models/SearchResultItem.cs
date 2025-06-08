@@ -19,7 +19,7 @@
         public string? FontFamily { get; set; }
 
         // Для палитры: список цветов (Hex)
-        public List<SearchColorViewModel>? PaletteColors { get; set; } = new List<SearchColorViewModel>();
+        public List<SearchColorViewModel>? PaletteColors { get; set; }
 
         public bool IsFavorited { get; set; } = false;
     }
