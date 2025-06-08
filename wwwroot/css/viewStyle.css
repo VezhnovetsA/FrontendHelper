@@ -1130,6 +1130,56 @@
         box-shadow: 0 0 10px var(--accent-glow);
     }
 
+
+
+/* ===========================================
+   Исправляем стиль “сердечка” и любых .favorite-toggle-btn
+   =========================================== */
+.favorite-toggle-btn {
+    /* убираем стандартные паддинги/границы */
+    background: transparent !important;
+    border: none !important;
+    padding: 0.25rem !important;
+    /* делаем круглой область кнопки */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+    /* чуть больше курсора */
+    cursor: pointer;
+}
+
+    .favorite-toggle-btn i {
+        font-size: 1.2rem; /* увеличиваем иконку */
+        line-height: 1; /* убираем смещение */
+        /* чтобы не оставалось «квадрата» при hover */
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+/* ===========================================
+   Гарантированное скругление любых .btn-outline-secondary
+   и .btn-outline-primary (в том числе редактирующих)
+   =========================================== */
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-outline-danger,
+.btn-primary {
+    border-radius: 50px !important;
+}
+
+/* В группах кнопок (btn-group) */
+.btn-group .btn {
+    border-radius: 50px !important;
+}
+
+/* Если вдруг остался «половинчатый» border-radius на <a> */
+a.btn-outline-secondary,
+a.btn-outline-primary,
+a.btn-primary {
+    border-radius: 50px !important;
+}
+
 /* ===========================================
    Конец дополнительных стилей
    =========================================== */

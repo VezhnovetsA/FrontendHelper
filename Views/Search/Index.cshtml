@@ -1,27 +1,27 @@
 ﻿@model FrontendHelper.Models.SearchViewModel
+@using FhEnums
+@inject FrontendHelper.Services.AuthService authService
 
 @{
-    // Словарь переводов ResourceType → русское название
+    // Русские заголовки для групп
     var typeNames = new Dictionary<string, string>
             {
                 ["Icon"] = "Иконки",
                 ["Picture"] = "Изображения",
                 ["AnimatedElement"] = "Анимации",
                 ["Button"] = "Кнопки",
-                ["Form"] = "Формы",
                 ["Template"] = "Шаблоны",
+                ["Form"] = "Формы",
                 ["Font"] = "Шрифты",
                 ["Palette"] = "Палитры"
-                // при необходимости добавьте сюда другие типы...
             };
 
-    // Группируем результаты по ResourceType
     var grouped = Model.Results
-        .GroupBy(item => item.ResourceType)
+        .GroupBy(r => r.ResourceType)
         .OrderBy(g => g.Key);
 }
 
-<h2>Результаты поиска для "@Model.Query"</h2>
+<h2 class="mb-4">Результаты поиска для «@Model.Query»</h2>
 
 @if (!Model.Results.Any())
 {
@@ -31,293 +31,294 @@ else
 {
     @foreach (var group in grouped)
     {
-        @* Определяем заголовок группы: из typeNames или сам ключ, если перевода нет *@
         var header = typeNames.ContainsKey(group.Key)
             ? typeNames[group.Key]
             : group.Key;
+        <h4 class="mt-5 mb-3 text-capitalize">@header</h4>
+        <div class="row gx-3 gy-4">
+            @foreach (var item in group)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm position-relative">
 
-        <h4 class="mt-4 mb-3 text-capitalize">@header</h4>
+                        @* — Preview — *@
+                        @switch (item.ResourceType)
+                        {
+                            case "Icon":
+                            case "Picture":
+                                <img src="@item.PreviewUrl"
+                                     alt="@item.Name"
+                                     class="card-img-top img-fluid"
+                                     style="object-fit:contain;max-height:200px;background:var(--bg-alt);padding:.5rem;" />
+                                break;
 
-        @* --- Шаблоны (Template) --- *@
-        @if (group.Key == "Template")
-        {
-            <div class="row gx-3 gy-4">
-                @foreach (var item in group)
-                {
-                    <div class="col-12">
-                        <div class="card shadow-sm mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">@item.Name</h5>
-                                <div class="position-relative mb-3 template-preview"
-                                     style="height:1200px; overflow:hidden; border:1px solid #e0e0e0;">
+                            case "AnimatedElement":
+                                <div style="height:180px;display:flex;align-items:center;justify-content:center;background:var(--bg-alt);padding:.5rem;">
+                                    @if (item.PreviewUrl.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <img src="@item.PreviewUrl" class="img-fluid" style="max-height:160px;" />
+                                    }
+                                    else
+                                    {
+                                        <video src="@item.PreviewUrl"
+                                               class="img-fluid"
+                                               muted loop autoplay playsinline
+                                               style="max-height:160px;">
+                                        </video>
+                                    }
+                                </div>
+                                break;
+
+                            case "Button":
+                                <div class="button-preview p-3 d-flex align-items-center justify-content-center" style="height:120px;background:var(--bg-alt);overflow:hidden;">
                                     <iframe src="@item.PreviewUrl"
-                                            style="border:none; width:100%; height:100%;"
-                                            scrolling="no">
-                                    </iframe>
-                                    <div class="template-overlay"
-                                         style="
-                                             position:absolute;
-                                             top:0;
-                                             left:0;
-                                             width:100%;
-                                             height:100%;
-                                             z-index:10;
-                                             background:transparent;
-                                                         ">
+                                            style="border:none;width:100%;height:100%;pointer-events:none;"
+                                            scrolling="no"></iframe>
+                                </div>
+                                break;
+
+                            case "Template":
+                                <div style="height:300px;overflow:auto;background:var(--bg-alt);padding:.5rem;border-top-left-radius:12px;border-top-right-radius:12px;">
+                                    <div style="width:2000px;height:2000px;transform:scale(.43);transform-origin:top left;position:relative;">
+                                        <iframe src="@item.PreviewUrl"
+                                                style="border:none;width:100%;height:100%;pointer-events:none;"
+                                                scrolling="no"></iframe>
                                     </div>
                                 </div>
-                                <a href="@item.DownloadUrl" download class="btn btn-primary">
-                                    Скачать HTML
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            @* --- Остальные типы: сетка 4 колонки --- *@
-            <div class="row gx-3 gy-4">
-                @foreach (var item in group)
-                {
-                    <div class="col-sm-6 col-md-4 col-lg-3">
-                        <div class="card h-100 shadow-sm">
+                                break;
 
-                            @switch (item.ResourceType)
+                            case "Form":
+                                <div style="height:300px;overflow-y:auto;background:var(--bg-alt);padding:.5rem;border-top-left-radius:12px;border-top-right-radius:12px;">
+                                    <iframe src="@item.PreviewUrl"
+                                            style="border:none;width:100%;height:1000px;pointer-events:none;"
+                                            scrolling="no"></iframe>
+                                </div>
+                                break;
+
+                            case "Font":
+                                <div class="p-4 d-flex align-items-center justify-content-center" style="height:150px;">
+                                    <p style="font-family:'@item.FontFamily';font-size:1.5rem;margin:0;">
+                                        @item.Name
+                                    </p>
+                                </div>
+                                break;
+
+                            case "Palette":
+                                <div class="p-3" style="height:300px;">
+                                    <h6 class="text-center mb-3">@item.Name</h6>
+                                    <div class="palette-grid d-flex flex-wrap" style="gap:2px;">
+                                        @foreach (var c in item.PaletteColors)
+                                        {
+                                            <div class="palette-swatch"
+                                                 title="@c.Hex"
+                                                 style="flex:1 0 30%;padding-top:30%;background:@c.Hex;position:relative;cursor:pointer;"
+                                                 onclick="copyColorHex('@c.Hex')">
+                                                <span class="swatch-hex" style="position:absolute;bottom:4px;left:4px;font-size:.75rem;background:rgba(255,255,255,.8);padding:2px;border-radius:2px;">
+                                                    @c.Hex
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                break;
+
+                            default:
+                                <div class="d-flex align-items-center justify-content-center bg-light" style="height:300px;">
+                                    <span class="text-muted">Нет превью</span>
+                                </div>
+                                break;
+                        }
+
+                        @* — «Лайк» (избранное) *@
+                        <button class="favorite-toggle-btn position-absolute top-0 end-0 m-2"
+                                data-asset-type="@item.ResourceType"
+                                data-asset-id="@item.Id"
+                                onclick="toggleFavorite(event, this)">
+                            <i class="bi @(item.IsFavorited ? "bi-heart-fill text-danger" : "bi-heart text-secondary")"
+                               title="@(item.IsFavorited ? "Убрать из избранного" : "Добавить в избранное")"></i>
+                        </button>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-truncate" title="@item.Name" style="font-size:1.1rem;">
+                                @item.Name
+                            </h5>
+                            @if (!string.IsNullOrEmpty(item.Topic))
                             {
-                                case "Icon":
-                                case "Picture":
-                                case "AnimatedElement":
-                                    <img src="@item.PreviewUrl"
-                                         class="card-img-top img-fluid"
-                                         style="object-fit: contain; max-height: 300px; width: 100%;" />
-                                    break;
-
-                                case "Button":
-                                    <div class="button-preview p-3 d-flex justify-content-center align-items-center"
-                                         style="height: 120px;">
-                                        <iframe src="@item.PreviewUrl"
-                                                style="border:none; width:100%; height:100%;"></iframe>
-                                    </div>
-                                    break;
-
-                                case "Form":
-                                    <div class="position-relative mb-2 border rounded" style="height: 400px;">
-                                        <iframe src="@item.PreviewUrl"
-                                                style="width:100%; height:100%; border:none;"></iframe>
-                                        <div class="form-overlay"
-                                             style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;">
-                                        </div>
-                                    </div>
-                                    break;
-
-                                case "Font":
-                                    <div class="p-4 d-flex justify-content-center align-items-center" style="height: 150px;">
-                                        <p style="font-family: '@item.FontFamily'; font-size: 1.5rem; margin:0;">
-                                            @item.Name
-                                        </p>
-                                    </div>
-                                    break;
-
-                                case "Palette":
-                                    <div class="p-3" style="height: 300px;">
-                                        <h6 class="mb-3 text-center">@item.Name</h6>
-                                        <div class="palette-grid d-flex flex-wrap" style="gap:2px;">
-                                            @foreach (var color in item.PaletteColors)
-                                            {
-                                                <div class="palette-swatch"
-                                                     title="Нажмите, чтобы скопировать HEX"
-                                                     style="
-                                                         flex: 1 0 30%;
-                                                         padding-top: 30%;
-                                                         background: @color.Hex;
-                                                         position: relative;
-                                                         cursor: pointer;
-                                                                                 "
-                                                     onclick="copyColorHex('@color.Hex')">
-                                                    <span class="swatch-hex"
-                                                          style="
-                                                              position: absolute;
-                                                              bottom: 4px;
-                                                              left: 4px;
-                                                              font-size: 0.75rem;
-                                                              background: rgba(255,255,255,0.7);
-                                                              padding: 2px;
-                                                              border-radius: 2px;
-                                                                                      ">
-                                                        @color.Hex
-                                                    </span>
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
-                                    break;
-
-                                default:
-                                    <div class="d-flex align-items-center justify-content-center bg-light"
-                                         style="height:300px;">
-                                        <span class="text-muted">Нет превью</span>
-                                    </div>
-                                    break;
+                                <p class="card-text text-muted small mb-2">Тема: @item.Topic</p>
                             }
+                            <p class="card-text mb-2">
+                                <span class="badge bg-secondary text-capitalize">@header</span>
+                            </p>
 
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title" style="font-size: 1.1rem;">@item.Name</h5>
-                                @if (!string.IsNullOrEmpty(item.Topic))
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                @* — Download / Copy buttons by type *@
+                                @if (item.ResourceType == "Icon" || item.ResourceType == "Picture")
                                 {
-                                    <p class="card-text text-muted small mb-2">Тема: @item.Topic</p>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="downloadImage('@item.PreviewUrl')">
+                                        Скачать
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="copyImageToClipboard('@item.PreviewUrl')">
+                                        Копировать
+                                    </button>
                                 }
-                                <p class="card-text mb-1">
-                                    <span class="badge bg-secondary text-capitalize">@header</span>
-                                </p>
+                                else if (item.ResourceType == "AnimatedElement")
+                                {
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="downloadAnimation('@item.PreviewUrl')">
+                                        Скачать
+                                    </button>
+                                }
+                                else if (item.ResourceType == "Button"
+                                || item.ResourceType == "Template"
+                                || item.ResourceType == "Form")
+                                {
+                                    <a class="btn btn-sm btn-outline-primary"
+                                       href="@item.DownloadUrl"
+                                       download>
+                                        Скачать HTML
+                                    </a>
+                                }
+                                else if (item.ResourceType == "Font")
+                                {
+                                    <a class="btn btn-sm btn-outline-primary"
+                                       href="@Url.Action("ShowFonts", "Font")">
+                                        Перейти к шрифтам
+                                    </a>
+                                }
+                                @* Палитры ▶︎ копируются по клику свотча *@
 
-                                <div class="mt-auto d-flex justify-content-between align-items-center">
-                                    @* Кнопки действий *@
-                                    @if (item.ResourceType == "Button"
-                                   || item.ResourceType == "Template"
-                                   || item.ResourceType == "Form")
-                                    {
-                                        <a class="btn btn-sm btn-outline-primary" href="@item.DownloadUrl" download>
-                                            Скачать HTML
+                                @* — Edit / Delete inline *@
+                                @* … внутри вашего Index.cshtml, в блоке Inline-редактирования *@
+                                @if (authService.HasPermission(
+                               item.ResourceType switch
+                               {
+                                   "Icon" => Permission.CanManageIcons,
+                                   "Picture" => Permission.CanManagePictures,
+                                   "AnimatedElement" => Permission.CanManageAnimatedElements,
+                                   "Button" => Permission.CanManageButtons,
+                                   "Template" => Permission.CanManageTemplates,
+                                   "Form" => Permission.CanManageForms,
+                                   "Font" => Permission.CanManageFonts,
+                                   "Palette" => Permission.CanManagePalettes,
+                                   _ => 0
+                               }))
+                                {
+                                    <div class="btn-group btn-group-sm ms-2" role="group">
+                                        <a class="btn btn-outline-secondary"
+                                           asp-controller="@item.ResourceType"
+                                           asp-action="@("Edit" + item.ResourceType)"
+                                           asp-route-id="@item.Id"
+                                           title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
                                         </a>
-                                    }
-                                    else if (item.ResourceType == "Icon"
-                                    || item.ResourceType == "Picture")
-                                    {
-                                        <button class="btn btn-sm btn-outline-primary"
-                                                type="button"
-                                                onclick="downloadImage('@item.PreviewUrl')">
-                                            Скачать
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-secondary"
-                                                type="button"
-                                                onclick="copyImageToClipboard('@item.PreviewUrl')">
-                                            Копировать изображение
-                                        </button>
-                                    }
-                                    else if (item.ResourceType == "AnimatedElement")
-                                    {
-                                        <button class="btn btn-sm btn-outline-primary"
-                                                type="button"
-                                                onclick="downloadImage('@item.PreviewUrl')">
-                                            Скачать
-                                        </button>
-                                    }
-                                    else if (item.ResourceType == "Font")
-                                    {
-                                        <a class="btn btn-sm btn-outline-primary"
-                                           href="@Url.Action("ShowFonts", "Font")">
-                                            Перейти к шрифтам
-                                        </a>
-                                    }
-                                    else if (item.ResourceType == "Palette")
-                                    {
-                                        @* Для палитр копирование HEX выполняется по клику на сам свотч *@
-                                    }
-                                </div>
+                                        <form class="d-inline"
+                                              asp-controller="@item.ResourceType"
+                                              asp-action="@("Delete" + item.ResourceType)"
+                                              asp-route-id="@item.Id"
+                                              method="post"
+                                              onsubmit="return confirm('Удалить этот элемент?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger" title="Удалить">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+
+                         
                             </div>
                         </div>
                     </div>
-                }
-            </div>
-        }
+                </div>
+            }
+        </div>
     }
 }
 
 @section Scripts {
     <script>
-        // Скачиваем изображение через скрытый <a download>
+        // — Helpers —
+        function getAntiForgeryToken() {
+          const t = document.querySelector('input[name="__RequestVerificationToken"]');
+          return t ? t.value : '';
+        }
+
+        // Скачиваем image
         function downloadImage(url) {
-            if (!url) return;
-            const link = document.createElement('a');
-            link.href = url;
-            const fileName = url.substring(url.lastIndexOf('/') + 1);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = url.split('/').pop();
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
         }
 
-        // Копируем изображение в буфер (конвертируем всё в PNG, GIF пропускаем)
+        // Копируем image через canvas
         async function copyImageToClipboard(url) {
-            try {
-                // Если это анимированный GIF, сообщаем, что копирование недоступно
-                if (url.match(/\.gif(\?.*)?$/i)) {
-                    alert('Копирование анимаций в буфер обмена не поддерживается.');
-                    return;
-                }
-
-                // Загружаем изображение
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.src = url;
-                await img.decode(); // ждём, пока картинка загрузится
-
-                // Рисуем на canvas
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-
-                // Получаем PNG-блоб из canvas
-                const blob = await new Promise(resolve => {
-                    canvas.toBlob(resolve, 'image/png');
-                });
-
-                if (!navigator.clipboard) {
-                    alert('Clipboard API не поддерживается этим браузером.');
-                    return;
-                }
-
-                // Кладём PNG-блоб в буфер обмена
-                await navigator.clipboard.write([
-                    new ClipboardItem({ 'image/png': blob })
-                ]);
-
-                alert('Изображение скопировано в буфер обмена');
-            } catch (err) {
-                alert('Не удалось скопировать изображение: ' + err);
-            }
+          try {
+            if (!navigator.clipboard) throw 'Clipboard API не поддерживается';
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = url;
+            await img.decode();
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+            await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
+            alert('Изображение скопировано');
+          } catch (e) {
+            alert('Не удалось скопировать: ' + e);
+          }
         }
 
-        // Копируем HEX-код цвета (для палитр)
+        // Скачиваем анимацию (gif/mp4)
+        function downloadAnimation(url) {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = url.split('/').pop();
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+
+        // Копируем HEX палитры
         function copyColorHex(hex) {
-            if (!navigator.clipboard) {
-                alert('Clipboard API не поддерживается этим браузером.');
-                return;
-            }
-            navigator.clipboard.writeText(hex)
-                .then(() => alert('HEX-код скопирован: ' + hex))
-                .catch(err => alert('Ошибка копирования: ' + err));
+          if (!navigator.clipboard) return alert('Clipboard не поддерживается');
+          navigator.clipboard.writeText(hex)
+            .then(() => alert('HEX скопирован: ' + hex))
+            .catch(e => alert('Ошибка: ' + e));
         }
 
-        // Для форм: прокрутка колесиком мыши
-        document.querySelectorAll('.position-relative').forEach(container => {
-            const iframe = container.querySelector('iframe');
-            const overlay = container.querySelector('.form-overlay');
-
-            overlay.addEventListener('wheel', function (e) {
-                e.preventDefault();
-                iframe.contentWindow.scrollBy(0, e.deltaY);
-            }, { passive: false });
-        });
-
-        // Для шаблонов: блокируем клики, но разрешаем прокрутку колесиком
-        document.querySelectorAll('.template-preview').forEach(container => {
-            const iframe = container.querySelector('iframe');
-            const overlay = container.querySelector('.template-overlay');
-
-            overlay.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+        // Toggle favorite
+        async function toggleFavorite(e, btn) {
+          e.stopPropagation();
+          const type = btn.dataset.assetType;
+          const id   = +btn.dataset.assetId;
+          const icon = btn.querySelector('i');
+          try {
+            const res = await fetch('/Favorites/Toggle', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': getAntiForgeryToken()
+              },
+              body: JSON.stringify({ assetType: type, assetId: id })
             });
-
-            overlay.addEventListener('wheel', function (e) {
-                e.preventDefault();
-                iframe.contentWindow.scrollBy(0, e.deltaY);
-            }, { passive: false });
-        });
+            if (!res.ok) throw res.statusText;
+            const { favorited } = await res.json();
+            icon.className = favorited
+              ? 'bi bi-heart-fill text-danger'
+              : 'bi bi-heart text-secondary';
+            icon.title = favorited
+              ? 'Убрать из избранного'
+              : 'Добавить в избранное';
+          } catch (err) {
+            alert('Не удалось обновить избранное: ' + err);
+          }
+        }
     </script>
 }
