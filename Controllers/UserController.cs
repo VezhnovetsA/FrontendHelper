@@ -10,6 +10,14 @@ namespace FrontendHelper.Controllers
     [IsAdmin]
     public class UserController : Controller
     {
+        private static readonly HashSet<string> _undeletableRoles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Admin",
+        "User",
+        "PremiumUser"
+
+    };
+
         private UserRepository _userRepository;
         private RoleRepository _roleRepository;
 
@@ -94,19 +102,34 @@ namespace FrontendHelper.Controllers
             return RedirectToAction("ShowRoles");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteRole(int id)
         {
+            var role = _roleRepository.GetAsset(id);
+            if (_undeletableRoles.Contains(role.RoleName))
+            {
+                TempData["Error"] = $"Роль «{role.RoleName}» нельзя удалить.";
+                return RedirectToAction(nameof(ShowRoles));
+            }
 
             _roleRepository.RemoveAsset(id);
-
-            return RedirectToAction("ShowRoles");
+            return RedirectToAction(nameof(ShowRoles));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateRole(int id, List<Permission> permissions)
         {
+            var role = _roleRepository.GetAsset(id);
+            if (string.Equals(role.RoleName, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Права для роли «Admin» менять нельзя.";
+                return RedirectToAction(nameof(ShowRoles));
+            }
 
             _roleRepository.UpdatePermission(id, permissions);
-            return RedirectToAction("ShowRoles");
+            return RedirectToAction(nameof(ShowRoles));
         }
 
 
@@ -124,6 +147,15 @@ namespace FrontendHelper.Controllers
         {
             return Enum.GetName<Permission>(permission);
 
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteUser(int id)
+        {
+            _userRepository.RemoveAsset(id);
+            return RedirectToAction(nameof(Index));
         }
 
     }

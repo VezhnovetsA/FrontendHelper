@@ -1,33 +1,35 @@
 ﻿@model FrontendHelper.Models.AuthenticationViewModel
 
+<div class="form-container">
+    <div class="form-card shadow-sm p-4 mx-auto">
+        <h2 class="card-title text-center mb-4">Вход</h2>
 
-<h2 class="mb-4">Вход</h2>
+        <form asp-action="Login" method="post" class="generic-form">
+            @Html.AntiForgeryToken()
 
-<form asp-action="Login" method="post" class="w-100" style="max-width:400px;">
-    @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <div class="mb-3">
-        <label asp-for="UserName" class="form-label"></label>
-        <input asp-for="UserName" class="form-control" />
-        <span asp-validation-for="UserName" class="text-danger"></span>
+            <div class="mb-3">
+                <label asp-for="UserName" class="form-label">Логин</label>
+                <input asp-for="UserName" class="form-control" placeholder="Введите логин" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Password" class="form-label">Пароль</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Введите пароль" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mb-3">Войти</button>
+
+            <div class="text-center">
+                Нет аккаунта? <a asp-action="Registration">Зарегистрироваться</a>
+            </div>
+        </form>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary w-100">Войти</button>
-
-    <div class="mt-3 text-center">
-        Нет аккаунта? <a asp-action="Registration">Зарегистрироваться</a>
-    </div>
-</form>
+</div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }
