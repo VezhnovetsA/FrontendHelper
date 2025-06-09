@@ -366,32 +366,41 @@
             @if (authService.IsAuthenticated())
             {
                 <p>Добро пожаловать, <strong>@authService.GetUserName()</strong></p>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a asp-controller="Favorites" asp-action="Index" class="btn btn-glow w-100 text-center">Мои избранные</a></li>
-                    @if (authService.IsAdmin())
-                    {
-                        <li class="mb-2"><a asp-controller="User" asp-action="Index" class="btn btn-glow w-100 text-center">Пользователи</a></li>
-                        <li class="mb-2"><a asp-controller="User" asp-action="ShowRoles" class="btn btn-glow w-100 text-center">Роли пользователей</a></li>
-                    }
-                    <li><a asp-controller="Authentication" asp-action="Logout" class="btn btn-glow w-100 text-center">Выйти</a></li>
-                </ul>
+       <ul class="list-unstyled">
+           @if (!authService.IsAuthenticated())
+           {
+               <li class="mb-2">
+                   <a asp-controller="Authentication" asp-action="Login" class="btn btn-glow w-100 text-center">Вход</a>
+               </li>
+               <li class="mb-2">
+                   <a asp-controller="Authentication" asp-action="Registration" class="btn btn-glow w-100 text-center">Регистрация</a>
+               </li>
+           }
+           else
+          {
+               <li class="mb-2">
+                  <a asp-controller="Favorites" asp-action="Index" class="btn btn-glow w-100 text-center">Мои избранные</a>
+               </li>
+               @if (authService.IsAdmin())
+               {
+                   <li class="mb-2"><a asp-controller="User" asp-action="Index" class="btn btn-glow w-100 text-center">Пользователи</a></li>
+                   <li class="mb-2"><a asp-controller="User" asp-action="ShowRoles" class="btn btn-glow w-100 text-center">Роли пользователей</a></li>
+               }
+               <li class="mb-2">
+                   <a asp-controller="Subscription" asp-action="Manage" class="btn btn-glow w-100 text-center">
+                       @(authService.IsPremiumUser() ? "Управление Premium" : "Купить Premium")
+                   </a>
+               </li>
+               <li class="mb-2">
+                   <a asp-controller="UserAssets" asp-action="Index" class="btn btn-glow w-100 text-center">Мои ресурсы</a>
+               </li>
+               <li>
+                   <a asp-controller="Authentication" asp-action="Logout" class="btn btn-glow w-100 text-center">Выйти</a>
+               </li>
+           }
+       </ul>
             }
-            else
-            {
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a asp-controller="Authentication" asp-action="Login" class="btn btn-glow w-100 text-center">Вход</a></li>
-                    <li><a asp-controller="Authentication" asp-action="Registration" class="btn btn-glow w-100 text-center">Регистрация</a></li>
-                </ul>
-            }
-            @if (authService.IsUser() || authService.IsPremiumUser())
-            {
-                <ul class="mb-2">
-                    <a asp-controller="Subscription" asp-action="Manage"
-                       class="btn btn-glow w-100 text-center">
-                        @(authService.IsPremiumUser() ? "Управление Premium" : "Купить Premium")
-                    </a>
-                </ul>
-            }
+
 
         </div>
     </div>

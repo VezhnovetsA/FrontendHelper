@@ -1184,3 +1184,26 @@ a.btn-primary {
    Конец дополнительных стилей
    =========================================== */
 
+/* Градиентная кнопка “Загрузить ресурс” */
+.btn-create-asset {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #A6808C, #EDAFB8);
+    color: #FFF;
+    text-decoration: none;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+    .btn-create-asset:hover {
+        background: linear-gradient(90deg, #EDAFB8, #A6808C);
+        transform: scale(1.03);
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
