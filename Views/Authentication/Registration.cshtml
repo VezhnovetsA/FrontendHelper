@@ -1,4 +1,4 @@
-﻿@model FrontendHelper.Models.AuthenticationViewModel
+﻿@model FrontendHelper.Models.RegisterViewModel
 
 <div class="form-container">
     <div class="form-card shadow-sm p-4 mx-auto">
@@ -10,15 +10,21 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="mb-3">
-                <label asp-for="UserName" class="form-label">Логин</label>
-                <input asp-for="UserName" class="form-control" placeholder="Придумайте логин" />
-                <span asp-validation-for="UserName" class="text-danger"></span>
+                <label asp-for="Login" class="form-label">Логин</label>
+                <input asp-for="Login" class="form-control" placeholder="Придумайте логин" />
+                <span asp-validation-for="Login" class="text-danger"></span>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-3">
                 <label asp-for="Password" class="form-label">Пароль</label>
                 <input asp-for="Password" type="password" class="form-control" placeholder="Придумайте пароль" />
                 <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="RepeatPassword" class="form-label">Повторите пароль</label>
+                <input asp-for="RepeatPassword" type="password" class="form-control" placeholder="Повторите пароль" />
+                <span asp-validation-for="RepeatPassword" class="text-danger"></span>
             </div>
 
             <button type="submit" class="btn btn-primary w-100 mb-3">Зарегистрироваться</button>

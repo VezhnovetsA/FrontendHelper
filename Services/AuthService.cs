@@ -1,4 +1,6 @@
 ﻿using FhEnums;
+using static System.Net.WebRequestMethods;
+using System.Security.Claims;
 
 namespace FrontendHelper.Services
 {
@@ -40,24 +42,24 @@ namespace FrontendHelper.Services
                 ?? false;
         }
 
-        public bool HasPermission(Permission permission)
-        {
-            // Если пользователь не аутентифицирован, сразу false
-            if (!IsAuthenticated())
-                return false;
+        //public bool HasPermission(Permission permission)
+        //{
+        //    // Если пользователь не аутентифицирован, сразу false
+        //    if (!IsAuthenticated())
+        //        return false;
 
-            // Попробуем получить claim с правами
-            var claimValue = GetClaim(CLAIM_KEY_PERMISSION);
-            if (string.IsNullOrEmpty(claimValue))
-                return false;
+        //    // Попробуем получить claim с правами
+        //    var claimValue = GetClaim(CLAIM_KEY_PERMISSION);
+        //    if (string.IsNullOrEmpty(claimValue))
+        //        return false;
 
-            // Если claim оказался непарсимым, тоже false
-            if (!int.TryParse(claimValue, out var permissionInt))
-                return false;
+        //    // Если claim оказался непарсимым, тоже false
+        //    if (!int.TryParse(claimValue, out var permissionInt))
+        //        return false;
 
-            var userPermission = (Permission)permissionInt;
-            return userPermission.HasFlag(permission);
-        }
+        //    var userPermission = (Permission)permissionInt;
+        //    return userPermission.HasFlag(permission);
+        //}
 
         private string? GetClaim(string key)
         {
@@ -73,5 +75,21 @@ namespace FrontendHelper.Services
         {
             return GetUserName() == "admin";
         }
+
+
+
+        public Permission CurrentPermission =>
+        Enum.TryParse<Permission>(GetClaim(CLAIM_KEY_PERMISSION), out var p) ? p : 0;
+
+        public bool HasPermission(Permission p) => CurrentPermission.HasFlag(p);
+
+        public bool IsPremium() => HasPermission(Permission.CanManageFilters); // или так, как захочешь
+
+        public bool IsInRole(string roleName)
+    => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value == roleName;
+
+        public bool IsPremiumUser() => IsInRole("PremiumUser");
+        public bool IsUser() => IsInRole("User");
+
     }
 }

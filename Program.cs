@@ -61,8 +61,7 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-var seed = new Seed();
-seed.CheckAndFillWithDefaultEntytiesDatabase(app.Services);
+FHDatabase.Seed.CheckAndFillWithDefaultEntytiesDatabase(app.Services);
 
 
 

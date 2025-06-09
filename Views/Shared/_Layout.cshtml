@@ -1,4 +1,5 @@
-﻿@using FrontendHelper.Services
+﻿@using FhEnums
+@using FrontendHelper.Services
 @inject AuthService authService
 
 
@@ -57,29 +58,153 @@
         <!-- Desktop Horizontal Navigation -->
         <div class="container d-none d-lg-flex justify-content-center mt-3">
             <ul class="nav">
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Picture" asp-action="ShowGroupsOfPicturesOnTheTopic">Картинки</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимации</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Button" asp-action="ShowGroupsOfButtons">Кнопки</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Font" asp-action="ShowFonts">Шрифты</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Form" asp-action="ShowAllForms">Формы</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Palette" asp-action="ShowPalettes">Палитры</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Template" asp-action="ShowGroupsOfTemplates">Шаблоны</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a></li>
+                @if (authService.HasPermission(Permission.CanViewIcons))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewPictures))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Picture" asp-action="ShowGroupsOfPicturesOnTheTopic">Картинки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewAnimatedElements))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимации</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewButtons))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Button" asp-action="ShowGroupsOfButtons">Кнопки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewFonts))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Font" asp-action="ShowFonts">Шрифты</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewForms))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Form" asp-action="ShowAllForms">Формы</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewPalettes))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Palette" asp-action="ShowPalettes">Палитры</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewTemplates))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Template" asp-action="ShowGroupsOfTemplates">Шаблоны</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanGenerateQrCode))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a>
+                    </li>
+                }
             </ul>
         </div>
         <!-- Mobile Navigation Collapse -->
         <div class="container d-lg-none collapse mt-3" id="mobileNav">
             <ul class="mobile-nav-links list-unstyled">
-                <li><a class="mobile-item" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a></li>
-                <li><a class="mobile-item" asp-controller="Picture" asp-action="ShowGroupsOfPicturesOnTheTopic">Картинки</a></li>
-                <li><a class="mobile-item" asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимации</a></li>
-                <li><a class="mobile-item" asp-controller="Button" asp-action="ShowGroupsOfButtons">Кнопки</a></li>
-                <li><a class="mobile-item" asp-controller="Font" asp-action="ShowFonts">Шрифты</a></li>
-                <li><a class="mobile-item" asp-controller="Form" asp-action="ShowAllForms">Формы</a></li>
-                <li><a class="mobile-item" asp-controller="Palette" asp-action="ShowAllPalettes">Палитры</a></li>
-                <li><a class="mobile-item" asp-controller="Template" asp-action="ShowGroupsOfTemplates">Шаблоны</a></li>
-                <li><a class="mobile-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a></li>
+                @if (authService.HasPermission(Permission.CanViewIcons))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewPictures))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Picture" asp-action="ShowGroupsOfPicturesOnTheTopic">Картинки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewAnimatedElements))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимации</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewButtons))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Button" asp-action="ShowGroupsOfButtons">Кнопки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewFonts))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Font" asp-action="ShowFonts">Шрифты</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewForms))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Form" asp-action="ShowAllForms">Формы</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewPalettes))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Palette" asp-action="ShowPalettes">Палитры</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewTemplates))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Template" asp-action="ShowGroupsOfTemplates">Шаблоны</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanGenerateQrCode))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a>
+                    </li>
+                }
             </ul>
         </div>
 
@@ -258,6 +383,16 @@
                     <li><a asp-controller="Authentication" asp-action="Registration" class="btn btn-glow w-100 text-center">Регистрация</a></li>
                 </ul>
             }
+            @if (authService.IsUser() || authService.IsPremiumUser())
+            {
+                <ul class="mb-2">
+                    <a asp-controller="Subscription" asp-action="Manage"
+                       class="btn btn-glow w-100 text-center">
+                        @(authService.IsPremiumUser() ? "Управление Premium" : "Купить Premium")
+                    </a>
+                </ul>
+            }
+
         </div>
     </div>
 

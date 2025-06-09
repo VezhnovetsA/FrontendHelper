@@ -1,0 +1,52 @@
+﻿@model FrontendHelper.Models.SubscriptionViewModel
+
+@{
+    ViewData["Title"] = "Управление Premium";
+}
+
+@if (TempData["Msg"] is string m)
+{
+    <div class="alert alert-success">@m</div>
+}
+
+@if (Model.IsPremium)
+{
+    <h2 class="mb-3">У вас активна Premium-подписка 🎉</h2>
+    <form asp-action="Cancel" method="post">
+        @Html.AntiForgeryToken()
+        <button class="btn btn-outline-danger">Отменить подписку</button>
+    </form>
+}
+else
+{
+    <h2 class="mb-3">Купить Premium</h2>
+    <form asp-action="Buy" method="post" class="generic-form" style="max-width:400px">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Purchase.CardNumber" class="form-label"></label>
+            <input asp-for="Purchase.CardNumber" class="form-control" />
+            <span asp-validation-for="Purchase.CardNumber" class="text-danger"></span>
+        </div>
+
+        <div class="row gx-2">
+            <div class="col">
+                <label asp-for="Purchase.Expiry" class="form-label"></label>
+                <input asp-for="Purchase.Expiry" class="form-control" />
+                <span asp-validation-for="Purchase.Expiry" class="text-danger"></span>
+            </div>
+            <div class="col">
+                <label asp-for="Purchase.Cvv" class="form-label"></label>
+                <input asp-for="Purchase.Cvv" class="form-control" />
+                <span asp-validation-for="Purchase.Cvv" class="text-danger"></span>
+            </div>
+        </div>
+
+        <button class="btn btn-primary w-100 mt-3">Оплатить 0 ₽ / мес</button>
+    </form>
+}
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

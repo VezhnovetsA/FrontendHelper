@@ -31,15 +31,15 @@ namespace FrontendHelper.Controllers
         {
             var viewModel = new IndexUserViewModel();
             viewModel.Users = _userRepository
-                .GetUsersWithRole()
-                .Select(x => new UserViewModel
-                {
-                    Id = x.Id,
-                    Name = x.UserName,
-                    RoleId = x.Role?.Id
+                  .WithRoles()                 // ← здесь
+                  .Select(u => new UserViewModel
+                  {
+                      Id = u.Id,
+                      Name = u.UserName,
+                      RoleId = u.RoleId
+                  })
+                  .ToList();
 
-                })
-                .ToList();
 
             viewModel.Roles = _roleRepository.GetAssets().Select(x => new RoleViewModel()
             {
@@ -58,7 +58,7 @@ namespace FrontendHelper.Controllers
             return View(viewModel);
         }
 
-        public IActionResult UpdateUserRole(int id, int? roleId)
+        public IActionResult UpdateUserRole(int id, int roleId)
         {
             _userRepository.UpdateRole(id, roleId);
             return RedirectToAction("Index");
