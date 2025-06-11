@@ -10,18 +10,11 @@ namespace FrontendHelper.Controllers
         public FilterController(FilterRepository repo) => _filterRepository = repo;
 
 
-
-
         public IActionResult Index() =>
            View(_filterRepository.GetAssets().ToList());
 
-
-
-
         [HttpGet]
         public IActionResult Create() => View(new FilterData());
-
-
 
 
         [HttpPost]

@@ -1,4 +1,5 @@
-﻿@using FrontendHelper.Services
+﻿@using FhEnums
+@using FrontendHelper.Services
 @inject AuthService authService
 
 
@@ -9,16 +10,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FrontendHelper</title>
 
-    <!-- Google Fonts: Montserrat -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet" />
-    <!-- Google Fonts: Varela Round -->
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet" />
-    <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-
-    <!-- Custom Styles -->
     <link rel="stylesheet" href="~/css/layoutStyle.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/viewStyle.css" asp-append-version="true" />
@@ -29,11 +24,9 @@
 <body class="d-flex flex-column h-100">
     <header class="top-navbar">
         <div class="container d-flex align-items-center justify-content-between">
-            <!-- Logo -->
             <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                 <img src="~/images/logotype.png" alt="FrontendHelper Logo" class="logo-img" />
             </a>
-            <!-- Right icons -->
             <div class="right-icons d-flex align-items-center">
                 <div class="dropdown me-3 d-none d-lg-block">
                     <a href="#" data-bs-toggle="dropdown" aria-expanded="false">
@@ -48,45 +41,164 @@
                 <a data-bs-toggle="offcanvas" data-bs-target="#offcanvasProfile" aria-controls="offcanvasProfile">
                     <i class="bi bi-person-circle header-icon"></i>
                 </a>
-                <!-- Mobile menu toggle -->
                 <button class="btn mobile-menu-btn d-lg-none ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNav" aria-controls="mobileNav" aria-expanded="false" aria-label="Toggle navigation">
                     <i class="bi bi-list h3 mb-0 text-dark"></i>
                 </button>
             </div>
         </div>
-        <!-- Desktop Horizontal Navigation -->
         <div class="container d-none d-lg-flex justify-content-center mt-3">
             <ul class="nav">
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Picture" asp-action="ShowGroupsOfPicturesOnTheTopic">Картинки</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимации</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Button" asp-action="ShowGroupsOfButtons">Кнопки</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Font" asp-action="ShowFonts">Шрифты</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Form" asp-action="ShowAllForms">Формы</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Palette" asp-action="ShowPalettes">Палитры</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="Template" asp-action="ShowGroupsOfTemplates">Шаблоны</a></li>
-                <li class="nav-item"><a class="nav-link nav-link-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a></li>
+                @if (authService.HasPermission(Permission.CanViewIcons))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewPictures))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Picture" asp-action="ShowGroupsOfPicturesOnTheTopic">Картинки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewAnimatedElements))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимации</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewButtons))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Button" asp-action="ShowGroupsOfButtons">Кнопки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewFonts))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Font" asp-action="ShowFonts">Шрифты</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewForms))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Form" asp-action="ShowAllForms">Формы</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewPalettes))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Palette" asp-action="ShowPalettes">Палитры</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewTemplates))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Template" asp-action="ShowGroupsOfTemplates">Шаблоны</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanGenerateQrCode))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a>
+                    </li>
+                }
             </ul>
         </div>
-        <!-- Mobile Navigation Collapse -->
         <div class="container d-lg-none collapse mt-3" id="mobileNav">
             <ul class="mobile-nav-links list-unstyled">
-                <li><a class="mobile-item" asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a></li>
-                <li><a class="mobile-item" asp-controller="Picture" asp-action="ShowGroupsOfPicturesOnTheTopic">Картинки</a></li>
-                <li><a class="mobile-item" asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимации</a></li>
-                <li><a class="mobile-item" asp-controller="Button" asp-action="ShowGroupsOfButtons">Кнопки</a></li>
-                <li><a class="mobile-item" asp-controller="Font" asp-action="ShowFonts">Шрифты</a></li>
-                <li><a class="mobile-item" asp-controller="Form" asp-action="ShowAllForms">Формы</a></li>
-                <li><a class="mobile-item" asp-controller="Palette" asp-action="ShowAllPalettes">Палитры</a></li>
-                <li><a class="mobile-item" asp-controller="Template" asp-action="ShowGroupsOfTemplates">Шаблоны</a></li>
-                <li><a class="mobile-item" asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a></li>
+                @if (authService.HasPermission(Permission.CanViewIcons))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Icon" asp-action="ShowGroupsOfIconsOnTheTopic">Иконки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewPictures))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Picture" asp-action="ShowGroupsOfPicturesOnTheTopic">Картинки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewAnimatedElements))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="AnimatedElement" asp-action="ShowGroupsOfAnimatedElementsOnTheTopic">Анимации</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewButtons))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Button" asp-action="ShowGroupsOfButtons">Кнопки</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewFonts))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Font" asp-action="ShowFonts">Шрифты</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewForms))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Form" asp-action="ShowAllForms">Формы</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewPalettes))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Palette" asp-action="ShowPalettes">Палитры</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanViewTemplates))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="Template" asp-action="ShowGroupsOfTemplates">Шаблоны</a>
+                    </li>
+                }
+
+                @if (authService.HasPermission(Permission.CanGenerateQrCode))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-item"
+                           asp-controller="QrCode" asp-action="GenerateQrCode">QR-код</a>
+                    </li>
+                }
             </ul>
         </div>
 
-        <!-- === Search Bar внутри шапки === -->
         <div class="container search-form mt-3">
             <form class="row gx-2 gy-2 align-items-center" method="get" asp-controller="Search" asp-action="Index">
-                <!-- Поле для текстового поиска -->
                 <div class="col-auto flex-grow-1">
                     <input name="searchQuery"
                            type="text"
@@ -95,7 +207,6 @@
                            value="@(ViewBag.CurrentQuery ?? "")" />
                 </div>
 
-                <!-- Селектор типа ресурса -->
                 @{
                     var current = ViewBag.CurrentResourceType as string;
                 }
@@ -104,96 +215,111 @@
                     <select name="resourceTypeFilter" class="form-select">
                         <option value="">Все типы</option>
 
-                        @* Иконки *@
-                        @if (current == "Icon")
+                        @if (authService.HasPermission(Permission.CanViewIcons))
                         {
-                            <option value="Icon" selected>Иконки</option>
-                        }
-                        else
-                        {
-                            <option value="Icon">Иконки</option>
-                        }
-
-                        @* Картинки *@
-                        @if (current == "Picture")
-                        {
-                            <option value="Picture" selected>Картинки</option>
-                        }
-                        else
-                        {
-                            <option value="Picture">Картинки</option>
+                            @if (current == "Icon")
+                            {
+                                <option value="Icon" selected>Иконки</option>
+                            }
+                            else
+                            {
+                                <option value="Icon">Иконки</option>
+                            }
                         }
 
-                        @* Анимированные *@
-                        @if (current == "AnimatedElement")
+                        @if (authService.HasPermission(Permission.CanViewPictures))
                         {
-                            <option value="AnimatedElement" selected>Анимации</option>
-                        }
-                        else
-                        {
-                            <option value="AnimatedElement">Анимации</option>
-                        }
-
-                        @* Кнопки *@
-                        @if (current == "Button")
-                        {
-                            <option value="Button" selected>Кнопки</option>
-                        }
-                        else
-                        {
-                            <option value="Button">Кнопки</option>
+                            @if (current == "Picture")
+                            {
+                                <option value="Picture" selected>Картинки</option>
+                            }
+                            else
+                            {
+                                <option value="Picture">Картинки</option>
+                            }
                         }
 
-                        @* Шаблоны *@
-                        @if (current == "Template")
+                        @if (authService.HasPermission(Permission.CanViewAnimatedElements))
                         {
-                            <option value="Template" selected>Шаблоны</option>
-                        }
-                        else
-                        {
-                            <option value="Template">Шаблоны</option>
-                        }
-
-                        @* Формы *@
-                        @if (current == "Form")
-                        {
-                            <option value="Form" selected>Формы</option>
-                        }
-                        else
-                        {
-                            <option value="Form">Формы</option>
+                            @if (current == "AnimatedElement")
+                            {
+                                <option value="AnimatedElement" selected>Анимации</option>
+                            }
+                            else
+                            {
+                                <option value="AnimatedElement">Анимации</option>
+                            }
                         }
 
-                        @* Шрифты *@
-                        @if (current == "Font")
+                        @if (authService.HasPermission(Permission.CanViewButtons))
                         {
-                            <option value="Font" selected>Шрифты</option>
-                        }
-                        else
-                        {
-                            <option value="Font">Шрифты</option>
+                            @if (current == "Button")
+                            {
+                                <option value="Button" selected>Кнопки</option>
+                            }
+                            else
+                            {
+                                <option value="Button">Кнопки</option>
+                            }
                         }
 
-                        @* Палитры *@
-                        @if (current == "Palette")
+                        @if (authService.HasPermission(Permission.CanViewTemplates))
                         {
-                            <option value="Palette" selected>Палитры</option>
+                            @if (current == "Template")
+                            {
+                                <option value="Template" selected>Шаблоны</option>
+                            }
+                            else
+                            {
+                                <option value="Template">Шаблоны</option>
+                            }
                         }
-                        else
+
+                        @if (authService.HasPermission(Permission.CanViewForms))
                         {
-                            <option value="Palette">Палитры</option>
+                            @if (current == "Form")
+                            {
+                                <option value="Form" selected>Формы</option>
+                            }
+                            else
+                            {
+                                <option value="Form">Формы</option>
+                            }
+                        }
+
+                        @if (authService.HasPermission(Permission.CanViewFonts))
+                        {
+                            @if (current == "Font")
+                            {
+                                <option value="Font" selected>Шрифты</option>
+                            }
+                            else
+                            {
+                                <option value="Font">Шрифты</option>
+                            }
+                        }
+
+                        @if (authService.HasPermission(Permission.CanViewPalettes))
+                        {
+                            @if (current == "Palette")
+                            {
+                                <option value="Palette" selected>Палитры</option>
+                            }
+                            else
+                            {
+                                <option value="Palette">Палитры</option>
+                            }
                         }
                     </select>
+
                 </div>
 
-                <!-- Кнопка “Найти” -->
                 <div class="col-auto">
                     <button type="submit" class="btn btn-glow btn-lg text-center">Найти</button>
                 </div>
             </form>
         </div>
 
-        <!-- === ПАНЕЛЬ ФИЛЬТРОВ (всегда сразу после выбора типа ресурса) === -->
         @{
             var availableFilters = ViewBag.AvailableFilters as List<FilterViewModel> ?? new List<FilterViewModel>();
             var selectedIds = ViewBag.SelectedFilterIds as List<int> ?? new List<int>();
@@ -204,7 +330,6 @@
         {
             <div class="filter-bar mb-4">
                 <form method="get" asp-controller="Search" asp-action="Index" id="filtersFormInLayout">
-                    <!-- Скрытые поля, чтобы не потерять текст и тип ресурса -->
                     <input type="hidden" name="searchQuery" value="@(currentQuery)" />
                     <input type="hidden" name="resourceTypeFilter" value="@(currentType)" />
 
@@ -228,34 +353,55 @@
                 </form>
             </div>
         }
-        <!-- /ПАНЕЛЬ ФИЛЬТРОВ -->
     </header>
 
-    <!-- Offcanvas Profile -->
     <div class="offcanvas offcanvas-end offcanvas-glow" tabindex="-1" id="offcanvasProfile" aria-labelledby="offcanvasProfileLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasProfileLabel">Профиль</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
         </div>
         <div class="offcanvas-body">
-            @if (authService.IsAuthenticated())
+            @if (!authService.IsAuthenticated())
             {
-                <p>Добро пожаловать, <strong>@authService.GetUserName()</strong></p>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a asp-controller="Favorites" asp-action="Index" class="btn btn-glow w-100 text-center">Мои избранные</a></li>
-                    @if (authService.IsAdmin())
-                    {
-                        <li class="mb-2"><a asp-controller="User" asp-action="Index" class="btn btn-glow w-100 text-center">Пользователи</a></li>
-                        <li class="mb-2"><a asp-controller="User" asp-action="ShowRoles" class="btn btn-glow w-100 text-center">Роли пользователей</a></li>
-                    }
-                    <li><a asp-controller="Authentication" asp-action="Logout" class="btn btn-glow w-100 text-center">Выйти</a></li>
+                    <li class="mb-2">
+                        <a asp-controller="Authentication" asp-action="Login" class="btn btn-glow w-100 text-center">Вход</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Authentication" asp-action="Registration" class="btn btn-glow w-100 text-center">Регистрация</a>
+                    </li>
                 </ul>
             }
             else
             {
+                <p>Добро пожаловать, <strong>@authService.GetUserName()</strong></p>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a asp-controller="Authentication" asp-action="Login" class="btn btn-glow w-100 text-center">Вход</a></li>
-                    <li><a asp-controller="Authentication" asp-action="Registration" class="btn btn-glow w-100 text-center">Регистрация</a></li>
+                    <li class="mb-2">
+                        <a asp-controller="Favorites" asp-action="Index" class="btn btn-glow w-100 text-center">Мои избранные</a>
+                    </li>
+                    @if (authService.IsAdmin())
+                    {
+                        <li class="mb-2">
+                            <a asp-controller="User" asp-action="Index" class="btn btn-glow w-100 text-center">Пользователи</a>
+                        </li>
+                        <li class="mb-2">
+                            <a asp-controller="User" asp-action="ShowRoles" class="btn btn-glow w-100 text-center">Роли пользователей</a>
+                        </li>
+                    }
+                    @if (!authService.IsAdmin() && (authService.IsUser() || authService.IsPremiumUser()))
+                    {
+                        <li class="mb-2">
+                            <a asp-controller="Subscription" asp-action="Manage" class="btn btn-glow w-100 text-center">
+                                @(authService.IsPremiumUser() ? "Управление Премиумом" : "Купить Премиум")
+                            </a>
+                        </li>
+                    }
+                    <li class="mb-2">
+                        <a asp-controller="UserAssets" asp-action="Index" class="btn btn-glow w-100 text-center">Мои ресурсы</a>
+                    </li>
+                    <li>
+                        <a asp-controller="Authentication" asp-action="Logout" class="btn btn-glow w-100 text-center">Выйти</a>
+                    </li>
                 </ul>
             }
         </div>
@@ -263,32 +409,27 @@
 
 
 
-    <!-- Main Content -->
     <main class="content-wrapper flex-fill">
         <div class="container py-4">
             @RenderBody()
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer-bar mt-auto">
         <div class="container text-center py-3">
             <p class="mb-0">&copy; 2025 FrontendHelper | <a href="#" class="footer-link nav-link-item">О нас</a> | <a href="#" class="footer-link nav-link-item">Помощь</a> | <a href="#" class="footer-link nav-link-item">Контакты</a></p>
         </div>
     </footer>
 
-    @* Вставляем невидимую форму только ради анти-CSRF-токена *@
     <form id="antiForgeryForm" style="display:none">
         @Html.AntiForgeryToken()
     </form>
 
-    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
 
     <script>
-        // Theme toggle
         const htmlEl = document.documentElement;
         const themeToggle = document.getElementById('themeToggle');
         themeToggle.addEventListener('click', e => {
@@ -302,6 +443,16 @@
         if (saved === 'dark' || saved === 'light') {
           htmlEl.setAttribute('data-theme', saved);
         }
+
+                document.querySelectorAll('.card[data-asset-id]').forEach(card => {
+          card.addEventListener('click', e => {
+            if (e.target.closest('button')) return;
+            const type = card.dataset.assetType;
+            const id   = card.dataset.assetId;
+            openAssetModal(type, id);
+          });
+        });
+
     </script>
 </body>
 </html>

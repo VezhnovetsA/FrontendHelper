@@ -10,6 +10,14 @@ namespace FrontendHelper.Controllers
     [IsAdmin]
     public class UserController : Controller
     {
+        private static readonly HashSet<string> _undeletableRoles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Admin",
+        "User",
+        "PremiumUser"
+
+    };
+
         private UserRepository _userRepository;
         private RoleRepository _roleRepository;
 
@@ -23,15 +31,15 @@ namespace FrontendHelper.Controllers
         {
             var viewModel = new IndexUserViewModel();
             viewModel.Users = _userRepository
-                .GetUsersWithRole()
-                .Select(x => new UserViewModel
-                {
-                    Id = x.Id,
-                    Name = x.UserName,
-                    RoleId = x.Role?.Id
+                  .WithRoles()  
+                  .Select(u => new UserViewModel
+                  {
+                      Id = u.Id,
+                      Name = u.UserName,
+                      RoleId = u.RoleId
+                  })
+                  .ToList();
 
-                })
-                .ToList();
 
             viewModel.Roles = _roleRepository.GetAssets().Select(x => new RoleViewModel()
             {
@@ -50,7 +58,7 @@ namespace FrontendHelper.Controllers
             return View(viewModel);
         }
 
-        public IActionResult UpdateUserRole(int id, int? roleId)
+        public IActionResult UpdateUserRole(int id, int roleId)
         {
             _userRepository.UpdateRole(id, roleId);
             return RedirectToAction("Index");
@@ -94,19 +102,34 @@ namespace FrontendHelper.Controllers
             return RedirectToAction("ShowRoles");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteRole(int id)
         {
+            var role = _roleRepository.GetAsset(id);
+            if (_undeletableRoles.Contains(role.RoleName))
+            {
+                TempData["Error"] = $"Роль «{role.RoleName}» нельзя удалить.";
+                return RedirectToAction(nameof(ShowRoles));
+            }
 
             _roleRepository.RemoveAsset(id);
-
-            return RedirectToAction("ShowRoles");
+            return RedirectToAction(nameof(ShowRoles));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateRole(int id, List<Permission> permissions)
         {
+            var role = _roleRepository.GetAsset(id);
+            if (string.Equals(role.RoleName, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Права для роли «Admin» менять нельзя.";
+                return RedirectToAction(nameof(ShowRoles));
+            }
 
             _roleRepository.UpdatePermission(id, permissions);
-            return RedirectToAction("ShowRoles");
+            return RedirectToAction(nameof(ShowRoles));
         }
 
 
@@ -124,6 +147,15 @@ namespace FrontendHelper.Controllers
         {
             return Enum.GetName<Permission>(permission);
 
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteUser(int id)
+        {
+            _userRepository.RemoveAsset(id);
+            return RedirectToAction(nameof(Index));
         }
 
     }

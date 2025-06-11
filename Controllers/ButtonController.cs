@@ -1,5 +1,4 @@
-﻿// ButtonController.cs
-using FHDatabase.Models;
+﻿using FHDatabase.Models;
 using FHDatabase.Repositories;
 using FhEnums;
 using FrontendHelper.Controllers.AuthorizationAttributes;
@@ -34,9 +33,6 @@ namespace FrontendHelper.Controllers
             _authService = authService;
         }
 
-        // ===========================
-        // ПРОСМОТР ВСЕХ КНОПОК
-        // ===========================
         [HasPermission(Permission.CanViewButtons)]
         public IActionResult ShowAllButtons()
         {
@@ -82,9 +78,6 @@ namespace FrontendHelper.Controllers
             return View(vm);
         }
 
-        // ===========================
-        // СОЗДАНИЕ (CanManageButtons)
-        // ===========================
         [HasPermission(Permission.CanManageButtons)]
         [HttpGet]
         public IActionResult CreateButton()
@@ -104,7 +97,6 @@ namespace FrontendHelper.Controllers
         [HasPermission(Permission.CanManageButtons)]
         public async Task<IActionResult> CreateButton(CreateButtonViewModel vm)
         {
-            // 1) Базовая валидация моделей (Name, Topic, HtmlFile)
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -114,7 +106,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // 2) Проверка расширения .html
             var ext = Path.GetExtension(vm.HtmlFile.FileName)?.ToLowerInvariant();
             if (ext != ".html")
             {
@@ -126,7 +117,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // 3) Сохраняем файл и создаём ButtonData
             var savedFileName = await _fileService.SaveFileAsync(vm.HtmlFile, "buttons");
             var newButton = new ButtonData
             {
@@ -136,7 +126,6 @@ namespace FrontendHelper.Controllers
             };
             _buttonRepository.AddAsset(newButton);
 
-            // 4) Обрабатываем "новые фильтры" из vm.NewFilterNames
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -161,8 +150,6 @@ namespace FrontendHelper.Controllers
                     createdFilterIds.Add(newFilter.Id);
                 }
             }
-
-            // 5) Собираем итоговый список фильтров (чекбоксы + вновь созданные)
             var toBindFilterIds = vm.SelectedFilterIds
                                   .Concat(createdFilterIds)
                                   .Distinct()
@@ -178,7 +165,6 @@ namespace FrontendHelper.Controllers
                 });
             }
 
-            // 6) Редирект на ShowAllButtonsOnTheTopic с явной передачей контроллера + topic
             return RedirectToAction(
                 actionName: nameof(ShowAllButtonsOnTheTopic),
                 controllerName: "Button",
@@ -188,9 +174,6 @@ namespace FrontendHelper.Controllers
 
 
 
-        // ===========================
-        // РЕДАКТИРОВАНИЕ (CanManageButtons)
-        // ===========================
         [HasPermission(Permission.CanManageButtons)]
         [HttpGet]
         public IActionResult EditButton(int id)
@@ -198,7 +181,6 @@ namespace FrontendHelper.Controllers
             var data = _buttonRepository.GetAsset(id);
             if (data == null) return NotFound();
 
-            // Существующие фильтры
             var existingFilters = _filterRepository
                 .GetFiltersForAsset("Button", id)
                 .Select(f => f.Id)
@@ -225,11 +207,8 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditButton(EditButtonViewModel vm)
         {
-            // 1) ОБЯЗАТЕЛЬНО убираем из ModelState ExistingFileName, чтобы не было ошибки "поле обязательное"
             ModelState.Remove(nameof(vm.ExistingFileName));
 
-            // 2) Если модель НЕ прошла валидацию (хотя бы одно поле нефайл-ориентированное невалидно),
-            //    мы должны вернуть AvailableFilters, чтобы чекбоксы снова отрисовались
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -242,14 +221,11 @@ namespace FrontendHelper.Controllers
             var data = _buttonRepository.GetAsset(vm.Id);
             if (data == null) return NotFound();
 
-            // 3) Сохраняем старое имя файла, чтобы, если ниже ошибка, вернулось в форму
             vm.ExistingFileName = data.ButtonCode;
 
-            // 4) Обновляем Name и Topic
             data.Name = vm.Name;
             data.Topic = vm.Topic;
 
-            // 5) Если пришёл новый файл – проверяем расширение и меняем его
             if (vm.HtmlFile != null)
             {
                 var ext = Path.GetExtension(vm.HtmlFile.FileName)?.ToLowerInvariant();
@@ -263,20 +239,15 @@ namespace FrontendHelper.Controllers
                     return View(vm);
                 }
 
-                // удаляем старый и сохраняем новый
+
                 _fileService.DeleteFile(data.ButtonCode, "buttons");
                 var newFileName = await _fileService.SaveFileAsync(vm.HtmlFile, "buttons");
                 data.ButtonCode = newFileName;
             }
-            // Если vm.HtmlFile == null, то data.ButtonCode останется прежним
+
 
             _buttonRepository.UpdateAsset(data);
 
-            // ============================
-            // Дальше обрабатываем фильтры (то же, что и в Create)
-            // ============================
-
-            // Собираем введённые новые фильтры
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -302,7 +273,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Удаляем связи, которые пользователь снял (если он ранее выбирал фильтры)
             var currentFilterIds = _filterRepository
                 .GetFiltersForAsset("Button", vm.Id)
                 .Select(f => f.Id)
@@ -316,7 +286,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Собираем итоговый список (выбранные + новые) и добавляем те, которых не было
             var finalFilterIds = vm.SelectedFilterIds
                                  .Concat(createdFilterIds)
                                  .Distinct()
@@ -339,9 +308,6 @@ namespace FrontendHelper.Controllers
         }
 
 
-        // ===========================
-        // УДАЛЕНИЕ (CanManageButtons)
-        // ===========================
         [HasPermission(Permission.CanManageButtons)]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -350,10 +316,8 @@ namespace FrontendHelper.Controllers
             var data = _buttonRepository.GetAsset(id);
             if (data == null) return NotFound();
 
-            // Удаляем физический файл
             _fileService.DeleteFile(data.ButtonCode, "buttons");
 
-            // Снимаем связи с фильтрами
             var filterIds = _filterRepository
                 .GetFiltersForAsset("Button", id)
                 .Select(f => f.Id)
@@ -363,14 +327,11 @@ namespace FrontendHelper.Controllers
                 _filterRepository.RemoveAssetFilter("Button", id, fid);
             }
 
-            // Удаляем саму запись
             _buttonRepository.RemoveAsset(id);
             return RedirectToAction(nameof(ShowAllButtons));
         }
 
-        // ===========================
-        // СКАЧАТЬ КОД (CanManageButtons)
-        // ===========================
+
         [HasPermission(Permission.CanManageButtons)]
         [HttpGet]
         public IActionResult DownloadCode(int id)
@@ -387,9 +348,7 @@ namespace FrontendHelper.Controllers
             return File(contentBytes, "text/html; charset=utf-8", fileName);
         }
 
-        // ===========================
-        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        // ===========================
+
         private ButtonViewModel ToViewModel(ButtonData d, int? userId)
         {
             bool isFav = false;
@@ -400,7 +359,6 @@ namespace FrontendHelper.Controllers
                     .Any(f => f.AssetType == "Button" && f.AssetId == d.Id);
             }
 
-            // Собираем все связанные фильтры и склеиваем в CSV через запятую
             var filterIds = _filterRepository
                 .GetFiltersForAsset("Button", d.Id)
                 .Select(f => f.Id)

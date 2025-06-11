@@ -33,7 +33,6 @@
                  data-button-name="@btn.Name"
                  data-button-topic="@btn.Topic"
                  data-button-file="@btn.ButtonCode">
-                <!-- Превью (iframe, pointer-events:none) -->
                 <div style="
                         height: 100px;
                         display: flex;
@@ -56,7 +55,6 @@
                     </iframe>
                 </div>
 
-                <!-- Тело карточки -->
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-truncate"
                         title="@btn.Name"
@@ -70,19 +68,19 @@
                             Скачать код
                         </button>
 
-                        <button class="favorite-toggle-btn"
-                                data-asset-type="Button"
-                                data-asset-id="@btn.Id"
-                                style="background:none; border:none;">
-                            @if (btn.IsFavorited)
-                            {
-                                <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
-                            }
-                            else
-                            {
-                                <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
-                            }
-                        </button>
+                            <button class="favorite-toggle-btn"
+                                    data-asset-type="Button"
+                                    data-asset-id="@btn.Id"
+                                    style="background:none; border:none;">
+                                @if (btn.IsFavorited)
+                                {
+                                    <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                                }
+                            </button>
                     </div>
                 </div>
             </div>
@@ -90,7 +88,6 @@
     }
 </div>
 
-<!-- Модал «Детали кнопки» -->
 <div class="modal fade" id="buttonDetailModal" tabindex="-1" aria-labelledby="buttonDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -112,7 +109,7 @@
                         background: var(--bg-alt);
                         overflow:hidden;
                      ">
-                    <!-- JS вставит сюда <iframe> -->
+
                 </div>
                 <h5 id="modalButtonName" class="mb-1"></h5>
                 <p id="modalButtonTopic" class="text-muted small mb-3"></p>
@@ -121,9 +118,9 @@
                     <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
                         <i class="bi bi-download"></i> Скачать код
                     </button>
-                    <button id="modalFavBtn" class="btn btn-outline-danger">
-                        <i id="modalFavIcon" class="bi"></i> Избранное
-                    </button>
+                        <button id="modalFavBtn" class="btn btn-outline-danger">
+                            <i id="modalFavIcon" class="bi"></i> Избранное
+                        </button>
                 </div>
 
                 @if (authService.HasPermission(Permission.CanManageButtons))

@@ -12,14 +12,12 @@
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <!-- Название -->
             <div class="mb-3">
                 <label asp-for="Title" class="form-label">Название</label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger small"></span>
             </div>
 
-            <!-- Существующие цвета -->
             <div class="mb-3">
                 <label class="form-label">Существующие цвета</label>
                 <div class="filter-list">
@@ -44,7 +42,6 @@
                 </div>
             </div>
 
-            <!-- Новые цвета -->
             <div class="mb-3">
                 <label class="form-label">Добавить новые цвета (HEX)</label>
                 <div id="new-colors-container">
@@ -67,7 +64,6 @@
                 </button>
             </div>
 
-            <!-- Фильтры -->
             <div class="mb-3">
                 <label class="form-label">Фильтры</label>
                 <div class="filter-list">
@@ -89,7 +85,6 @@
                 </div>
             </div>
 
-            <!-- Новые фильтры -->
             <div class="mb-3">
                 <label asp-for="NewFilterNames" class="form-label">Добавить новые фильтры</label>
                 <input asp-for="NewFilterNames"
@@ -98,7 +93,6 @@
                 <span asp-validation-for="NewFilterNames" class="text-danger small"></span>
             </div>
 
-            <!-- Кнопки -->
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <a asp-action="ShowPalettes"

@@ -18,13 +18,9 @@ namespace FrontendHelper.Models
 
         public IFormFile? FontFile { get; set; }
 
-        // Список доступных фильтров (CheckboxList)
         public List<SelectListItem> AvailableFilters { get; set; } = new();
 
-        // Список ID отмеченных фильтров
         public List<int> SelectedFilterIds { get; set; } = new();
-
-        // Новые фильтры, вводимые строкой через запятую
         public string? NewFilterNames { get; set; }
     }
 }

@@ -21,10 +21,8 @@ namespace FrontendHelper.Services
 
             var extension = Path.GetExtension(file.FileName);
 
-            // рандом имя для папки
             var fileName = $"{Guid.NewGuid()}{extension}";
 
-            // строка пути к папке wwwroot/папка_с_ресурсами:
             var pathToFolder = Path.Combine(_environment.WebRootPath, subFolder);
             if (!Directory.Exists(pathToFolder))
                 Directory.CreateDirectory(pathToFolder);

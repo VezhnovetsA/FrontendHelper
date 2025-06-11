@@ -28,7 +28,7 @@
                 }
             </div>
 
-            @* Если QR-код уже сгенерирован *@
+
             @if (!string.IsNullOrEmpty(Model.QrCodeImage))
             {
                 <div class="mb-4 d-flex justify-content-center">
@@ -49,20 +49,21 @@
                     <button type="button"
                             class="btn btn-sm btn-outline-primary"
                             style="padding: 0.75rem 1.5rem; font-size:1rem; border-radius:50px;"
-                            onclick="location.href='@Model.QrCodeImage';">
+                            onclick="downloadQr('@Model.QrCodeImage')">
                         <i class="bi bi-download me-1"></i> Скачать
                     </button>
+
 
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary"
                             style="padding: 0.75rem 1.5rem; font-size:1rem; border-radius:50px;"
-                            onclick="navigator.clipboard.writeText('@Model.QrCodeImage')">
+                            onclick="copyQrImage('@Model.QrCodeImage')">
                         <i class="bi bi-clipboard me-1"></i> Копировать
                     </button>
+
                 </div>
             }
 
-            <!-- Кнопка «Сгенерировать» под результатом -->
             <div class="card-body text-center">
                 <button type="submit"
                         class="btn btn-primary"
@@ -79,5 +80,30 @@
 </div>
 
 @section Scripts {
+    <script>
+        async function downloadQr(src) {
+          const a = document.createElement('a');
+          a.href = src;
+          a.download = 'qrcode.png';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+
+        async function copyQrImage(src) {
+          try {
+            const response = await fetch(src);
+            const blob = await response.blob();
+            await navigator.clipboard.write([
+              new ClipboardItem({ [blob.type]: blob })
+            ]);
+            alert('QR-код скопирован в буфер обмена!');
+          } catch (err) {
+            alert('Не удалось скопировать QR-код: ' + err);
+          }
+        }
+    </script>
+
     @await Html.PartialAsync("_ValidationScriptsPartial")
+
 }

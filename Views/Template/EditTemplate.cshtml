@@ -45,7 +45,6 @@
                 <span asp-validation-for="HtmlFile" class="text-danger small"></span>
             </div>
 
-            @* Существующие фильтры в чекбоксах *@
             @if (Model.AvailableFilters.Any())
             {
                 <div class="mb-3">
@@ -67,7 +66,6 @@
                 </div>
             }
 
-            @* Поле для ввода новых фильтров *@
             <div class="mb-3">
                 <label asp-for="NewFilterNames" class="form-label">
                     Новые фильтры (через запятую)

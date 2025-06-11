@@ -56,26 +56,25 @@
                 </div>
 
                 <div class="mt-auto d-flex justify-content-end">
-                    <button class="btn btn-sm btn-outline-secondary favorite-toggle-btn"
-                            data-asset-type="Palette"
-                            data-asset-id="@pal.Id"
-                            style="background:none;border:none;">
-                        @if (pal.IsFavorited)
-                        {
-                            <i class="bi bi-heart-fill text-danger"></i>
-                        }
-                        else
-                        {
-                            <i class="bi bi-heart text-secondary"></i>
-                        }
-                    </button>
+                        <button class="btn btn-sm btn-outline-secondary favorite-toggle-btn"
+                                data-asset-type="Palette"
+                                data-asset-id="@pal.Id"
+                                style="background:none;border:none;">
+                            @if (pal.IsFavorited)
+                            {
+                                <i class="bi bi-heart-fill text-danger"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-heart text-secondary"></i>
+                            }
+                        </button>
                 </div>
             </div>
         </div>
     }
 </div>
 
-<!-- Модалка деталей палитры -->
 <div class="modal fade" id="paletteDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -87,9 +86,9 @@
                 <h5 id="modalPaletteTitle" class="mb-3"></h5>
                 <div id="modalPaletteGrid" class="palette-grid d-flex flex-wrap mb-3"></div>
                 <div class="d-flex justify-content-center mb-3">
-                    <button id="modalFavBtn" class="btn btn-outline-danger me-2">
-                        <i id="modalFavIcon" class="bi"></i> Избранное
-                    </button>
+                        <button id="modalFavBtn" class="btn btn-outline-danger me-2">
+                            <i id="modalFavIcon" class="bi"></i> Избранное
+                        </button>
                 </div>
                 @if (authService.HasPermission(Permission.CanManagePalettes))
                 {
@@ -117,11 +116,9 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-          // Инициализируем Bootstrap‐модалку
           const modalEl = document.getElementById('paletteDetailModal');
           const modal = new bootstrap.Modal(modalEl);
 
-          // Функция копирования HEX
           function copyColorHex(hex) {
             if (!navigator.clipboard) {
               return alert('Clipboard API не поддерживается этим браузером.');
@@ -131,10 +128,8 @@
               .catch(err => alert('Ошибка копирования: ' + err));
           }
 
-          // Обработчик клика по карточке — открывает модалку, если клик не на свотч и не на сердце
           document.querySelectorAll('.js-palette-card').forEach(card => {
             card.addEventListener('click', function(e) {
-              // НЕ открывать модалку, если клик внутри свотча или кнопки избранного
               if (e.target.closest('.palette-swatch') || e.target.closest('.favorite-toggle-btn')) {
                 return;
               }
@@ -144,10 +139,9 @@
               const colors = (card.dataset.paletteColors || '').split(',');
               const fav    = card.dataset.paletteFavorited === 'true';
 
-              // Заполняем заголовок
               document.getElementById('modalPaletteTitle').innerText = title;
 
-              // Заполняем сетку цветов внутри модалки
+
               const grid = document.getElementById('modalPaletteGrid');
               grid.innerHTML = '';
               colors.forEach(hex => {
@@ -173,7 +167,6 @@
                 grid.append(sw);
               });
 
-              // Настраиваем кнопку избранного внутри модалки
               const favIcon = document.getElementById('modalFavIcon');
               const favBtn  = document.getElementById('modalFavBtn');
               favIcon.className = fav
@@ -195,21 +188,21 @@
                   favIcon.className = isFav
                     ? 'bi bi-heart-fill text-danger'
                     : 'bi bi-heart text-secondary';
-                  // Обновляем иконку на самой карточке
+
                   const cardFavIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${id}"] i`);
                   if (cardFavIcon) {
                     cardFavIcon.className = isFav
                       ? 'bi bi-heart-fill text-danger'
                       : 'bi bi-heart text-secondary';
                   }
-                  // Синхронизируем флаг
+
                   card.dataset.paletteFavorited = isFav;
                 } catch (err) {
                   alert('Не удалось обновить «Избранное»: ' + err);
                 }
               };
 
-              // Если есть права — меняем ссылки Edit/Delete
+
         @if (authService.HasPermission(Permission.CanManagePalettes))
         {
             <text>
@@ -218,12 +211,10 @@
             </text>
         }
 
-              // Показываем модалку
               modal.show();
             });
           });
 
-          // Обработчик «сердечка» на карточке
           document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function(e) {
               e.stopPropagation();
@@ -246,7 +237,7 @@
                 } else {
                   iconEl.className = 'bi bi-heart text-secondary';
                 }
-                // Обновляем dataset карточки
+
                 const card = document.querySelector(`.js-palette-card[data-palette-id="${assetId}"]`);
                 if (card) card.dataset.paletteFavorited = json.favorited;
               } catch (err) {
@@ -255,7 +246,6 @@
             });
           });
 
-          // Обработчик копирования на свотчах карточки
           document.querySelectorAll('.palette-swatch').forEach(sw => {
             sw.addEventListener('click', function(e) {
               e.stopPropagation();
@@ -263,7 +253,6 @@
             });
           });
 
-          // Фильтрация карточек
           const items = document.querySelectorAll('.js-palette-card');
           const boxes = document.querySelectorAll('.filter-checkbox');
           function applyFilters() {

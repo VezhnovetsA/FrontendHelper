@@ -8,7 +8,6 @@
 
 <h2 class="mb-4">Все шаблоны</h2>
 
-<!-- Кнопка «Группы шаблонов» -->
 <div class="mb-4">
     <a class="btn btn-sm btn-outline-primary btn-view-all"
        asp-action="ShowGroupsOfTemplates"
@@ -29,7 +28,6 @@
 <div class="row gx-3 gy-4">
     @foreach (var tpl in Model)
     {
-        <!-- Широкая карточка: занимает в 2 раза больше места по ширине -->
         <div class="col-sm-12 col-md-8 col-lg-6">
             <div class="card h-100 shadow-sm position-relative"
                  style="cursor:pointer;"
@@ -37,7 +35,6 @@
                  data-template-name="@tpl.Name"
                  data-template-topic="@tpl.Topic"
                  data-template-file="@tpl.TemplateCode">
-                <!-- Превью в карточке: фиксированная высота 300px, прокрутка, масштаб 0.43 -->
                 <div style="
                         height: 300px;
                         overflow: auto;
@@ -55,7 +52,7 @@
                                     width: 2000px;
                                     height: 2000px;
                                     transform-origin: top left;
-                                    transform: scale(0.43); /* сохранён прежний масштаб в карточке */
+                                    transform: scale(0.43);
                                     border: none;
                                     pointer-events: none;
                                     "
@@ -64,7 +61,6 @@
                     </div>
                 </div>
 
-                <!-- Тело карточки -->
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-truncate"
                         title="@tpl.Name"
@@ -79,19 +75,19 @@
                             Скачать код
                         </button>
 
-                        <button class="favorite-toggle-btn"
-                                data-asset-type="Template"
-                                data-asset-id="@tpl.Id"
-                                style="background:none; border:none;">
-                            @if (tpl.IsFavorited)
-                            {
-                                <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
-                            }
-                            else
-                            {
-                                <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
-                            }
-                        </button>
+                            <button class="favorite-toggle-btn"
+                                    data-asset-type="Template"
+                                    data-asset-id="@tpl.Id"
+                                    style="background:none; border:none;">
+                                @if (tpl.IsFavorited)
+                                {
+                                    <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                                }
+                            </button>
                     </div>
                 </div>
             </div>
@@ -99,12 +95,9 @@
     }
 </div>
 
-<!-- Модальное окно «Детали шаблона» -->
 <div class="modal fade" id="templateDetailModal" tabindex="-1" aria-labelledby="templateDetailModalLabel" aria-hidden="true">
-    <!-- Класс modal-xl для максимально большой ширины -->
     <div class="modal-dialog modal-dialog-centered modal-xl"
          style="max-width: 90vw;">
-        <!-- Можно настроить ширину, например, 90vw -->
         <div class="modal-content">
 
             <div class="modal-header">
@@ -113,7 +106,6 @@
             </div>
 
             <div class="modal-body text-center">
-                <!-- Фиксированная высота 800px, прокрутка, НЕТ масштабирования -->
                 <div id="modalTemplatePreview"
                      class="mb-3"
                      style="
@@ -123,7 +115,6 @@
                         background: var(--bg-alt);
                         padding: 0.5rem;
                      ">
-                    <!-- JS вставит сюда iframe без transform -->
                 </div>
                 <h5 id="modalTemplateName" class="mb-1"></h5>
                 <p id="modalTemplateTopic" class="text-muted small mb-3"></p>
@@ -132,9 +123,9 @@
                     <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
                         <i class="bi bi-download"></i> Скачать код
                     </button>
-                    <button id="modalFavBtn" class="btn btn-outline-danger">
-                        <i id="modalFavIcon" class="bi"></i> Избранное
-                    </button>
+                        <button id="modalFavBtn" class="btn btn-outline-danger">
+                            <i id="modalFavIcon" class="bi"></i> Избранное
+                        </button>
                 </div>
 
                 @if (authService.HasPermission(Permission.CanManageTemplates))
@@ -166,7 +157,6 @@
 
 @section Scripts {
     <script>
-        // Скачиваем HTML-файл шаблона
         function downloadCode(url) {
             const link = document.createElement('a');
             link.href = url;
@@ -175,17 +165,15 @@
             document.body.removeChild(link);
         }
 
-        // Получаем антифальсификационный токен
         function getAntiForgeryToken() {
             const input = document.querySelector('input[name="__RequestVerificationToken"]');
             return input ? input.value : '';
         }
 
-        // Toggle «Избранное» в карточке
         document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function (e) {
                 e.stopPropagation();
-                const assetType = this.dataset.assetType; // "Template"
+                const assetType = this.dataset.assetType; 
                 const assetId   = parseInt(this.dataset.assetId, 10);
                 const iconEl = this.querySelector('i');
 
@@ -216,7 +204,6 @@
             });
         });
 
-        // Открыть модалку «Детали шаблона»
         function openTemplateModal(templateId) {
             var triggerEl = document.querySelector(`.card[data-template-id='${templateId}']`);
             if (!triggerEl) return;
@@ -229,13 +216,13 @@
             document.getElementById('modalTemplateName').innerText = name;
             document.getElementById('modalTemplateTopic').innerText = "Тема: " + topic;
 
-            // Вставляем iframe без масштабирования
+
             var container = document.getElementById('modalTemplatePreview');
             container.innerHTML = "";
 
             var iframe = document.createElement('iframe');
             iframe.src = previewUrl;
-            // Ширина 100% контейнера, высота — автоматическая (внутри появится скролл, если контент выше)
+
             iframe.style.cssText = `
                 width: 100%;
                 height: 100%;
@@ -246,12 +233,11 @@
 
             container.appendChild(iframe);
 
-            // Кнопка «Скачать»
+
             document.getElementById('modalDownloadBtn').onclick = () => {
                 downloadCode(`@Url.Action("DownloadCode", "Template")/${templateId}`);
             };
 
-            // «Избранное» в модалке
             var favIcon = document.getElementById('modalFavIcon');
             var favBtn = document.getElementById('modalFavBtn');
             var cardIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${templateId}"] i`);
@@ -286,7 +272,6 @@
                         favBtn.title = 'Добавить в избранное';
                     }
 
-                    // Обновляем «сердечко» в карточке
                     var cardBtnIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${templateId}"] i`);
                     if (cardBtnIcon) {
                         if (result.favorited) {
@@ -321,7 +306,6 @@
             bsModal.show();
         }
 
-        // Привязываем клик по карточкам
         document.querySelectorAll('.card[data-template-id]').forEach(card => {
             card.addEventListener('click', function(e) {
                 if (e.target.tagName === 'BUTTON' || e.target.tagName === 'I') return;

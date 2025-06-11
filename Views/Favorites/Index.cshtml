@@ -1,75 +1,264 @@
-﻿@model FrontendHelper.Models.FavoritesViewModel
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+﻿@model FrontendHelper.Models.HomeIndexViewModel
+@using FhEnums
+@inject FrontendHelper.Services.AuthService authService
 
-<form id="antiforgery-form">@Html.AntiForgeryToken()</form>
+<h1 class="mb-4">Ваши избранные, @Model.UserName!</h1>
 
-<div class="container py-4">
-    <h2 class="mb-4">Мои избранные</h2>
-
-    @if (!Model.Favorites.Any())
+@functions {
+    string GetTypeLabel(string type) => type switch
     {
-        <p>У вас ещё нет избранных элементов</p>
-    }
-    else
+        "Icon" => "Иконки",
+        "Picture" => "Изображения",
+        "AnimatedElement" => "Анимации",
+        "Button" => "Кнопки",
+        "Template" => "Шаблоны",
+        "Form" => "Формы",
+        "Font" => "Шрифты",
+        "Palette" => "Палитры",
+        _ => type
+    };
+}
+
+@{
+    var sections = new (IEnumerable<dynamic> Items, string Header)[]
     {
-        <div class="row g-4">
-            @foreach (var item in Model.Favorites)
-            {
-                <div class="col-md-3">
-                    <div class="card h-100">
-                        <img src="@item.PreviewUrl"
-                             class="card-img-top"
-                             alt="@item.Name" />
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">@item.Name</h5>
-                            <div class="mt-auto d-flex justify-content-between">
-                               
-                                <button class="btn btn-outline-danger btn-sm remove-fav"
-                                        data-type="@item.AssetType"
-                                        data-id="@item.AssetId"
-                                        title="Убрать из избранного">
-                                    <i class="bi bi-star-fill"></i>
-                                </button>
+        (Model.Icons.Cast<dynamic>(),           "Иконки"),
+        (Model.Pictures.Cast<dynamic>(),        "Изображения"),
+        (Model.AnimatedElements.Cast<dynamic>(),"Анимации"),
+        (Model.Buttons.Cast<dynamic>(),         "Кнопки"),
+        (Model.Templates.Cast<dynamic>(),       "Шаблоны"),
+        (Model.Forms.Cast<dynamic>(),           "Формы"),
+        (Model.Fonts.Cast<dynamic>(),           "Шрифты"),
+        (Model.Palettes.Cast<dynamic>(),        "Палитры")
+    };
+}
+
+@foreach (var sec in sections)
+{
+
+    var items = sec.Items;
+    if (!items.Any()) continue;
+    <h4 class="mt-5 mb-3">@sec.Header</h4>
+    <div class="row gx-3 gy-4">
+        @foreach (var item in items)
+        {
+            var cols = sec.Header == "Шаблоны"
+            ? "col-sm-12 col-md-8 col-lg-6"
+            : "col-sm-6 col-md-4 col-lg-3";
+            <div class="@cols">
+                <div class="card h-100 shadow-sm position-relative" style="cursor:@(sec.Header=="Шаблоны"?"pointer":"default");" data-id="@item.Id">
+                    @switch ((string)item.ResourceType)
+                    {
+                        case "Icon":
+                        case "Picture":
+                            <img src="@item.PreviewUrl" alt="@item.Name" class="card-img-top img-fluid"
+                                 style="object-fit:contain;max-height:200px;background:var(--bg-alt);padding:.5rem;" />
+                            break;
+                        case "AnimatedElement":
+                            <div style="height:180px;display:flex;align-items:center;justify-content:center;background:var(--bg-alt);padding:.5rem;">
+                                @if (item.PreviewUrl.EndsWith(".gif", System.StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <img src="@item.PreviewUrl" class="img-fluid" style="max-height:160px;" />
+                                }
+                                else
+                                {
+                                    <video src="@item.PreviewUrl" class="img-fluid" muted loop autoplay playsinline style="max-height:160px;"></video>
+                                }
                             </div>
+                            break;
+                        case "Button":
+                            <div class="button-preview p-3 d-flex align-items-center justify-content-center"
+                                 style="height:120px;background:var(--bg-alt);overflow:hidden;">
+                                <iframe src="@item.PreviewUrl" style="border:none;width:100%;height:100%;pointer-events:none;" scrolling="no"></iframe>
+                            </div>
+                            break;
+                        case "Template":
+                            <div class="template-preview p-3" style="height:300px;background:var(--bg-alt);overflow:auto;padding:.5rem;border-top-left-radius:12px;border-top-right-radius:12px;">
+                                <div style="width:2000px;height:2000px;position:relative;transform-origin:top left;transform:scale(.43);">
+                                    <iframe src="@item.PreviewUrl" style="border:none;width:100%;height:100%;pointer-events:none;" scrolling="no"></iframe>
+                                </div>
+                            </div>
+                            break;
+                        case "Form":
+                            <div style="height:300px;overflow-y:auto;background:var(--bg-alt);padding:.5rem;border-top-left-radius:12px;border-top-right-radius:12px;">
+                                <iframe src="@item.PreviewUrl" style="border:none;width:100%;height:1000px;pointer-events:none;" scrolling="no"></iframe>
+                            </div>
+                            break;
+                        case "Font":
+                            <div class="font-preview-container p-4 d-flex align-items-center justify-content-center" style="height:150px;font-family:'@item.FontFamily';">
+                                <p style="margin:0;font-size:1.5rem;">@item.Name</p>
+                            </div>
+                            break;
+                        case "Palette":
+                            <div class="p-3" style="height:300px;">
+                                <div class="palette-grid d-flex flex-wrap mb-3" style="gap:2px;">
+                                    @foreach (var c in item.PaletteColors)
+                                    {
+                                        <div class="palette-swatch" title="@c.Hex" style="flex:1 0 30%;padding-top:30%;background:@c.Hex;cursor:pointer;" onclick="copyColorHex('@c.Hex')">
+                                            <span class="swatch-hex">@c.Hex</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            break;
+                    }
+
+                    <button class="favorite-toggle-btn position-absolute top-0 end-0 m-2" data-asset-type="@item.ResourceType" data-asset-id="@item.Id" onclick="toggleFavorite(event,this)">
+                        <i class="bi @(item.IsFavorited?"bi-heart-fill text-danger":"bi-heart text-secondary")"></i>
+                    </button>
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-truncate" title="@item.Name" style="font-size:1.1rem;">@item.Name</h5>
+                        @if (!string.IsNullOrEmpty((string)item.Topic))
+                        {
+                            <p class="card-text text-muted small mb-2">Тема: @item.Topic</p>
+                        }
+                        <p class="card-text mb-2"><span class="badge bg-secondary text-capitalize">@(GetTypeLabel(item.ResourceType))</span></p>
+
+                        <div class="mt-auto d-flex gap-2">
+                            @switch (item.ResourceType)
+                            {
+                                case "Icon":
+                                case "Picture":
+                                    <button class="btn btn-sm btn-outline-primary" onclick="downloadImage('@item.PreviewUrl')" title="Скачать"><i class="bi bi-download"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="copyImageToClipboard('@item.PreviewUrl')" title="Копировать"><i class="bi bi-clipboard"></i></button>
+                                    break;
+                                case "AnimatedElement":
+                                    <button class="btn btn-sm btn-outline-primary" onclick="downloadAnimation('@item.PreviewUrl')" title="Скачать"><i class="bi bi-download"></i></button>
+                                    break;
+                                case "Button":
+                                case "Template":
+                                case "Form":
+                                    <a class="btn btn-sm btn-outline-primary" href="@item.DownloadUrl" download title="Скачать"><i class="bi bi-download"></i></a>
+                                    break;
+                                case "Font":
+                                    <a class="btn btn-sm btn-outline-primary" asp-controller="Font" asp-action="ShowFonts" title="Перейти к шрифтам"><i class="bi bi-fonts"></i></a>
+                                    break;
+                            }
+
+                            @if (authService.HasPermission(
+                           item.ResourceType switch
+                           {
+                               "Icon" => Permission.CanManageIcons,
+                               "Picture" => Permission.CanManagePictures,
+                               "AnimatedElement" => Permission.CanManageAnimatedElements,
+                               "Button" => Permission.CanManageButtons,
+                               "Template" => Permission.CanManageTemplates,
+                               "Form" => Permission.CanManageForms,
+                               "Font" => Permission.CanManageFonts,
+                               "Palette" => Permission.CanManagePalettes,
+                               _ => 0
+                           }))
+                            {
+                                <a class="btn btn-sm btn-outline-secondary" asp-controller="@item.ResourceType" asp-action="@($"Edit{item.ResourceType}")" asp-route-id="@item.Id" title="Редактировать"><i class="bi bi-pencil"></i></a>
+                                <form asp-controller="@item.ResourceType" asp-action="@($"Delete{item.ResourceType}")" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Удалить этот элемент?');" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить"><i class="bi bi-trash"></i></button>
+                                </form>
+                            }
                         </div>
                     </div>
                 </div>
-            }
-        </div>
-    }
-</div>
+            </div>
+        }
+    </div>
+    <div class="mt-3">
+        @{
+            var resType = sec.Items.First().ResourceType as string;
+            var actionName = resType switch
+            {
+                "Icon" => "ShowGroupsOfIconsOnTheTopic",
+                "Picture" => "ShowGroupsOfPicturesOnTheTopic",
+                "AnimatedElement" => "ShowGroupsOfAnimatedElementsOnTheTopic",
+                "Button" => "ShowGroupsOfButtons",
+                "Font" => "ShowFonts",
+                "Form" => "ShowAllForms",
+                "Palette" => "ShowPalettes",
+                "Template" => "ShowGroupsOfTemplates",
+                _ => "Index"
+            };
+        }
 
+    </div>
+}
 
 
 @section Scripts {
     <script>
-        // токен из формы
-        const token = document.querySelector('#antiforgery-form input[name="__RequestVerificationToken"]').value;
+        function getAntiForgeryToken() {
+            const t = document.querySelector('input[name="__RequestVerificationToken"]');
+            return t ? t.value : '';
+        }
 
-        document.querySelectorAll('.remove-fav').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const type = btn.dataset.type;
-            const id   = parseInt(btn.dataset.id, 10);
+        function downloadImage(url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = url.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
 
-            fetch('/Favorites/Toggle', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'RequestVerificationToken': token
-              },
-              body: JSON.stringify({ assetType: type, assetId: id })
-            })
-            .then(res => {
-              if (!res.ok) throw new Error('Ошибка при удалении из избранного');
-              // удаление карточки элемента
-              btn.closest('.col-md-3').remove();
-              // если нет избранных
-              if (!document.querySelector('.col-md-3')) {
-                document.querySelector('.container.py-4').innerHTML = '<p>У вас ещё нет избранных элементов.</p>';
-              }
-            })
-            .catch(console.error);
-          });
-        });
+        async function copyImageToClipboard(url) {
+            try {
+                if (!navigator.clipboard) throw 'Clipboard API не поддерживается';
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = url;
+                await img.decode();
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+                await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
+                alert('Изображение скопировано');
+            } catch (e) {
+                alert('Не удалось скопировать: ' + e);
+            }
+        }
+
+        function downloadAnimation(url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = url.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function copyColorHex(hex) {
+            if (!navigator.clipboard) return alert('Clipboard не поддерживается');
+            navigator.clipboard.writeText(hex)
+                .then(() => alert('HEX скопирован: ' + hex))
+                .catch(e => alert('Ошибка: ' + e));
+        }
+
+        async function toggleFavorite(e, btn) {
+            e.stopPropagation();
+            const type = btn.dataset.assetType;
+            const id   = +btn.dataset.assetId;
+            const icon = btn.querySelector('i');
+            try {
+                const res = await fetch('/Favorites/Toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': getAntiForgeryToken()
+                    },
+                    body: JSON.stringify({ assetType: type, assetId: id })
+                });
+                if (!res.ok) throw res.statusText;
+                const { favorited } = await res.json();
+                icon.className = favorited
+                    ? 'bi bi-heart-fill text-danger'
+                    : 'bi bi-heart text-secondary';
+                icon.title = favorited
+                    ? 'Убрать из избранного'
+                    : 'Добавить в избранное';
+            } catch (err) {
+                alert('Не удалось обновить избранное: ' + err);
+            }
+        }
     </script>
 }

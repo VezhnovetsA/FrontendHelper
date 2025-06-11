@@ -1,5 +1,4 @@
-﻿// FrontendHelper/Controllers/FormController.cs
-using FHDatabase.Models;
+﻿using FHDatabase.Models;
 using FHDatabase.Repositories;
 using FhEnums;
 using FrontendHelper.Controllers.AuthorizationAttributes;
@@ -36,9 +35,7 @@ namespace FrontendHelper.Controllers
             _authService = authService;
         }
 
-        // ===========================
-        // ПРОСМОТР ВСЕХ ФОРМ
-        // ===========================
+
         [HasPermission(Permission.CanViewForms)]
         public IActionResult ShowAllForms()
         {
@@ -84,9 +81,6 @@ namespace FrontendHelper.Controllers
             return View(vmGroups);
         }
 
-        // ===========================
-        // СОЗДАНИЕ (CanManageForms)
-        // ===========================
         [HasPermission(Permission.CanManageForms)]
         [HttpGet]
         public IActionResult CreateForm()
@@ -106,7 +100,6 @@ namespace FrontendHelper.Controllers
         [HasPermission(Permission.CanManageForms)]
         public async Task<IActionResult> CreateForm(CreateFormViewModel vm)
         {
-            // 1) Базовая валидация моделей (Name, Topic, FormFile)
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -116,7 +109,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // 2) Проверка расширения .html
             var ext = Path.GetExtension(vm.FormFile.FileName)?.ToLowerInvariant();
             if (ext != ".html")
             {
@@ -128,7 +120,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // 3) Сохраняем файл и создаём FormData
             var savedFileName = await _fileService.SaveFileAsync(vm.FormFile, "forms");
             var newForm = new FormData
             {
@@ -138,7 +129,6 @@ namespace FrontendHelper.Controllers
             };
             _formRepository.AddAsset(newForm);
 
-            // 4) Обрабатываем "новые фильтры" из vm.NewFilterNames
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', System.StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -164,7 +154,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // 5) Собираем итоговый список фильтров (чекбоксы + вновь созданные)
             var toBindFilterIds = vm.SelectedFilterIds
                                   .Concat(createdFilterIds)
                                   .Distinct()
@@ -180,7 +169,6 @@ namespace FrontendHelper.Controllers
                 });
             }
 
-            // 6) Редирект на ShowAllFormsOnTheTopic
             return RedirectToAction(
                 actionName: nameof(ShowAllFormsOnTheTopic),
                 controllerName: "Form",
@@ -188,9 +176,6 @@ namespace FrontendHelper.Controllers
             );
         }
 
-        // ===========================
-        // РЕДАКТИРОВАНИЕ (CanManageForms)
-        // ===========================
         [HasPermission(Permission.CanManageForms)]
         [HttpGet]
         public IActionResult EditForm(int id)
@@ -198,7 +183,6 @@ namespace FrontendHelper.Controllers
             var data = _formRepository.GetAsset(id);
             if (data == null) return NotFound();
 
-            // Существующие фильтры
             var existingFilters = _filterRepository
                 .GetFiltersForAsset("Form", id)
                 .Select(f => f.Id)
@@ -225,10 +209,8 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditForm(EditFormViewModel vm)
         {
-            // 1) ОБЯЗАТЕЛЬНО убираем из ModelState ExistingFileName, чтобы не было ошибки "поле обязательное"
             ModelState.Remove(nameof(vm.ExistingFileName));
 
-            // 2) Если модель НЕ прошла валидацию — возвращаем AvailableFilters и обратно в форму
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -241,14 +223,11 @@ namespace FrontendHelper.Controllers
             var data = _formRepository.GetAsset(vm.Id);
             if (data == null) return NotFound();
 
-            // 3) Сохраняем старое имя файла, чтобы вернуть при ошибке
             vm.ExistingFileName = data.FormCode;
 
-            // 4) Обновляем Name и Topic
             data.Name = vm.Name;
             data.Topic = vm.Topic;
 
-            // 5) Если пришёл новый файл – проверяем расширение и заменяем его
             if (vm.FormFile != null)
             {
                 var ext = Path.GetExtension(vm.FormFile.FileName)?.ToLowerInvariant();
@@ -262,18 +241,13 @@ namespace FrontendHelper.Controllers
                     return View(vm);
                 }
 
-                // удаляем старый и сохраняем новый
                 _fileService.DeleteFile(data.FormCode, "forms");
                 var newFileName = await _fileService.SaveFileAsync(vm.FormFile, "forms");
                 data.FormCode = newFileName;
             }
-            // Если vm.FormFile == null, то data.FormCode остаётся прежним
 
             _formRepository.UpdateAsset(data);
 
-            // ============================
-            // Дальше обрабатываем фильтры (аналогично Create)
-            // ============================
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', System.StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -299,7 +273,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Удаляем связи, которые пользователь снял
             var currentFilterIds = _filterRepository
                 .GetFiltersForAsset("Form", vm.Id)
                 .Select(f => f.Id)
@@ -313,7 +286,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Собираем итоговый список (выбранные + новые) и добавляем те, которых не было
             var finalFilterIds = vm.SelectedFilterIds
                                  .Concat(createdFilterIds)
                                  .Distinct()
@@ -335,9 +307,6 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowAllForms));
         }
 
-        // ===========================
-        // УДАЛЕНИЕ (CanManageForms)
-        // ===========================
         [HasPermission(Permission.CanManageForms)]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -346,10 +315,10 @@ namespace FrontendHelper.Controllers
             var data = _formRepository.GetAsset(id);
             if (data == null) return NotFound();
 
-            // Удаляем физический файл
+
             _fileService.DeleteFile(data.FormCode, "forms");
 
-            // Снимаем связи с фильтрами
+
             var filterIds = _filterRepository
                 .GetFiltersForAsset("Form", id)
                 .Select(f => f.Id)
@@ -359,14 +328,12 @@ namespace FrontendHelper.Controllers
                 _filterRepository.RemoveAssetFilter("Form", id, fid);
             }
 
-            // Удаляем запись из БД
+
             _formRepository.RemoveAsset(id);
             return RedirectToAction(nameof(ShowAllForms));
         }
 
-        // ===========================
-        // СКАЧАТЬ КОД (CanManageForms)
-        // ===========================
+
         [HasPermission(Permission.CanManageForms)]
         [HttpGet]
         public IActionResult DownloadCode(int id)
@@ -383,9 +350,7 @@ namespace FrontendHelper.Controllers
             return File(contentBytes, "text/html; charset=utf-8", fileName);
         }
 
-        // ===========================
-        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        // ===========================
+
         private FormViewModel ToViewModel(FormData d, int? userId)
         {
             bool isFav = false;
@@ -396,7 +361,7 @@ namespace FrontendHelper.Controllers
                     .Any(f => f.AssetType == "Form" && f.AssetId == d.Id);
             }
 
-            // Собираем все связанные фильтры и склеиваем в CSV через запятую
+
             var filterIds = _filterRepository
                 .GetFiltersForAsset("Form", d.Id)
                 .Select(f => f.Id)

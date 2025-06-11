@@ -1,5 +1,4 @@
-﻿// FrontendHelper/Models/CreateAnimatedElementViewModel.cs
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -14,7 +13,6 @@ namespace FrontendHelper.Models
         [Required, MaxLength(100)]
         public string Topic { get; set; }
 
-        // Убираем [FileExtensions], оставляем просто [Required]
         [Required]
         public IFormFile ImgFile { get; set; }
 

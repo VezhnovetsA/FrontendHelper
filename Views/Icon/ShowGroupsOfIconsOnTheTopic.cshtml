@@ -8,7 +8,6 @@
 
 <h2 class="mb-4">Группы иконок</h2>
 
-@* Кнопка «Все иконки» (переход на ShowAllIcons) *@
 <div class="mb-4">
     <a class="btn btn-sm btn-outline-primary btn-view-all"
        asp-controller="Icon"
@@ -71,19 +70,19 @@
                                 </button>
                             </div>
                         </div>
-                        <button class="favorite-toggle-btn"
-                                data-asset-type="Icon"
-                                data-asset-id="@icon.Id"
-                                style="position: absolute; top: 8px; right: 8px; background: none; border: none;">
-                            @if (icon.IsFavorited)
-                            {
-                                <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
-                            }
-                            else
-                            {
-                                <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
-                            }
-                        </button>
+                            <button class="favorite-toggle-btn"
+                                    data-asset-type="Icon"
+                                    data-asset-id="@icon.Id"
+                                    style="position: absolute; top: 8px; right: 8px; background: none; border: none;">
+                                @if (icon.IsFavorited)
+                                {
+                                    <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                                }
+                            </button>
                     </div>
                 </div>
             }
@@ -91,7 +90,6 @@
     </div>
 }
 
-@* Модальное окно для детального просмотра одной иконки *@
 <div class="modal fade" id="iconDetailModal" tabindex="-1" aria-labelledby="iconDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -115,9 +113,9 @@
                     <button id="modalCopyBtn" class="btn btn-outline-secondary me-2">
                         <i class="bi bi-clipboard"></i> Копировать
                     </button>
-                    <button id="modalFavBtn" class="btn btn-outline-danger">
-                        <i id="modalFavIcon" class="bi"></i> Избранное
-                    </button>
+                        <button id="modalFavBtn" class="btn btn-outline-danger">
+                            <i id="modalFavIcon" class="bi"></i> Избранное
+                        </button>
                 </div>
 
                 @if (authService.HasPermission(Permission.CanManageIcons))
@@ -146,7 +144,6 @@
 
 @section Scripts {
     <script>
-        // Скачивание изображения
         function downloadIcon(url) {
             const link = document.createElement('a');
             link.href = url;
@@ -157,7 +154,6 @@
             document.body.removeChild(link);
         }
 
-        // Копирование изображения в буфер
         async function copyImageToClipboard(url) {
             try {
                 const response = await fetch(url);
@@ -173,13 +169,11 @@
             }
         }
 
-        // Получаем токен антифальсификации
         function getAntiForgeryToken() {
             const tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]');
             return tokenInput ? tokenInput.value : '';
         }
 
-        // Обработчик toggle–«Избранное» для карточки
         document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const assetType = this.dataset.assetType;
@@ -211,7 +205,6 @@
             });
         });
 
-        // Обработка открытия модального окна
         const iconDetailModal = document.getElementById('iconDetailModal');
         iconDetailModal.addEventListener('show.bs.modal', function (event) {
             const triggerEl = event.relatedTarget;
@@ -220,7 +213,6 @@
             const topic     = triggerEl.dataset.iconTopic;
             const imgUrl    = triggerEl.dataset.iconImg;
 
-            // Считываем реальное состояние «лайка» прямо из карточки:
             const cardIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${iconId}"] i`);
             const isFavoritedCard = cardIcon && cardIcon.classList.contains('bi-heart-fill');
 
@@ -237,7 +229,6 @@
             const favIcon = document.getElementById('modalFavIcon');
             const favBtn  = document.getElementById('modalFavBtn');
 
-            // Устанавливаем иконку в модалке в зависимости от карточки:
             if (isFavoritedCard) {
                 favIcon.className = 'bi bi-heart-fill text-danger';
                 favBtn.title     = 'Убрать из избранного';
@@ -259,7 +250,6 @@
                     if (!response.ok) throw new Error(`Сервер вернул ${response.status}`);
                     const result = await response.json();
 
-                    // Модальное окно: переключаем иконку
                     if (result.favorited) {
                         favIcon.className = 'bi bi-heart-fill text-danger';
                         favBtn.title     = 'Убрать из избранного';
@@ -268,7 +258,6 @@
                         favBtn.title     = 'Добавить в избранное';
                     }
 
-                    // CARD: находим карточку и меняем её иконку
                     const cardBtnIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${iconId}"] i`);
                     if (cardBtnIcon) {
                         if (result.favorited) {
@@ -286,7 +275,6 @@
                 }
             };
 
-        @* Если есть права на редактирование/удаление, настраиваем кнопки: *@
         @if (authService.HasPermission(Permission.CanManageIcons))
         {
             <text>

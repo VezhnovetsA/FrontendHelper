@@ -1,5 +1,4 @@
-﻿// FrontendHelper/Models/CreateTemplateViewModel.cs
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
@@ -18,7 +17,6 @@ namespace FrontendHelper.Models
         [Required]
         public IFormFile HtmlFile { get; set; }
 
-        // Фильтры
         public List<int> SelectedFilterIds { get; set; } = new List<int>();
         public List<SelectListItem> AvailableFilters { get; set; } = new List<SelectListItem>();
 

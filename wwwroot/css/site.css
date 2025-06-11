@@ -27,9 +27,3 @@ body {
     margin-right: 10px;
     margin-left: 10px;
 }
-
-/*header {
-    height: 80px;*/ /* Установите желаемую высоту */
-    /*display: flex;*/ /* Чтобы элементы внутри могли быть выровнены */
-    /*align-items: center;*/ /* Выровнять элементы по вертикали */
-/*}*/

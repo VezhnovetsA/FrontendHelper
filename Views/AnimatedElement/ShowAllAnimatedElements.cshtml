@@ -10,8 +10,8 @@
 
 <div class="mb-4">
     <a class="btn btn-sm btn-outline-primary btn-view-all"
-       asp-action="ShowGroupsOfAnimatedElementsOnTheTopic"
-       asp-controller="AnimatedElement">
+    asp-action="ShowGroupsOfAnimatedElementsOnTheTopic"
+    asp-controller="AnimatedElement">
         ← Группы анимаций
     </a>
 </div>
@@ -19,8 +19,8 @@
 @if (authService.HasPermission(Permission.CanManageAnimatedElements))
 {
     <a class="btn-create-icon mb-3"
-       asp-controller="AnimatedElement"
-       asp-action="CreateAnimatedElement">
+    asp-controller="AnimatedElement"
+    asp-action="CreateAnimatedElement">
         <i class="bi bi-plus-lg"></i> Добавить анимацию
     </a>
 }
@@ -38,30 +38,30 @@
                     @if (ext == ".gif")
                     {
                         <img src="@src"
-                             alt="@anim.Name"
-                             class="card-img-top img-fluid"
-                             style="object-fit: contain; max-height: 160px; width: 100%;"
-                             data-bs-toggle="modal"
-                             data-bs-target="#animatedDetailModal"
-                             data-animated-element-id="@anim.Id"
-                             data-animated-element-name="@anim.Name"
-                             data-animated-element-topic="@anim.Topic"
-                             data-animated-element-img="@src" />
+                        alt="@anim.Name"
+                        class="card-img-top img-fluid"
+                        style="object-fit: contain; max-height: 160px; width: 100%;"
+                        data-bs-toggle="modal"
+                        data-bs-target="#animatedDetailModal"
+                        data-animated-element-id="@anim.Id"
+                        data-animated-element-name="@anim.Name"
+                        data-animated-element-topic="@anim.Topic"
+                        data-animated-element-img="@src" />
                     }
                     else
                     {
                         <video class="card-img-top img-fluid"
-                               style="object-fit: contain; max-height: 160px; width: 100%;"
-                               muted
-                               loop
-                               autoplay
-                               playsinline
-                               data-bs-toggle="modal"
-                               data-bs-target="#animatedDetailModal"
-                               data-animated-element-id="@anim.Id"
-                               data-animated-element-name="@anim.Name"
-                               data-animated-element-topic="@anim.Topic"
-                               data-animated-element-img="@src">
+                        style="object-fit: contain; max-height: 160px; width: 100%;"
+                        muted
+                        loop
+                        autoplay
+                        playsinline
+                        data-bs-toggle="modal"
+                        data-bs-target="#animatedDetailModal"
+                        data-animated-element-id="@anim.Id"
+                        data-animated-element-name="@anim.Name"
+                        data-animated-element-topic="@anim.Topic"
+                        data-animated-element-img="@src">
                             <source src="@src" type="video/mp4" />
                         </video>
                     }
@@ -75,32 +75,31 @@
 
                     <div class="mt-auto d-flex justify-content-between align-items-center">
                         <button class="btn btn-sm btn-outline-primary"
-                                onclick="downloadAnimation('@src')">
+                        onclick="downloadAnimation('@src')">
                             Скачать
                         </button>
                         <span style="width:0;"></span>
                     </div>
                 </div>
 
-                <button class="favorite-toggle-btn"
-                        data-asset-type="AnimatedElement"
-                        data-asset-id="@anim.Id"
-                        style="position:absolute; top:8px; right:8px; background:none; border:none;">
-                    @if (anim.IsFavorited)
-                    {
-                        <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
-                    }
-                    else
-                    {
-                        <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
-                    }
-                </button>
+                    <button class="favorite-toggle-btn"
+                            data-asset-type="AnimatedElement"
+                            data-asset-id="@anim.Id"
+                            style="position:absolute; top:8px; right:8px; background:none; border:none;">
+                        @if (anim.IsFavorited)
+                        {
+                            <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                        }
+                    </button>
             </div>
         </div>
     }
 </div>
 
-@* Модальное окно (тот же самый #animatedDetailModal, что и ниже) *@
 <div class="modal fade" id="animatedDetailModal" tabindex="-1" aria-labelledby="animatedDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -117,9 +116,9 @@
                     <button id="modalDownloadBtn" class="btn btn-outline-primary me-2">
                         <i class="bi bi-download"></i> Скачать
                     </button>
-                    <button id="modalFavBtn" class="btn btn-outline-danger">
-                        <i id="modalFavIcon" class="bi"></i> Избранное
-                    </button>
+                        <button id="modalFavBtn" class="btn btn-outline-danger">
+                            <i id="modalFavIcon" class="bi"></i> Избранное
+                        </button>
                 </div>
 
                 @if (authService.HasPermission(Permission.CanManageAnimatedElements))
@@ -148,7 +147,6 @@
 
 @section Scripts {
     <script>
-        // Скачиваем GIF/MP4/WebM
         function downloadAnimation(url) {
             const link = document.createElement('a');
             link.href = url;
@@ -164,7 +162,6 @@
             return tokenInput ? tokenInput.value : '';
         }
 
-        // Toggle «Избранное»
         document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const assetType = this.dataset.assetType;
@@ -291,7 +288,6 @@
                 }
             };
 
-        @* Если есть права на редактирование/удаление, настраиваем кнопки *@
         @if (authService.HasPermission(Permission.CanManageAnimatedElements))
         {
             <text>

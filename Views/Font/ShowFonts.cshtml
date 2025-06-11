@@ -2,12 +2,13 @@
 @using FhEnums
 @inject FrontendHelper.Services.AuthService authService
 
+
 @{
     ViewData["Title"] = "Шрифты";
 }
 
 @section Head {
-    <!-- Подключаем внешние внешние CSS-шрифты -->
+
     @foreach (var f in Model.Fonts.Where(x =>
                  !string.IsNullOrEmpty(x.LinkOrLocalUrl) &&
                  !x.LinkOrLocalUrl.StartsWith("/fonts/")))
@@ -15,7 +16,7 @@
         <link rel="stylesheet" href="@f.LinkOrLocalUrl" />
     }
 
-    <!-- Объявляем локальные font-face -->
+
     <style>
     @foreach (var f in Model.Fonts.Where(x =>
                  !string.IsNullOrEmpty(x.LinkOrLocalUrl) &&
@@ -35,9 +36,9 @@
 <div class="container py-4">
     <h2 class="mb-4">Шрифты</h2>
 
-    @* ─── Фиксированная верхняя панель ─── *@
+
     <div class="sticky-top bg-white pb-3 px-3" style="z-index: 10; border-radius:12px;">
-        @* Кнопка “Добавить шрифт” *@
+
         @if (authService.HasPermission(Permission.CanManageFonts))
         {
             <div class="mb-2">
@@ -49,7 +50,7 @@
             </div>
         }
 
-        @* Поле предпросмотра + кнопка копирования со стилем *@
+
         <div class="d-flex align-items-start mb-2">
             <div class="flex-grow-1 me-2">
                 <label for="inputText" class="form-label">Введите текст для предпросмотра</label>
@@ -66,7 +67,7 @@
             </div>
         </div>
 
-        @* Панель фильтров *@
+
         @if (Model.AvailableFilters.Any())
         {
             <div class="filter-bar mb-2">
@@ -86,7 +87,7 @@
         }
     </div>
 
-    @* ─── Основной контент: прокручиваемая таблица ─── *@
+
     <div class="card mb-5">
         <div class="card-body p-0">
             <div class="font-table-wrapper">

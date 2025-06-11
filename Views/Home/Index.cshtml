@@ -2,10 +2,38 @@
 @using FhEnums
 @inject FrontendHelper.Services.AuthService authService
 
+@section Head {
+    <style>
+    @foreach (var f in Model.Fonts)
+    {
+        if (!string.IsNullOrEmpty(f.DownloadUrl) && f.DownloadUrl.StartsWith("/fonts/"))
+        {
+            <text>
+            @@font-face {
+                font-family: '@f.FontFamily';
+                src: url('@Url.Content(f.DownloadUrl)') format('truetype');
+                font-display: swap;
+            }
+            </text>
+        }
+    }
+    </style>
+
+    @foreach (var f in Model.Fonts.Where(x =>
+             !string.IsNullOrEmpty(x.DownloadUrl) 
+             && (x.DownloadUrl.StartsWith("http://") || x.DownloadUrl.StartsWith("https://"))))
+    {
+        <link rel="stylesheet" href="@f.DownloadUrl" />
+    }
+}
+
+
+
+
 <h1 class="mb-4">Добро пожаловать, @Model.UserName!</h1>
 
 @functions {
-    // Отображаем русский заголовок типа
+
     string GetTypeLabel(string type) => type switch
     {
         "Icon" => "Иконки",
@@ -20,9 +48,9 @@
     };
 }
 
-@* === Общая сетка карточек === *@
+
 @{
-    // Каждый элемент секции: Items и Header названы для корректной работы кортежей
+  
     var sections = new (IEnumerable<dynamic> Items, string Header)[]
     {
         (Items: Model.Icons.Cast<dynamic>(),           Header: "Иконки"),
@@ -86,11 +114,19 @@
                                 <iframe src="@item.PreviewUrl" style="border:none;width:100%;height:1000px;pointer-events:none;" scrolling="no"></iframe>
                             </div>
                             break;
-                        case "Font":
-                            <div class="font-preview-container p-4 d-flex align-items-center justify-content-center" style="height:150px;font-family:'@item.FontFamily';">
-                                <p style="margin:0;font-size:1.5rem;">@item.Name</p>
-                            </div>
-                            break;
+
+                          case "Font":
+    <div class="font-preview-container p-4 d-flex align-items-center justify-content-center"
+         style="height:150px; font-family:@item.FontFamily;">
+        <p class="m-0" style="font-size:1.25rem;">
+            @item.Name
+        </p>
+    </div>
+    break;
+
+
+
+
                         case "Palette":
                             <div class="p-3" style="height:300px;">
                                 <div class="palette-grid d-flex flex-wrap mb-3" style="gap:2px;">
@@ -105,9 +141,16 @@
                             break;
                     }
 
-                    <button class="favorite-toggle-btn position-absolute top-0 end-0 m-2" data-asset-type="@item.ResourceType" data-asset-id="@item.Id" onclick="toggleFavorite(event,this)">
-                        <i class="bi @(item.IsFavorited?"bi-heart-fill text-danger":"bi-heart text-secondary")"></i>
-                    </button>
+                    @if (authService.IsAuthenticated())
+                    {
+                        <button class="favorite-toggle-btn position-absolute top-0 end-0 m-2"
+                                data-asset-type="@item.ResourceType"
+                                data-asset-id="@item.Id"
+                                onclick="toggleFavorite(event,this)">
+                            <i class="bi @(item.IsFavorited ? "bi-heart-fill text-danger" : "bi-heart text-secondary")"></i>
+                        </button>
+                    }
+
 
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title text-truncate" title="@item.Name" style="font-size:1.1rem;">@item.Name</h5>
@@ -134,6 +177,7 @@
                                     <a class="btn btn-sm btn-outline-primary" href="@item.DownloadUrl" download title="Скачать"><i class="bi bi-download"></i></a>
                                     break;
                                 case "Font":
+                                    
                                     <a class="btn btn-sm btn-outline-primary" asp-controller="Font" asp-action="ShowFonts" title="Перейти к шрифтам"><i class="bi bi-fonts"></i></a>
                                     break;
                             }
@@ -166,7 +210,6 @@
     </div>
     <div class="mt-3">
         @{
-            // Определяем контроллер и действие для кнопки "Смотреть все"
             var resType = sec.Items.First().ResourceType as string;
             var actionName = resType switch
             {
@@ -184,6 +227,7 @@
         <a class="btn btn-sm btn-outline-primary btn-view-all"
            asp-controller="@resType"
            asp-action="@actionName">
+            @* возможно стоит убрать для гостя возможно стоит убрать для гостя возможно стоит убрать для гостя возможно стоит убрать для гостя возможно стоит убрать для гостя возможно стоит убрать для гостя возможно стоит убрать для гостя *@
             ← Смотреть все @sec.Header.ToLower()
         </a>
     </div>

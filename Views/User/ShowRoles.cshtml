@@ -1,37 +1,79 @@
-﻿@model RolesViewModel
+﻿@model FrontendHelper.Models.RolesViewModel
 
-<div class="roles">
-	@foreach (var role in Model.Roles)
-	{
-		<div class="role">
-			<h2>@role.Name</h2>
-			<form method="post" action="/User/UpdateRole">
-				<input type="hidden" value="@role.Id" name="id"/>
-				@foreach (var permission in Model.Permissions)
-				{
-					<label>
-						@permission.PermissionName
-						<input type="checkbox"
-							   name="permissions"
-							   value="@permission.Permission"
-							   checked="@(role.Permissions.Contains(permission.Permission))" />
-					</label>
-				}
-				<button type="submit">Сохранить </button>
-			</form>
-			
+@{
+    var saveProtected = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Admin" };
+    var deleteProtected = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Admin", "User", "PremiumUser" };
+}
 
-			<a href="/User/DeleteRole?id=@role.Id">Удалить роль</a>
+<h1 class="mb-4">Роли и права</h1>
 
-		</div>
-	}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="row gx-4 gy-4">
+    @foreach (var role in Model.Roles)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card form-card p-3">
+                <h5 class="card-title">@role.Name</h5>
+
+                <form asp-action="UpdateRole" method="post" class="generic-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@role.Id" />
+
+                    <div class="filter-list mb-3">
+                        @foreach (var perm in Model.Permissions)
+                        {
+                            <label class="form-check form-check-inline">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="permissions"
+                                       value="@perm.Permission"
+                                @(role.Permissions.Contains(perm.Permission) ? "checked" : "") />
+                                <span class="form-check-label">@perm.PermissionName</span>
+                            </label>
+                        }
+                    </div>
+
+                    @if (!saveProtected.Contains(role.Name))
+                    {
+                        <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
+                    }
+                </form>
+
+                <div class="mt-2 text-end">
+                    @if (!deleteProtected.Contains(role.Name))
+                    {
+                        <form asp-action="DeleteRole" method="post"
+                              onsubmit="return confirm('Удалить роль «@role.Name»?');"
+                              class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@role.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
+<hr class="my-5" />
 
-<div class="create-role-container">
-	<form method="post" action="/User/CreateRole">
-		<input name="roleName" placeholder="Введите название новой роли" />
-		<button type="submit">Создать роль</button>
-	</form>
-
+<div class="card form-card p-4">
+    <h5>Создать новую роль</h5>
+    <form asp-action="CreateRole" method="post" class="d-flex generic-form">
+        @Html.AntiForgeryToken()
+        <input type="text"
+               name="roleName"
+               class="form-control me-2"
+               placeholder="Название роли"
+               required
+               maxlength="100" />
+        <button type="submit" class="btn btn-primary">Создать</button>
+    </form>
 </div>

@@ -48,14 +48,11 @@
                 <span asp-validation-for="FontFile" class="text-danger small"></span>
             </div>
 
-            @* ================================
-               Существующие фильтры (чек-боксы)
-               ================================ *@
+
             @if (Model.AvailableFilters.Any())
             {
                 <div class="mb-3">
                     <label class="form-label">Существующие фильтры</label>
-                    @* Оборачиваем в .filter-list, чтобы наши чек-боксы были видимы *@
                     <div class="filter-list">
                         @foreach (var filt in Model.AvailableFilters)
                         {

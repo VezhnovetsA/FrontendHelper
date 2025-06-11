@@ -1,4 +1,3 @@
-// FrontendHelper/Controllers/HomeController.cs
 using FrontendHelper.Models;
 using FHDatabase.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -58,7 +57,6 @@ namespace FrontendHelper.Controllers
                 ? _authService.GetUserId()
                 : (int?)null;
 
-            // Вспомогательный лямбда, чтобы не дублировать код
             static List<SearchResultItem> Load<T>(
      BaseRepository<T> repo,
      string resourceType,
@@ -71,20 +69,18 @@ namespace FrontendHelper.Controllers
      int limit
  ) where T : BaseDataModel
             {
-                // Забираем первых limit штук из БД
                 var entities = repo
                     .Query()
                     .AsNoTracking()
                     .Take(limit)
                     .ToList();
 
-                // Проецируем в SearchResultItem, уже используя лямбды для Name/Topic
                 return entities.Select(e => new SearchResultItem
                 {
                     ResourceType = resourceType,
                     Id = e.Id,
-                    Name = nameSelector(e),          // <-- напрямую
-                    Topic = topicSelector(e),         // <-- напрямую
+                    Name = nameSelector(e),
+                    Topic = topicSelector(e),
                     PreviewUrl = previewUrl(e),
                     DownloadUrl = downloadUrl(e),
                     IsFavorited = userId.HasValue
@@ -92,7 +88,6 @@ namespace FrontendHelper.Controllers
                 }).ToList();
             }
 
-            // Иконки
             vm.Icons = Load(
                 _iconRepo, "Icon",
                 i => i.Name,
@@ -104,7 +99,7 @@ namespace FrontendHelper.Controllers
                 8
             );
 
-            // Картинки
+
             vm.Pictures = Load(
                 _picRepo, "Picture",
                 p => p.Name,
@@ -116,7 +111,7 @@ namespace FrontendHelper.Controllers
                 8
             );
 
-            // Анимации
+
             vm.AnimatedElements = Load(
                 _animRepo, "AnimatedElement",
                 a => a.Name,
@@ -128,7 +123,6 @@ namespace FrontendHelper.Controllers
                 8
             );
 
-            // Кнопки
             vm.Buttons = Load(
                 _buttonRepo, "Button",
                 b => b.Name,
@@ -146,7 +140,7 @@ namespace FrontendHelper.Controllers
                 8
             );
 
-            // Шаблоны
+
             vm.Templates = Load(
                 _tplRepo, "Template",
                 t => t.Name,
@@ -164,7 +158,7 @@ namespace FrontendHelper.Controllers
                 8
             );
 
-            // Формы
+
             vm.Forms = Load(
                 _formRepo, "Form",
                 f => f.Name,
@@ -182,17 +176,47 @@ namespace FrontendHelper.Controllers
                 8
             );
 
-            // Шрифты
-            vm.Fonts = Load(
-                _fontRepo, "Font",
-                f => f.Name,
-                _ => null,
-                _ => string.Empty,
-                _ => null,
-                _favRepo,
-                userId,
-                8
-            );
+
+            //vm.Fonts = Load(
+            //    _fontRepo, "Font",
+            //    f => f.Name,
+            //    _ => null,
+            //    _ => string.Empty,
+            //    _ => null,
+            //    _favRepo,
+            //    userId,
+            //    8
+            //);
+
+            var fontEntities = _fontRepo
+                .Query()
+                .AsNoTracking()
+                .ToList();
+
+            vm.Fonts = fontEntities
+                .Select(f =>
+                {
+                    var isExternal = !string.IsNullOrEmpty(f.Link);
+
+                    return new SearchResultItem
+                    {
+                        ResourceType = "Font",
+                        Id = f.Id,
+                        Name = f.Name,
+                        FontFamily = f.FontFamily,
+                        PreviewUrl = string.Empty,
+                        DownloadUrl = isExternal
+                                          ? f.Link!
+                                          : Url.Content($"~/fonts/{f.LocalFileName}"),
+                        IsFavorited = userId.HasValue
+                                          && _favRepo.IsFavorited(userId.Value, "Font", f.Id),
+
+                    };
+                })
+                .ToList();
+
+
+
 
             foreach (var f in vm.Fonts)
             {
@@ -201,18 +225,17 @@ namespace FrontendHelper.Controllers
             }
 
             vm.Palettes = Load(
-    _paletteRepo,        // репозиторий
-    "Palette",           // resourceType
-    p => p.Title,        // nameSelector — например, Title
-    _ => (string?)null,  // topicSelector — у палитр нет темы
-    _ => string.Empty,   // previewUrlSelector — не нужен
-    _ => null,           // downloadUrlSelector — не нужен
-    _favRepo,            // ваш FavoriteRepository
-    userId,              // текущий пользователь
-    8                    // лимит
+    _paletteRepo,        
+    "Palette",          
+    p => p.Title,        
+    _ => (string?)null,  
+    _ => string.Empty,   
+    _ => null,          
+    _favRepo,           
+    userId,             
+    8                   
 );
 
-            // теперь «дотянем» цвета из БД
             foreach (var p in vm.Palettes)
             {
                 var paletteEntity = _paletteRepo.GetOnePalette(p.Id);

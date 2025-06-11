@@ -2,6 +2,6 @@
 {
     public class FavoritesViewModel
     {
-        public List<FavoriteItemViewModel> Favorites { get; set; }
+        public List<int> Favorites { get; set; }
     }
 }

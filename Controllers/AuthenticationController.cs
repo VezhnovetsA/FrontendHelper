@@ -3,27 +3,22 @@ using FrontendHelper.Models;
 using FrontendHelper.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using System.Security.Claims;
 
 namespace FrontendHelper.Controllers
 {
     public class AuthenticationController : Controller
     {
-        private UserRepository _userRepository;
 
-        public AuthenticationController(UserRepository userRepository)
-        {
-            _userRepository = userRepository;
-        }
-        public IActionResult Login()
-        {
-            return View();
-        }
+        private readonly UserRepository _users;
 
-        public IActionResult Registration()
-        {
-            return View();
-        }
+        public AuthenticationController(UserRepository users) => _users = users;
+
+        public IActionResult Login() => View();
+        public IActionResult Registration() => View();
+
+       
 
         public IActionResult Logout()
         {
@@ -31,53 +26,47 @@ namespace FrontendHelper.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+
+
+
         [HttpPost]
-        public IActionResult Login(AuthenticationViewModel authenticationViewModel)
+        public IActionResult Login(LoginViewModel vm)
         {
-            var user = _userRepository.Login(authenticationViewModel.UserName, authenticationViewModel.Password);
+            if (!ModelState.IsValid) return View(vm);
 
-            if (user is null)
+            var user = _users.Login(vm.Login, vm.Password);
+            if (user == null)
+                return View(vm);
+
+            var claims = new List<Claim>
+        {
+            new Claim(AuthService.CLAIM_KEY_ID,         user.Id.ToString()),
+            new Claim(AuthService.CLAIM_KEY_NAME,       user.UserName),
+            new Claim(AuthService.CLAIM_KEY_PERMISSION, ((int?)user.Role?.Permission ?? 0).ToString()),
+            new Claim(ClaimTypes.Role,                  user.Role?.RoleName ?? ""),
+            new Claim(ClaimTypes.AuthenticationMethod,  AuthService.AUTH_TYPE)
+        };
+
+            var props = new AuthenticationProperties
             {
-                return RedirectToAction("Login");
-
-            }
-
-            var claims = new List<Claim>()
-            {
-                new Claim(AuthService.CLAIM_KEY_ID, user.Id.ToString()),
-                new Claim(AuthService.CLAIM_KEY_NAME, user.UserName.ToString()),
-                new Claim(AuthService.CLAIM_KEY_PERMISSION, ((int?)user.Role?.Permission ?? -1).ToString()),
-                new Claim(ClaimTypes.AuthenticationMethod, AuthService.AUTH_TYPE)
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14)
             };
 
-            var identity = new ClaimsIdentity(claims, AuthService.AUTH_TYPE);
-            var principal = new ClaimsPrincipal(identity);
+            var id = new ClaimsIdentity(claims, AuthService.AUTH_TYPE);
+            var principal = new ClaimsPrincipal(id);
 
-            HttpContext.SignInAsync(principal).Wait();
-
+            HttpContext.SignInAsync(AuthService.AUTH_TYPE, principal, props).Wait();
             return RedirectToAction("Index", "Home");
         }
 
-
         [HttpPost]
-        public IActionResult Registration(AuthenticationViewModel authenticationViewModel)
+        public IActionResult Registration(RegisterViewModel vm)
         {
-            var isNameNotUniq = _userRepository.Any(authenticationViewModel.UserName);
-
-            if (isNameNotUniq)
-            {
-                ModelState.AddModelError(nameof(AuthenticationViewModel.UserName), "Введенное имя неуникально");
-            }
-
-
-            if (!ModelState.IsValid)
-            {
-                return View(authenticationViewModel);
-            }
-
-            _userRepository.Registration(authenticationViewModel.UserName, authenticationViewModel.Password);
-
+            if (!ModelState.IsValid) return View(vm);
+            _users.Register(vm.Login, vm.Password);
             return RedirectToAction("Login");
         }
+
     }
 }

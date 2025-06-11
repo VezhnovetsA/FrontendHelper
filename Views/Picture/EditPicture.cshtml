@@ -45,7 +45,6 @@
                 <span asp-validation-for="ImgFile" class="text-danger small"></span>
             </div>
 
-            @* Список существующих фильтров *@
             @if (Model.AvailableFilters.Any())
             {
                 <div class="mb-3">
@@ -67,7 +66,6 @@
                 </div>
             }
 
-            @* Поле для новых фильтров *@
             <div class="mb-3">
                 <label asp-for="NewFilterNames" class="form-label">
                     Новые фильтры (через запятую)

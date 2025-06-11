@@ -72,19 +72,19 @@
                                 </button>
                             </div>
                         </div>
-                        <button class="favorite-toggle-btn"
-                                data-asset-type="Picture"
-                                data-asset-id="@pic.Id"
-                                style="position: absolute; top: 8px; right: 8px; background: none; border: none;">
-                            @if (pic.IsFavorited)
-                            {
-                                <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
-                            }
-                            else
-                            {
-                                <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
-                            }
-                        </button>
+                            <button class="favorite-toggle-btn"
+                                    data-asset-type="Picture"
+                                    data-asset-id="@pic.Id"
+                                    style="position: absolute; top: 8px; right: 8px; background: none; border: none;">
+                                @if (pic.IsFavorited)
+                                {
+                                    <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                                }
+                            </button>
                     </div>
                 </div>
             }
@@ -115,9 +115,9 @@
                     <button id="modalCopyBtn" class="btn btn-outline-secondary me-2">
                         <i class="bi bi-clipboard"></i> Копировать
                     </button>
-                    <button id="modalFavBtn" class="btn btn-outline-danger">
-                        <i id="modalFavIcon" class="bi"></i> Избранное
-                    </button>
+                        <button id="modalFavBtn" class="btn btn-outline-danger">
+                            <i id="modalFavIcon" class="bi"></i> Избранное
+                        </button>
                 </div>
 
                 @if (authService.HasPermission(Permission.CanManagePictures))
@@ -146,7 +146,7 @@
 
 @section Scripts {
     <script>
-        // Скачиваем картинку
+
         function downloadImage(url) {
             const link = document.createElement('a');
             link.href = url;
@@ -157,31 +157,27 @@
             document.body.removeChild(link);
         }
 
-        // Копируем картинку в буфер обмена (с конвертацией в PNG через canvas)
         async function copyImageToClipboard(url) {
             try {
-                // Загружаем изображение в <img>
+
                 const img = new Image();
-                img.crossOrigin = "anonymous"; // обязательно, чтобы избежать tainted canvas
+                img.crossOrigin = "anonymous";
                 img.src = url;
                 await new Promise((resolve, reject) => {
                     img.onload = () => resolve();
                     img.onerror = () => reject(new Error("Не удалось загрузить изображение"));
                 });
 
-                // Рисуем его на canvas
                 const canvas = document.createElement('canvas');
                 canvas.width  = img.naturalWidth;
                 canvas.height = img.naturalHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0);
 
-                // Получаем Blob в формате PNG
                 const blob = await new Promise(resolve => {
                     canvas.toBlob(resolve, "image/png");
                 });
 
-                // Записываем в буфер обмена
                 if (!navigator.clipboard) {
                     alert('Clipboard API не поддерживается этим браузером.');
                     return;
@@ -193,13 +189,11 @@
             }
         }
 
-        // Получаем антифальсификационный токен (если нужен для других AJAX-запросов)
         function getAntiForgeryToken() {
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
             return tokenInput ? tokenInput.value : '';
         }
 
-        // Toggle «Избранное» для карточки
         document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const assetType = this.dataset.assetType;
@@ -231,7 +225,6 @@
             });
         });
 
-        // Обработка открытия модального окна
         const pictureDetailModal = document.getElementById('pictureDetailModal');
         pictureDetailModal.addEventListener('show.bs.modal', function (event) {
             const triggerEl = event.relatedTarget;
@@ -240,7 +233,6 @@
             const topic     = triggerEl.dataset.pictureTopic;
             const imgUrl    = triggerEl.dataset.pictureImg;
 
-            // Считываем текущее состояние «Избранного»
             const cardIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${picId}"] i`);
             const isFavCard = cardIcon && cardIcon.classList.contains('bi-heart-fill');
 
@@ -275,7 +267,6 @@
                     if (!response.ok) throw new Error('Сетевая ошибка');
                     const result = await response.json();
 
-                    // Переключаем иконку в модалке
                     if (result.favorited) {
                         favIcon.className = 'bi bi-heart-fill text-danger';
                         favBtn.title      = 'Убрать из избранного';
@@ -284,7 +275,6 @@
                         favBtn.title      = 'Добавить в избранное';
                     }
 
-                    // Переключаем иконку в карточке
                     const cardBtnIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${picId}"] i`);
                     if (cardBtnIcon) {
                         if (result.favorited) {
@@ -302,7 +292,6 @@
                 }
             };
 
-        @* Если есть права на редактирование/удаление, настраиваем кнопки: *@
         @if (authService.HasPermission(Permission.CanManagePictures))
         {
             <text>

@@ -1,25 +1,46 @@
-﻿@model IndexUserViewModel
+﻿@model FrontendHelper.Models.IndexUserViewModel
+@inject FrontendHelper.Services.AuthService authService
 
-<div class="users">
-	@foreach(var user in Model.Users)
-	{
-		<div class="users">
-			<form method="post" action="/User/UpdateUserRole">
-				<input type="hidden" name="id" value="@user.Id"/>
-				@user.Name
-				<select name="roleId">
-					@foreach (var role in Model.Roles)
-					{
-						<option value="@role.Id"
-								selected="@(user.RoleId == role.Id  ? "selected" : null )">
-							@role.Name
-						</option>
-					}
-				</select>
-				<button type="submit">Обновить</button>
-            </form>
-		</div>
+<h1 class="mb-4">Пользователи</h1>
 
-	}
-
-</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Роль</th>
+            <th class="text-end">Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.Name</td>
+                <td>
+                    <form asp-action="UpdateUserRole" method="post" class="d-flex align-items-center generic-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <select name="roleId" class="form-select form-select-sm me-2" style="width:auto;">
+                            @foreach (var role in Model.Roles)
+                            {
+                                <option value="@role.Id" selected="@(user.RoleId == role.Id ? "selected" : null)">
+                                    @role.Name
+                                </option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Обновить</button>
+                    </form>
+                </td>
+                <td class="text-end">
+                    <form asp-action="DeleteUser" method="post" onsubmit="return confirm('Удалить пользователя @user.Name?');" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Удалить
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

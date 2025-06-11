@@ -45,7 +45,6 @@ namespace FrontendHelper.Models.CustomValidationAttributes
                 return false;
             }
 
-            //return base.IsValid(value);
             return true;
         }
 

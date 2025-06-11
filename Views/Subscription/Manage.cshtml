@@ -1,0 +1,71 @@
+﻿@model FrontendHelper.Models.SubscriptionViewModel
+
+@{
+    ViewData["Title"] = "Управление Premium";
+}
+
+<div class="form-container">
+    @if (TempData["Msg"] is string m)
+    {
+        <div class="alert alert-success">@m</div>
+    }
+
+    <div class="form-card shadow-sm p-4 mx-auto" style="max-width:420px;">
+        @if (Model.IsPremium)
+        {
+            <h2 class="card-title text-center mb-4">У вас активна Премиум-подписка 🎉</h2>
+            <form asp-action="Cancel" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger w-100">Отменить подписку</button>
+            </form>
+        }
+        else
+        {
+            <h2 class="card-title text-center mb-4">Купить Премиум-подписку</h2>
+            <form asp-action="Buy" method="post" class="generic-form">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Purchase.CardNumber" class="form-label">Номер карты</label>
+                    <input asp-for="Purchase.CardNumber"
+                           class="form-control"
+                           maxlength="19"
+                           pattern="\d{13,19}"
+                           placeholder="0000 0000 0000 0000"
+                           title="Введите 13–19 цифр" />
+                    <span asp-validation-for="Purchase.CardNumber" class="text-danger"></span>
+                </div>
+
+                <div class="row gx-2 mb-3">
+                    <div class="col">
+                        <label asp-for="Purchase.Expiry" class="form-label">ММ/ГГ</label>
+                        <input asp-for="Purchase.Expiry"
+                               class="form-control"
+                               maxlength="5"
+                               pattern="(0[1-9]|1[0-2])\/\d\d"
+                               placeholder="MM/YY"
+                               title="Формат MM/YY" />
+                        <span asp-validation-for="Purchase.Expiry" class="text-danger"></span>
+                    </div>
+                    <div class="col">
+                        <label asp-for="Purchase.Cvv" class="form-label">CVV</label>
+                        <input asp-for="Purchase.Cvv"
+                               class="form-control"
+                               maxlength="4"
+                               pattern="\d{3,4}"
+                               placeholder="123"
+                               title="3–4 цифры" />
+                        <span asp-validation-for="Purchase.Cvv" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Оплатить 0 BYN/мес</button>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
