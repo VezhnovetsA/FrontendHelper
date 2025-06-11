@@ -15,7 +15,6 @@ namespace FrontendHelper.Models
         [MaxLength(200)]
         public string Topic { get; set; }
 
-        // Имя уже существующего файла – обязательно должно отправляться назад
         public string ExistingImg { get; set; }
 
         public IFormFile? ImgFile { get; set; }

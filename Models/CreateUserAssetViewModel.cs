@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace FrontendHelper.Models
 {
-    /// <summary>
-    /// Модель для формы загрузки собственного ресурса пользователем.
-    /// </summary>
+
     public class CreateUserAssetViewModel
     {
         [Required]

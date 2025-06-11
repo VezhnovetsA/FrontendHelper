@@ -13,7 +13,7 @@ namespace FrontendHelper.Models
     {
         public int Id { get; set; }
         public string Title { get; set; } = "";
-        public List<string> ColorHexes { get; set; } = new(); // просто список HEX
+        public List<string> ColorHexes { get; set; } = new();
         public List<int> FilterIds { get; set; } = new();
         public bool IsFavorited { get; set; }
     }

@@ -12,7 +12,6 @@
 
         public bool IsFavorited { get; set; }
 
-        // Список Id фильтров, склеенный в CSV (только для JS-логики “фильтры/избранные”)
         public string FilterIdsCsv { get; set; }
     }
 

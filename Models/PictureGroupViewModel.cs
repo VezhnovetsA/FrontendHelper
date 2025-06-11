@@ -1,5 +1,4 @@
-﻿// FrontendHelper/Models/PictureGroupViewModel.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace FrontendHelper.Models
 {

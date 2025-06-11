@@ -32,7 +32,7 @@
             <div class="mb-3">
                 <label class="form-label">Текущий файл</label>
                 <div class="mb-2">
-                    @* Если это GIF, показываем <img>; если видео (mp4/webm) — <video> *@
+
                     @{
                         var ext = System.IO.Path.GetExtension(Model.ExistingImg ?? "").ToLowerInvariant();
                     }
@@ -57,7 +57,6 @@
                 <span asp-validation-for="ImgFile" class="text-danger small"></span>
             </div>
 
-            @* Чекбоксы для выбора существующих фильтров *@
             @if (Model.AvailableFilters.Any())
             {
                 <div class="mb-3">
@@ -79,7 +78,6 @@
                 </div>
             }
 
-            @* Новые фильтры *@
             <div class="mb-3">
                 <label asp-for="NewFilterNames" class="form-label">
                     Новые фильтры (через запятую)

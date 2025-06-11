@@ -1,24 +1,14 @@
-﻿/* -----------------------------------------------
-   Global Layout Styles (layout.css)
-   Охватывает: шапку, навигацию, строка поиска,
-   стили селектора фильтра (назадка offcanvas).
-   ----------------------------------------------- */
-
-/* === Цветовые переменные === */
+﻿
 :root {
-    /* Фоны */
     --bg: #F5F7FA;
     --bg-alt: #FFFFFF;
     --surface: #FFFFFF;
-    /* Тексты */
     --text-primary: #383F51;
     --text-secondary: #7798AB;
-    /* Градиенты */
     --gradient-primary-from: #383F51;
     --gradient-primary-to: #7798AB;
     --gradient-secondary-from: #A6808C;
     --gradient-secondary-to: #EDAFB8;
-    /* Акцент */
     --accent: #94ECBE;
     --accent-hover: #69D8A0;
     --accent-glow: rgba(148, 236, 190, 0.4);
@@ -26,26 +16,21 @@
 }
 
     :root[data-theme="dark"] {
-        /* Темные фоны */
         --bg: #1E1E1E;
         --bg-alt: #2A2A2A;
         --surface: #2E2E2E;
-        /* Тексты */
         --text-primary: #FFFFFF;
         --text-secondary: #7798AB;
-        /* Градиенты */
         --gradient-primary-from: #383F51;
         --gradient-primary-to: #7798AB;
         --gradient-secondary-from: #A6808C;
         --gradient-secondary-to: #EDAFB8;
-        /* Акцент */
         --accent: #94ECBE;
         --accent-hover: #69D8A0;
         --accent-glow: rgba(148, 236, 190, 0.4);
         --font-family: 'Montserrat', sans-serif;
     }
 
-/* === Global Reset & Base === */
 html {
     overflow-y: scroll;
 }
@@ -83,13 +68,11 @@ img {
     display: block;
 }
 
-/* === Логотип === */
 .logo-img {
     max-height: 50px;
     width: auto;
 }
 
-/* === Шапка (Top Navbar) === */
 .top-navbar {
     position: sticky;
     top: 0;
@@ -105,7 +88,6 @@ img {
     align-items: center;
 }
 
-/* Горизонтальная навигация */
 .nav {
     display: flex;
     gap: 1.5rem;
@@ -149,7 +131,6 @@ img {
             border-radius: 1px;
         }
 
-/* Кнопка мобильного меню */
 .mobile-menu-btn {
     background: none;
     border: none;
@@ -164,7 +145,6 @@ img {
         box-shadow: 0 0 15px var(--accent-glow);
     }
 
-/* Мобильная навигация */
 .mobile-nav-links {
     background: var(--surface);
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
@@ -188,7 +168,6 @@ img {
         color: var(--text-primary);
     }
 
-/* Блок с иконками справа */
 .right-icons {
     display: flex;
     align-items: center;
@@ -214,20 +193,17 @@ img {
         box-shadow: 0 0 10px var(--accent-glow);
     }
 
-/* Стили для дропдаунов профиля */
 .dropdown-glow {
     background: rgba(255,255,255,0.6);
     backdrop-filter: blur(5px);
     border-radius: 8px;
 }
 
-/* Offcanvas Profile */
 .offcanvas-glow {
     background: rgba(255,255,255,0.4);
     backdrop-filter: blur(10px);
 }
 
-/* Ссылки в offcanvas */
 .offcanvas-body a {
     color: var(--text-primary);
     display: block;
@@ -255,21 +231,16 @@ img {
     transform: scale(1.05);
 }
 
-/* Контент */
 .content-wrapper {
     flex: 1 0 auto;
     padding-top: 1rem;
 }
 
-/* === Search Bar & Filter Styles === */
-
-/* .search-form — контейнер вокруг <form>, оставляем padding, margin  */
 .search-form {
     padding: 0 1rem;
     margin-bottom: 1rem;
 }
 
-    /* Делаем сам <form> flex-разметкой: поле ввода + селектор + кнопка */
     .search-form form {
         display: flex;
         align-items: center;
@@ -277,16 +248,15 @@ img {
         width: 100%;
     }
 
-/* Расширенная строка поиска: заполнить почти всю ширину */
 .search-input {
-    flex: 1 1 auto; /* Поле занимает всё доступное место */
+    flex: 1 1 auto;
     padding: 0.75rem 1rem 0.75rem 1.5rem;
     border-radius: 999px;
     border: none;
     background: var(--surface);
     font-size: 1rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    max-width: none; /* Убираем ограничение */
+    max-width: none;
 }
 
     .search-input:focus {
@@ -294,13 +264,11 @@ img {
         box-shadow: 0 2px 5px rgba(0,0,0,0.08) !important;
     }
 
-/* В темной теме поле остаётся светлым */
 :root[data-theme="dark"] .search-input {
     background: #FFFFFF;
     color: var(--text-primary);
 }
 
-/* Стили кнопки «Найти» */
 button.btn-glow {
     padding: 0.75rem 2rem;
     font-size: 0.9rem;
@@ -324,13 +292,8 @@ button.btn-glow {
         box-shadow: 0 0 0 4px var(--accent), 0 0 15px var(--accent-glow) !important;
     }
 
-/* === Селектор фильтра (Type Filter) === */
-/* Делаем <select> похожим на offcanvas-панель:
-   белый фон, размытие, glow, скругление */
-
-/* Убираем дефолтную стрелку и стилизуем «пилл» */
 .search-form .form-select {
-    flex: 0 0 180px; /* Фиксированная ширина */
+    flex: 0 0 180px; 
     padding: 0.5rem 1rem;
     border-radius: 999px;
     border: none;
@@ -338,7 +301,7 @@ button.btn-glow {
     color: var(--text-primary);
     font-size: 1rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    appearance: none; /* Убираем стандартную стрелку */
+    appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='14' height='8' viewBox='0 0 14 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%237798AB' stroke-width='2'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
@@ -354,20 +317,16 @@ button.btn-glow {
         outline: none !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 6px var(--accent-glow);
     }
-
-    /* Скрыть стрелку в Firefox */
     .search-form .form-select::-ms-expand {
         display: none;
     }
 
-    /* Стили для опций (выпадающего списка) */
     .search-form .form-select option {
         background: var(--surface);
         color: var(--text-primary);
         padding: 0.5rem 1rem;
     }
 
-/* === Theme Toggle Icon Styles === */
 .theme-toggle {
     display: inline-flex;
     align-items: center;
@@ -398,13 +357,9 @@ button.btn-glow {
         outline: none !important;
     }
 
-/* Footer links hover */
 .footer-link:hover {
     color: var(--accent-hover);
 }
-
-
-
 
 
 .filter-bar {

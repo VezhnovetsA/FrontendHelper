@@ -32,16 +32,12 @@ namespace FrontendHelper.Controllers
             _fileService = fileService;
         }
 
-        // ========================================
-        // Просмотр всех шрифтов
-        // ========================================
         [HasPermission(Permission.CanViewFonts)]
         public IActionResult ShowFonts()
         {
             var fonts = _fontRepository.GetAssets().ToList();
             var allFilters = _filterRepository.GetFiltersByCategory("Font").ToList();
 
-            // Формируем SelectListItem для панели фильтров
             var filterSelectItems = allFilters
                 .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                 .ToList();
@@ -96,14 +92,10 @@ namespace FrontendHelper.Controllers
             return View(vm);
         }
 
-        // ========================================
-        // Добавление нового шрифта
-        // ========================================
         [HasPermission(Permission.CanManageFonts)]
         [HttpGet]
         public IActionResult AddFont()
         {
-            // Подготовим модель с пустым списком фильтров
             var vm = new CreateFontViewModel
             {
                 AvailableFilters = _filterRepository
@@ -120,7 +112,6 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddFont(CreateFontViewModel viewModel)
         {
-            // Если модель некорректна, вернём её с доступными фильтрами
             if (!ModelState.IsValid)
             {
                 viewModel.AvailableFilters = _filterRepository
@@ -136,7 +127,6 @@ namespace FrontendHelper.Controllers
                 FontFamily = viewModel.FontFamily
             };
 
-            // Обрабатываем внешний Link / файл
             if (!string.IsNullOrEmpty(viewModel.Link))
             {
                 font.Link = viewModel.Link;
@@ -149,10 +139,9 @@ namespace FrontendHelper.Controllers
                 font.LocalFileName = fileName;
             }
 
-            // Сохраняем шрифт
+
             _fontRepository.AddAsset(font);
 
-            // === Обрабатываем существующие фильтры ===
             var toBindFilterIds = viewModel.SelectedFilterIds.Distinct().ToList();
             foreach (var fid in toBindFilterIds)
             {
@@ -164,7 +153,6 @@ namespace FrontendHelper.Controllers
                 });
             }
 
-            // === Обрабатываем новые фильтры (если заданы) ===
             var newNames = (viewModel.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -174,7 +162,6 @@ namespace FrontendHelper.Controllers
 
             foreach (var name in newNames)
             {
-                // Если такой фильтр уже есть — не дублируем
                 var already = _filterRepository
                     .GetFiltersByCategory("Font")
                     .FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
@@ -191,7 +178,6 @@ namespace FrontendHelper.Controllers
                     newFid = newFilter.Id;
                 }
 
-                // В любом случае привяжем к новому шрифту, если ещё не привязано
                 if (!toBindFilterIds.Contains(newFid))
                 {
                     _filterRepository.AddAssetFilter(new AssetFilter
@@ -206,9 +192,6 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowFonts));
         }
 
-        // ========================================
-        // Редактирование шрифта
-        // ========================================
         [HasPermission(Permission.CanManageFonts)]
         [HttpGet]
         public IActionResult EditFont(int id)
@@ -216,7 +199,6 @@ namespace FrontendHelper.Controllers
             var font = _fontRepository.GetAsset(id);
             if (font == null) return NotFound();
 
-            // Собираем ViewModel
             var vm = new EditFontViewModel
             {
                 Id = font.Id,
@@ -226,13 +208,11 @@ namespace FrontendHelper.Controllers
                 ExistingFileName = font.LocalFileName
             };
 
-            // Заполняем список всех фильтров
             vm.AvailableFilters = _filterRepository
                 .GetFiltersByCategory("Font")
                 .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                 .ToList();
 
-            // Помечаем уже привязанные к этому шрифту фильтры
             vm.SelectedFilterIds = _filterRepository
                 .GetFiltersForAsset("Font", id)
                 .Select(f => f.Id)
@@ -248,7 +228,6 @@ namespace FrontendHelper.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Если ошибка валидации, снова подгружаем AvailableFilters
                 viewModel.AvailableFilters = _filterRepository
                     .GetFiltersByCategory("Font")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
@@ -259,7 +238,6 @@ namespace FrontendHelper.Controllers
             var font = _fontRepository.GetAsset(viewModel.Id);
             if (font == null) return NotFound();
 
-            // 1) Обрабатываем внешний Link → сбрасываем старый локальный файл
             if (!string.IsNullOrEmpty(viewModel.Link))
             {
                 if (!string.IsNullOrEmpty(font.LocalFileName))
@@ -270,7 +248,6 @@ namespace FrontendHelper.Controllers
                 font.Link = viewModel.Link;
             }
 
-            // 2) Обрабатываем новый загруженный файл → сбрасываем Link и старый файл
             if (viewModel.FontFile != null)
             {
                 if (!string.IsNullOrEmpty(font.Link))
@@ -283,14 +260,11 @@ namespace FrontendHelper.Controllers
                 font.LocalFileName = newFileName;
             }
 
-            // 3) Обновляем остальные поля
             font.Name = viewModel.Name;
             font.FontFamily = viewModel.FontFamily;
             _fontRepository.UpdateAsset(font);
 
-            // ===== Работа с фильтрами =====
 
-            // 3.1) Удаляем те связи «Font–Filter», которые больше не отмечены
             var currentFilterIds = _filterRepository
                 .GetFiltersForAsset("Font", viewModel.Id)
                 .Select(f => f.Id)
@@ -304,8 +278,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // 3.2) Привязываем выбранные в форме + новые
-            // Сначала обрабатываем новые фильтры из строки
             var newNames = (viewModel.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -332,7 +304,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Собираем окончательный список: выбранные + только что созданные
             var finalFilterIds = viewModel.SelectedFilterIds
                 .Concat(newFilterIds)
                 .Distinct()
@@ -354,9 +325,7 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowFonts));
         }
 
-        // ========================================
-        // Удаление шрифта
-        // ========================================
+
         [HasPermission(Permission.CanManageFonts)]
         [HttpPost]
         [ValidateAntiForgeryToken]

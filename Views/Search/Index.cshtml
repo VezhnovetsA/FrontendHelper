@@ -3,7 +3,6 @@
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    // Русские заголовки для групп
     var typeNames = new Dictionary<string, string>
             {
                 ["Icon"] = "Иконки",
@@ -41,7 +40,6 @@ else
                 <div class="col-sm-6 col-md-4 col-lg-3">
                     <div class="card h-100 shadow-sm position-relative">
 
-                        @* — Preview — *@
                         @switch (item.ResourceType)
                         {
                             case "Icon":
@@ -129,7 +127,6 @@ else
                                 break;
                         }
 
-                        @* — «Лайк» (избранное) *@
                         <button class="favorite-toggle-btn position-absolute top-0 end-0 m-2"
                                 data-asset-type="@item.ResourceType"
                                 data-asset-id="@item.Id"
@@ -151,7 +148,6 @@ else
                             </p>
 
                             <div class="mt-auto d-flex justify-content-between align-items-center">
-                                @* — Download / Copy buttons by type *@
                                 @if (item.ResourceType == "Icon" || item.ResourceType == "Picture")
                                 {
                                     <button class="btn btn-sm btn-outline-primary"
@@ -187,10 +183,7 @@ else
                                         Перейти к шрифтам
                                     </a>
                                 }
-                                @* Палитры ▶︎ копируются по клику свотча *@
 
-                                @* — Edit / Delete inline *@
-                                @* … внутри вашего Index.cshtml, в блоке Inline-редактирования *@
                                 @if (authService.HasPermission(
                                item.ResourceType switch
                                {
@@ -239,13 +232,11 @@ else
 
 @section Scripts {
     <script>
-        // — Helpers —
         function getAntiForgeryToken() {
           const t = document.querySelector('input[name="__RequestVerificationToken"]');
           return t ? t.value : '';
         }
 
-        // Скачиваем image
         function downloadImage(url) {
           const a = document.createElement('a');
           a.href = url;
@@ -255,7 +246,6 @@ else
           a.remove();
         }
 
-        // Копируем image через canvas
         async function copyImageToClipboard(url) {
           try {
             if (!navigator.clipboard) throw 'Clipboard API не поддерживается';
@@ -275,7 +265,6 @@ else
           }
         }
 
-        // Скачиваем анимацию (gif/mp4)
         function downloadAnimation(url) {
           const a = document.createElement('a');
           a.href = url;
@@ -285,7 +274,6 @@ else
           a.remove();
         }
 
-        // Копируем HEX палитры
         function copyColorHex(hex) {
           if (!navigator.clipboard) return alert('Clipboard не поддерживается');
           navigator.clipboard.writeText(hex)
@@ -293,7 +281,6 @@ else
             .catch(e => alert('Ошибка: ' + e));
         }
 
-        // Toggle favorite
         async function toggleFavorite(e, btn) {
           e.stopPropagation();
           const type = btn.dataset.assetType;

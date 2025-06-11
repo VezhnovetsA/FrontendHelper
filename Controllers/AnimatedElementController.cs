@@ -36,10 +36,6 @@ namespace FrontendHelper.Controllers
             _auth_service = authService;
         }
 
-        // ===========================
-        // ПРОСМОТР (CanViewAnimatedElements)
-        // ===========================
-
         [HasPermission(Permission.CanViewAnimatedElements)]
         public IActionResult ShowGroupsOfAnimatedElementsOnTheTopic(int numberOfElements = 8)
         {
@@ -96,9 +92,6 @@ namespace FrontendHelper.Controllers
             return View(vm);
         }
 
-        // ===========================
-        // СОЗДАНИЕ (CanManageAnimatedElements)
-        // ===========================
 
         [HasPermission(Permission.CanManageAnimatedElements)]
         [HttpGet]
@@ -119,7 +112,6 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateAnimatedElement(CreateAnimatedElementViewModel vm)
         {
-            // Проверяем сначала общую валидность модели
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -129,10 +121,8 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // Ручная проверка расширения
             if (vm.ImgFile != null)
             {
-                // допустимые расширения
                 var allowedExt = new[] { ".gif", ".mp4", ".webm" };
                 var ext = Path.GetExtension(vm.ImgFile.FileName).ToLowerInvariant();
                 if (!allowedExt.Contains(ext))
@@ -147,7 +137,6 @@ namespace FrontendHelper.Controllers
             }
             else
             {
-                // Если вдруг vm.ImgFile == null (но атрибут [Required] должен был это перехватить)
                 ModelState.AddModelError(nameof(vm.ImgFile), "Пожалуйста, выберите файл.");
                 vm.AvailableFilters = _filterRepository
                     .GetFiltersByCategory("AnimatedElement")
@@ -156,7 +145,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // Всё валидно, сохраняем файл
             var savedFile = await _fileService.SaveFileAsync(vm.ImgFile, "images/animated-elements");
             var entity = new AnimatedElementData
             {
@@ -166,7 +154,6 @@ namespace FrontendHelper.Controllers
             };
             _animatedElementRepository.AddAsset(entity);
 
-            // Обработка «новых фильтров»
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', System.StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -192,7 +179,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Привязываем все выбранные фильтры (существующие + новые)
             var toBindFilterIds = vm.SelectedFilterIds
                                   .Concat(createdFilterIds)
                                   .Distinct()
@@ -211,9 +197,6 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowAllAnimatedElementsOnTheTopic), new { topic = vm.Topic });
         }
 
-        // ===========================
-        // РЕДАКТИРОВАНИЕ (CanManageAnimatedElements)
-        // ===========================
 
         [HasPermission(Permission.CanManageAnimatedElements)]
         [HttpGet]
@@ -260,7 +243,6 @@ namespace FrontendHelper.Controllers
             var data = _animatedElementRepository.GetAsset(vm.Id);
             if (data == null) return NotFound();
 
-            // Если пользователь загрузил новый файл, проверяем его расширение
             if (vm.ImgFile != null)
             {
                 var allowedExt = new[] { ".gif", ".mp4", ".webm" };
@@ -275,18 +257,15 @@ namespace FrontendHelper.Controllers
                     return View(vm);
                 }
 
-                // Удаляем старый и сохраняем новый
                 _fileService.DeleteFile(data.Img, "images/animated-elements");
                 var newName = await _fileService.SaveFileAsync(vm.ImgFile, "images/animated-elements");
                 data.Img = newName;
             }
-            // иначе: если vm.ImgFile == null, оставляем существующий файл без изменений
 
             data.Name = vm.Name;
             data.Topic = vm.Topic;
             _animatedElementRepository.UpdateAsset(data);
 
-            // Обработка «новых фильтров»
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', System.StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -312,7 +291,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Снимаем старые связи, которые пользователь убрал
             var currentFilterIds = _filterRepository
                 .GetFiltersForAsset("AnimatedElement", vm.Id)
                 .Select(f => f.Id)
@@ -326,7 +304,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Добавляем новые связи
             var finalFilterIds = vm.SelectedFilterIds
                                  .Concat(createdFilterIds)
                                  .Distinct()
@@ -347,10 +324,6 @@ namespace FrontendHelper.Controllers
 
             return RedirectToAction(nameof(ShowAllAnimatedElementsOnTheTopic), new { topic = data.Topic });
         }
-
-        // ===========================
-        // УДАЛЕНИЕ (CanManageAnimatedElements)
-        // ===========================
 
         [HasPermission(Permission.CanManageAnimatedElements)]
         [HttpPost]
@@ -376,9 +349,6 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowAllAnimatedElements));
         }
 
-        // ===========================
-        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        // ===========================
 
         private AnimatedElementViewModel PassDataToViewModel(AnimatedElementData d, int? userId)
         {

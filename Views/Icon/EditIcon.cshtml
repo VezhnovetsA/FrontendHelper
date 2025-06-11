@@ -44,7 +44,6 @@
                 <span asp-validation-for="ImgFile" class="text-danger small"></span>
             </div>
 
-            @* Скопировали блок выбора «существующих фильтров» из CreateIcon *@
             @if (Model.AvailableFilters.Any())
             {
                 <div class="mb-3">
@@ -66,7 +65,6 @@
                 </div>
             }
 
-            @* Поле для новых фильтров *@
             <div class="mb-3">
                 <label asp-for="NewFilterNames" class="form-label">
                     Новые фильтры (через запятую)

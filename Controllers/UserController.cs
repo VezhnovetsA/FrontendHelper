@@ -31,7 +31,7 @@ namespace FrontendHelper.Controllers
         {
             var viewModel = new IndexUserViewModel();
             viewModel.Users = _userRepository
-                  .WithRoles()                 // ← здесь
+                  .WithRoles()  
                   .Select(u => new UserViewModel
                   {
                       Id = u.Id,

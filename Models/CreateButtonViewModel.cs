@@ -13,8 +13,6 @@ namespace FrontendHelper.Models
 
         [Required]
         public IFormFile HtmlFile { get; set; }
-
-        // Новые фильтры, аналогично иконкам:
         public List<int> SelectedFilterIds { get; set; } = new List<int>();
         public List<SelectListItem> AvailableFilters { get; set; } = new List<SelectListItem>();
 

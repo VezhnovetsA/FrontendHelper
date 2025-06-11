@@ -1,11 +1,4 @@
-﻿/* -----------------------------------------------
-   Views-specific Styles (viewStyle.css)
-   Охватывает: карточки результатов, превью шаблонов,
-   кнопок, форм, изображений, шрифтов, палитр, фильтры и т.д.
-   ----------------------------------------------- */
-
-/* === Карточки === */
-.card {
+﻿.card {
     background: var(--surface);
     border: 1px solid transparent;
     border-radius: 12px;
@@ -21,7 +14,7 @@
         border-color: var(--accent);
     }
 
-/* Заголовки карточек */
+
 .card-title {
     margin-bottom: 0.5rem;
     color: var(--text-primary);
@@ -29,7 +22,7 @@
     font-weight: 600;
 }
 
-/* Текст карточек */
+
 .card-text {
     color: var(--text-secondary);
     margin-bottom: 0.5rem;
@@ -39,7 +32,7 @@
         color: var(--text-secondary);
     }
 
-/* === Сетка результатов поиска === */
+
 .row.gx-3 {
     --bs-gutter-x: 1rem;
 }
@@ -61,7 +54,7 @@
         margin-bottom: 1.5rem;
     }
 
-/* === Шаблоны (Template) === */
+
 .template-preview {
     position: relative;
     overflow: hidden;
@@ -70,7 +63,7 @@
 
     .template-preview iframe {
         width: 100%;
-        height: 960px; /* Уменьшено на 1/5 от 1200px */
+        height: 960px;
         border: none;
         background: var(--surface);
         display: block;
@@ -91,14 +84,14 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
 }
 
-/* === Кнопки внутри карточек === */
+
 .card-body .btn {
     font-size: 0.85rem;
     padding: 0.5rem 1rem;
     border-radius: 50px;
     transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
 }
-/* “Скачать” (outline-primary): градиент A6808C → EDAFB8 */
+
 .card-body .btn-outline-primary {
     color: var(--gradient-secondary-from);
     border-color: var(--gradient-secondary-from);
@@ -112,7 +105,7 @@
         transform: scale(1.05);
         border-radius: 50px;
     }
-/* “Копировать” (outline-secondary): градиент 7798AB → 383F51 */
+
 .card-body .btn-outline-secondary {
     color: #7798AB;
     border-color: #7798AB;
@@ -126,7 +119,7 @@
         transform: scale(1.05);
         border-radius: 50px;
     }
-/* “Скачать HTML” (btn-primary): основной градиент и glow */
+
 .card-body .btn-primary {
     background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
     border: none;
@@ -142,7 +135,6 @@
         border-radius: 50px;
     }
 
-/* === Изображения / Иконки / Анимированные === */
 .card-img-top {
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
@@ -162,7 +154,6 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow);
         }
 
-/* === Шрифты (Font) === */
 .font-preview-container {
     height: 150px;
     display: flex;
@@ -182,7 +173,6 @@
         text-decoration: underline var(--accent);
     }
 
-/* === Палитры (Palette) === */
 .palette-grid {
     display: flex;
     flex-wrap: wrap;
@@ -235,7 +225,6 @@
             z-index: 20;
         }
 
-/* === Панель фильтров под строкой поиска === */
 .filter-bar {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(5px);
@@ -283,7 +272,6 @@
         pointer-events: none;
     }
 
-/* === Поисковая строка === */
 :root[data-theme="dark"] .search-input {
     background: #FFFFFF;
     color: #383F51;
@@ -293,7 +281,6 @@
         color: #383F51;
     }
 
-/* === Поддержка тёмной темы === */
 :root[data-theme="dark"] .top-navbar {
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
@@ -341,7 +328,7 @@
             color: var(--surface);
             box-shadow: 0 0 12px var(--accent-glow);
         }
-/* Кнопки внутри карточек: белый текст при hover */
+
 :root[data-theme="dark"] .card-body .btn-outline-secondary:hover {
     background: linear-gradient(90deg, #7798AB, #383F51);
     color: var(--surface);
@@ -364,49 +351,40 @@
     border-radius: 50px;
 }
 
-/* === Модальное окно с иконкой === */
 .modal-body img {
-    margin: 0 auto; /* Центрируем изображение */
+    margin: 0 auto;
     display: block;
 }
 
-/* ===========================================
-   ПРАВКИ ДЛЯ МОДАЛЬНОГО ОКНА
-   =========================================== */
 
-/* Делаем само окно более круглым, с лёгкой полупрозрачностью */
 .modal-content {
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.95); /* чуть полупрозрачный белый фон */
+    background: rgba(255, 255, 255, 0.95);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
     overflow: hidden;
 }
 
-/* В тёмной теме слегка затемняем фон окна и делаем его более контрастным */
 :root[data-theme="dark"] .modal-content {
     background: rgba(30, 30, 30, 0.95);
     box-shadow: 0 6px 20px rgba(255, 255, 255, 0.1);
 }
 
-/* Округляем края у заголовка/футера, чтобы не обрезался общий border-radius */
 .modal-header,
 .modal-footer {
     border: none;
     background: transparent;
 }
 
-/* Центрируем содержимое модального диалога по вертикали */
 .modal-dialog {
     max-width: 500px;
 }
 
-/* Скролл внутри .modal-body, если контент слишком большой */
 .modal-body {
     max-height: 70vh;
     overflow-y: auto;
 }
 
-/* Скрываем дефолтный border у кнопки закрытия, оставляем только красный крестик */
+
 .modal-header .btn-close {
     background: none;
     opacity: 0.7;
@@ -416,10 +394,6 @@
         opacity: 1;
     }
 
-/* ===========================================
-   ГРАДИЕНТНАЯ КНОПКА «Создать иконку»
-   =========================================== */
-/* Заменили градиент на розовый (A6808C → EDAFB8) */
 .btn-create-icon {
     display: inline-block;
     margin-bottom: 1rem;
@@ -442,7 +416,6 @@
         color: #FFF;
     }
 
-/* В тёмной теме чуть затемним розовый градиент */
 :root[data-theme="dark"] .btn-create-icon {
     filter: brightness(0.9);
 }
@@ -451,21 +424,15 @@
         filter: brightness(1.1);
     }
 
-/* ===========================================
-   Повторим стили модального окна из viewStyle.css,
-   чтобы все вместе выглядело единообразно
-   =========================================== */
-
-/* Центрируем изображение внутри модалки (если есть) */
 .modal-body img {
-    margin: 0 auto; /* Центрируем изображение */
+    margin: 0 auto;
     display: block;
     max-width: 100%;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Общий класс для кнопок внутри модалки */
+
 #modalDownloadBtn,
 #modalCopyBtn,
 #modalFavBtn,
@@ -477,7 +444,7 @@
     transition: background 0.2s, transform 0.2s, box-shadow 0.2s, color 0.2s;
 }
 
-/* Градиенты для «Скачать» и «Копировать» */
+
 #modalDownloadBtn {
     background: linear-gradient(90deg, #A6808C, #EDAFB8);
     color: #FFF;
@@ -502,7 +469,7 @@
         box-shadow: 0 0 12px var(--accent-glow);
     }
 
-/* Кнопка «Избранное» (градиент + glow) */
+
 #modalFavBtn {
     background: linear-gradient(90deg, var(--accent), var(--accent-hover));
     color: var(--surface);
@@ -515,7 +482,7 @@
         box-shadow: 0 0 12px var(--accent-glow);
     }
 
-/* Кнопки «Редактировать» / «Удалить» (градиенты + glow) */
+
 #modalEditBtn {
     background: linear-gradient(90deg, #FFD966, #FFC000);
     color: #000;
@@ -540,7 +507,7 @@
         box-shadow: 0 0 12px var(--accent-glow);
     }
 
-/* Тёмная тема: корректируем фон и тень у кнопок модалки */
+
 :root[data-theme="dark"] #modalDownloadBtn,
 :root[data-theme="dark"] #modalCopyBtn,
 :root[data-theme="dark"] #modalFavBtn,
@@ -557,7 +524,7 @@
         filter: brightness(1.1);
     }
 
-/* Иконка внутри кнопок модалки */
+
 #modalDownloadBtn i,
 #modalCopyBtn i,
 #modalFavBtn i,
@@ -567,20 +534,12 @@
     font-size: 1rem;
 }
 
-/* Устанавливаем минимальную ширину для «Редактировать» и «Удалить» */
+
 #modalEditBtn,
 #modalDeleteForm .btn {
     min-width: 120px;
 }
 
-
-
-
-
-
-/* ===========================================
-   Стиль кнопки “Смотреть все” / “Назад”
-   =========================================== */
 
 .btn-view-all {
     display: inline-block;
@@ -592,7 +551,6 @@
     background: transparent;
     text-decoration: none;
     transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
-    /* Чтобы ровно совпадать с .card-body .btn-outline-primary */
 }
 
     .btn-view-all:hover {
@@ -602,7 +560,6 @@
         transform: scale(1.05);
     }
 
-/* Тёмная тема: рамка и текст аккуратно подсвечиваются */
 :root[data-theme="dark"] .btn-view-all {
     color: var(--gradient-secondary-from);
     border-color: var(--gradient-secondary-from);
@@ -613,12 +570,6 @@
     }
 
 
-
-
-/* ===============================
-   Правки для универсальной формы
-   =============================== */
-
 .form-container {
     max-width: 600px;
     margin: 0 auto;
@@ -628,47 +579,40 @@
 .form-card {
     border-radius: 12px;
     background: var(--surface);
-    transition: box-shadow 0.2s; /* transform здесь не нужен */
+    transition: box-shadow 0.2s;
 }
 
-    /* Полностью отключаем «прыжок» и подсветку */
     .form-card:hover {
         transform: none !important;
         box-shadow: none !important;
     }
 
-/* Превью текущего загруженного изображения */
 .existing-preview {
     max-height: 150px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Стили для самой формы */
 .generic-form .form-control {
     border-radius: 20px;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-    /* Мягкая подсветка поля при наведении */
     .generic-form .form-control:hover {
         border-color: var(--accent);
         box-shadow: 0 0 6px var(--accent-glow);
     }
 
-    /* Поля ввода при фокусе */
     .generic-form .form-control:focus {
         border-color: var(--accent);
         box-shadow: 0 0 8px var(--accent-glow);
     }
 
-/* Метки полей */
 .generic-form .form-label {
     font-weight: 500;
     color: var(--text-primary);
 }
 
-/* Стиль кнопок «Сохранить» / «Отмена» */
 .generic-form .btn-primary {
     background: linear-gradient(90deg, var(--gradient-primary-from), var(--gradient-primary-to));
     border: none;
@@ -702,9 +646,6 @@
         box-shadow: 0 0 12px var(--accent-glow);
     }
 
-/* =====================================
-   Стилизация чекбоксов (галочек) сайта
-   ===================================== */
 .generic-form .form-check-input {
     width: 1.25rem;
     height: 1.25rem;
@@ -723,7 +664,6 @@
         border-color: var(--accent);
     }
 
-/* В тёмной теме корректируем фон карточки и превью */
 :root[data-theme="dark"] .form-card {
     background: rgba(30, 30, 30, 0.95);
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
@@ -733,7 +673,6 @@
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
 }
 
-/* Тёмная тема для чекбоксов */
 :root[data-theme="dark"] .generic-form .form-check-input {
     border-color: var(--text-secondary);
 }
@@ -743,16 +682,6 @@
         border-color: var(--accent);
     }
 
-
-
-/* ==============================================
-   Дополнительные правки для страницы “Шрифты” (КОМПАКТНЫЙ ВАРИАНТ)
-   ============================================== */
-
-/* 1) Стилизация поля textarea (предпросмотр):
-   - Немного уменьшили скруглённые углы и внутренний отступ
-   - Убрали синий outline при фокусе
-   ============================================== */
 #inputText {
     border-radius: 8px;
     padding: 0.5rem;
@@ -766,7 +695,6 @@
         box-shadow: 0 0 6px var(--accent-glow);
     }
 
-/* Тёмная тема для textarea */
 :root[data-theme="dark"] #inputText {
     background: rgba(30, 30, 30, 0.9);
     color: var(--surface);
@@ -778,33 +706,25 @@
         box-shadow: 0 0 6px var(--accent-glow);
     }
 
-/* ==============================================
-   2) Hover/Active-эффекты для строк таблицы
-   ============================================== */
 
-/* При наведении на строку: приглушённый фон */
 .font-row:hover {
     background: var(--bg-alt);
 }
 
-/* При клике/зажатии: более “тёплый” фон */
 .font-row:active {
     background: var(--accent-bg);
 }
 
-/* Выбранная строка: accent-фон и accent-цвет текста */
 .font-row.selected {
     background: var(--accent-bg);
     border-left: 3px solid var(--accent);
 }
 
-    /* Цвет названия в выбранной строке делаем акцентным */
     .font-row.selected td:nth-child(2) {
         color: var(--accent);
         font-weight: 600;
     }
 
-/* Тёмная тема: корректируем стили hover/selected */
 :root[data-theme="dark"] .font-row:hover {
     background: rgba(255, 255, 255, 0.04);
 }
@@ -822,17 +742,11 @@
         color: var(--accent);
     }
 
-/* ==============================================
-   3) Убираем outline/box-shadow у кнопки “сердечко”
-   ============================================== */
 .favorite-toggle-btn:focus {
     outline: none !important;
     box-shadow: none !important;
 }
 
-/* ==============================================
-   4) Уменьшаем отступы и скругления в таблице
-   ============================================== */
 .table tbody tr {
     border-radius: 6px;
     margin-bottom: 0.4rem;
@@ -843,14 +757,12 @@
     border-spacing: 0 0.4rem;
 }
 
-    /* Заголовки столбцов: уменьшили padding и шрифт */
     .table thead th {
         padding: 0.6rem 0.8rem;
         font-size: 0.9rem;
         font-weight: 600;
     }
 
-    /* Ячейки строк: уменьшили padding, шрифт и скругление фона */
     .table tbody td {
         border: none;
         padding: 0.6rem 0.8rem;
@@ -860,21 +772,16 @@
         font-size: 0.9rem;
     }
 
-/* Тёмная тема для ячеек */
 :root[data-theme="dark"] .table tbody td {
     background: rgba(30, 30, 30, 0.9);
 }
 
-/* ==============================================
-   5) Уменьшаем высоту прокручиваемой области таблицы
-   ============================================== */
 .font-table-wrapper {
-    max-height: 20vh; /* компактнее */
+    max-height: 20vh;
     overflow-y: auto;
     padding: 0.4rem;
 }
 
-    /* Стилизуем скроллбар */
     .font-table-wrapper::-webkit-scrollbar {
         width: 6px;
     }
@@ -884,23 +791,15 @@
         border-radius: 3px;
     }
 
-/* ==============================================
-   6) Скрываем “белую” область под .sticky-top в темной теме
-   ============================================== */
+
 :root[data-theme="dark"] .sticky-top {
     background: var(--surface);
 }
 
-/* ================================
-   Дополнительно для тёмной темы
-   ================================ */
-
-/* 1) Фон фиксированной верхней панели */
 :root[data-theme="dark"] .sticky-top {
     background: var(--surface) !important;
 }
 
-/* 2) В тёмной теме делаем текст во всех ячейках таблицы белым */
 :root[data-theme="dark"] .table thead th,
 :root[data-theme="dark"] .table tbody td,
 :root[data-theme="dark"] .font-row td,
@@ -908,41 +807,34 @@
     color: #FFF;
 }
 
-/* 3) В тёмной теме делаем фон фильтров и поля предпросмотра тёмным */
 :root[data-theme="dark"] .filter-bar,
 :root[data-theme="dark"] #inputText {
     background: rgba(30, 30, 30, 0.85);
 }
 
-/* 4) Фон “карточки” (контейнера таблицы) тоже тёмный */
 :root[data-theme="dark"] .card {
     background: rgba(30, 30, 30, 0.9);
 }
 
-/* 5) Корректируем фон заголовков таблицы (thead) и цвет */
 :root[data-theme="dark"] .table thead th {
     background: rgba(30, 30, 30, 0.9);
     color: var(--text-secondary);
     border-bottom-color: var(--text-secondary);
 }
 
-/* 6) Если где-то остался белый фон у .sticky-top — пусть станет тёмным */
 :root[data-theme="dark"] .sticky-top.bg-white {
     background: var(--surface) !important;
 }
 
-/* 7) Убираем “белые” промежутки между строками */
 :root[data-theme="dark"] .table tbody tr td {
     background: rgba(30, 30, 30, 0.9);
 }
 
-/* 8) В тёмной теме делаем текст лейблов и placeholder белым */
 :root[data-theme="dark"] .form-label,
 :root[data-theme="dark"] #inputText::placeholder {
     color: #DDD;
 }
 
-/* 9) Скрываем контрастные белые обводки кнопок и ссылок */
 :root[data-theme="dark"] .btn-create-icon,
 :root[data-theme="dark"] .btn-outline-primary,
 :root[data-theme="dark"] .btn-outline-secondary,
@@ -950,9 +842,7 @@
     filter: brightness(0.9);
 }
 
-/* ==============================================
-   7) Скругляем углы у .sticky-top (верхней панели)
-   ============================================== */
+
 .sticky-top.bg-white {
     border-radius: 8px;
 }
@@ -962,21 +852,15 @@
     border-radius: 8px;
 }
 
-/* ==============================================
-   8) Новый блок для чек-боксов в формах (компактнее)
-   ============================================== */
-
-/* Контейнер для списка чек-боксов в форме */
 .filter-list {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
 }
 
-    /* Чек-боксы внутри .filter-list становятся видимыми */
     .filter-list .form-check-input {
-        position: static !important; /* отменяем absolute */
-        opacity: 1 !important; /* отменяем opacity:0 */
+        position: static !important;
+        opacity: 1 !important;
         pointer-events: auto !important;
         width: 1rem;
         height: 1rem;
@@ -984,7 +868,6 @@
         vertical-align: middle;
     }
 
-    /* Отступы и выравнивание у label внутри .filter-list */
     .filter-list .form-check-label {
         cursor: pointer;
         user-select: none;
@@ -992,7 +875,6 @@
         font-size: 0.9rem;
     }
 
-    /* Выравнивание блока .form-check */
     .filter-list .form-check {
         margin: 0;
         display: flex;
@@ -1000,110 +882,83 @@
         font-size: 0.9rem;
     }
 
-/* Тёмная тема: чуть приглушаем чек-боксы */
+
 :root[data-theme="dark"] .filter-list .form-check-input {
     filter: brightness(0.9);
 }
 
-
-/* ==============================================
-   Уточнённые правки для “Шрифты”: уменьшаем высоту верхней панели
-   ============================================== */
-
-/* 1) Уменьшаем отступы у .sticky-top (верхней панели) */
 .sticky-top {
-    padding-top: 0.5rem; /* вместо ранее более крупных отступов */
+    padding-top: 0.5rem;
     padding-bottom: 0.5rem;
-    margin-bottom: 0.5rem; /* чуть меньше отступ вниз */
+    margin-bottom: 0.5rem;
 }
 
-    /* 2) Сокращаем промежутки внутри кнопки “Добавить шрифт” */
     .sticky-top .btn-create-icon {
-        padding: 0.4rem 1rem; /* чуть меньше по вертикали */
-        font-size: 0.95rem; /* чуть уменьшили текст */
-        margin-bottom: 0.5rem; /* сокращаем отступ от следующего элемента */
+        padding: 0.4rem 1rem;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
     }
 
-    /* 3) Компактнее label и textarea в верхней панели */
     .sticky-top .form-label {
         font-size: 0.9rem;
-        margin-bottom: 0.25rem; /* менее “воздуха” между label и textarea */
+        margin-bottom: 0.25rem;
     }
 
 #inputText {
-    margin-bottom: 0.5rem; /* сократили пространство под textarea */
-    font-size: 0.9rem; /* чуть меньше шрифт */
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
 }
 
-/* 4) Сжали панель фильтров: уменьшаем padding и gap */
 .filter-bar {
-    padding: 0.3rem 0.6rem; /* поменьше вокруг чекбоксов */
-    gap: 0.4rem; /* более плотная сетка */
-    margin-bottom: 0; /* устраняем лишний отступ */
+    padding: 0.3rem 0.6rem;
+    gap: 0.4rem;
+    margin-bottom: 0;
 }
 
     .filter-bar .form-check-label {
-        font-size: 0.85rem; /* чуть компактнее текст */
-        padding: 0.3rem 0.6rem; /* сокращаем внутренний отступ */
+        font-size: 0.85rem;
+        padding: 0.3rem 0.6rem;
     }
 
-/* 5) Убираем лишний margin у .sticky-top.bg-white в тёмной теме */
 :root[data-theme="dark"] .sticky-top.bg-white {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     margin-bottom: 0.5rem;
 }
 
-/* 6) Компактнее иконка “сердечко” в .sticky-top */
 .sticky-top .favorite-toggle-btn {
-    margin-right: 0.2rem; /* если она когда-то использовалась там */
+    margin-right: 0.2rem;
 }
 
-/* 7) Сводим к минимуму любые дополнительные пустоты */
 .sticky-top h2 {
-    margin-bottom: 0.4rem; /* сокращаем заголовок “Шрифты” */
-    font-size: 1.3rem; /* чуть меньше размер заголовка */
+    margin-bottom: 0.4rem;
+    font-size: 1.3rem;
 }
 
-/* 8) Дополнительно: минимальный отступ для контейнера .container сверху */
 .container.py-4 {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
 }
 
-/* ==============================================
-   Сводные компактные стили остаются прежними
-   (остальная часть – без изменений, как в предыдущем ответе)
-   ============================================== */
 
-/* ============================================
-   1) Стили для «подсвеченного» фильтра через :checked + label
-   ============================================ */
 .filter-checkbox {
-    /* Скрываем стандартное чекбокс-окружение (можно кастомизировать) */
     position: absolute;
     opacity: 0;
     pointer-events: none;
 }
 
-    /* Если чекбокс отмечен — делаем лейбл «активным» */
     .filter-checkbox:checked + .filter-label {
         background: var(--accent);
         color: var(--surface);
         box-shadow: 0 0 8px var(--accent-glow);
     }
 
-        /* Чтобы при наведении цвет не перекрывал «чекнутые» фильтры */
         .filter-checkbox:checked + .filter-label:hover {
             background: var(--accent-hover);
             box-shadow: 0 0 10px var(--accent-glow);
         }
 
-/* При этом сам .filter-label до проверки :checked можно оставить в исходном виде:
-   (например у вас уже есть .filter-label { background: var(--bg-alt); ... } ) */
 
-
-/* Добавь в конец viewStyle.css */
 .btn-outline-secondary {
     color: #7798AB;
     border-color: #7798AB;
@@ -1131,36 +986,25 @@
     }
 
 
-
-/* ===========================================
-   Исправляем стиль “сердечка” и любых .favorite-toggle-btn
-   =========================================== */
 .favorite-toggle-btn {
-    /* убираем стандартные паддинги/границы */
+
     background: transparent !important;
     border: none !important;
     padding: 0.25rem !important;
-    /* делаем круглой область кнопки */
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 50% !important;
-    /* чуть больше курсора */
     cursor: pointer;
 }
 
     .favorite-toggle-btn i {
-        font-size: 1.2rem; /* увеличиваем иконку */
-        line-height: 1; /* убираем смещение */
-        /* чтобы не оставалось «квадрата» при hover */
+        font-size: 1.2rem;
+        line-height: 1;
         background: transparent !important;
         box-shadow: none !important;
     }
 
-/* ===========================================
-   Гарантированное скругление любых .btn-outline-secondary
-   и .btn-outline-primary (в том числе редактирующих)
-   =========================================== */
 .btn-outline-secondary,
 .btn-outline-primary,
 .btn-outline-danger,
@@ -1168,23 +1012,16 @@
     border-radius: 50px !important;
 }
 
-/* В группах кнопок (btn-group) */
 .btn-group .btn {
     border-radius: 50px !important;
 }
 
-/* Если вдруг остался «половинчатый» border-radius на <a> */
 a.btn-outline-secondary,
 a.btn-outline-primary,
 a.btn-primary {
     border-radius: 50px !important;
 }
 
-/* ===========================================
-   Конец дополнительных стилей
-   =========================================== */
-
-/* Градиентная кнопка “Загрузить ресурс” */
 .btn-create-asset {
     display: inline-flex;
     align-items: center;

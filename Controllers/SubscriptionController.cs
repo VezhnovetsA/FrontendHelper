@@ -26,21 +26,24 @@ public class SubscriptionController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Buy(BuyPremiumViewModel model)
+    public async Task<IActionResult> Buy(SubscriptionViewModel vm)
     {
-        if (!ModelState.IsValid)
-            return View("Manage", new SubscriptionViewModel { IsPremium = false });
 
-        // 1) Обновляем роль в базе
+        if (!ModelState.IsValid)
+        {
+            vm.IsPremium = false;
+            return View("Manage", vm);
+        }
+
         var premiumRole = _roles.ByName("PremiumUser")!;
         _users.UpdateRole(_auth.GetUserId(), premiumRole.Id);
 
-        // 2) Пересоздаём cookie с новыми клеймами
         await ReSignInCurrentUserAsync();
 
         TempData["Msg"] = "Спасибо! Подписка оформлена. С карты ежемесячно будет списываться 0 BYN";
         return RedirectToAction(nameof(Manage));
     }
+
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Cancel()
@@ -54,28 +57,29 @@ public class SubscriptionController : Controller
         return RedirectToAction(nameof(Manage));
     }
 
-    /// <summary>
-    /// Пересоздаёт ClaimsPrincipal в соответствии с текущей ролью пользователя
-    /// </summary>
+
     private async Task ReSignInCurrentUserAsync()
     {
-        // берём из базы пользователя вместе с ролью
+        // Получаем пользователя с ролью из БД
         var user = _users.WithRoles()
                          .First(u => u.Id == _auth.GetUserId());
 
-        // собираем новые клеймы
-        var claims = new List<Claim> {
-            new Claim(AuthService.CLAIM_KEY_ID, user.Id.ToString()),
-            new Claim(AuthService.CLAIM_KEY_NAME, user.UserName),
-            // теперь берём Permission из роли, уже обновлённой
-            new Claim(AuthService.CLAIM_KEY_PERMISSION, ((int?)user.Role?.Permission ?? -1).ToString()),
-            new Claim(ClaimTypes.AuthenticationMethod, AuthService.AUTH_TYPE)
-        };
+        // Собираем клеймы: Id, Name, Permission и Role
+        var claims = new List<Claim>
+    {
+        new Claim(AuthService.CLAIM_KEY_ID, user.Id.ToString()),
+        new Claim(AuthService.CLAIM_KEY_NAME, user.UserName),
+        new Claim(AuthService.CLAIM_KEY_PERMISSION, ((int?)user.Role?.Permission ?? 0).ToString()),
+        new Claim(ClaimTypes.Role, user.Role?.RoleName ?? ""),        // ← здесь добавляем роль
+        new Claim(ClaimTypes.AuthenticationMethod, AuthService.AUTH_TYPE)
+    };
+
         var identity = new ClaimsIdentity(claims, AuthService.AUTH_TYPE);
         var principal = new ClaimsPrincipal(identity);
 
-        // заменяем cookie
+        // Выходим из текущей схемы и сразу же входим обратно в ту же схему
         await HttpContext.SignOutAsync(AuthService.AUTH_TYPE);
-        await HttpContext.SignInAsync(principal);
+        await HttpContext.SignInAsync(AuthService.AUTH_TYPE, principal);
     }
+
 }

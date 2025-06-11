@@ -1,9 +1,7 @@
 ﻿@model FrontendHelper.Models.RolesViewModel
 
 @{
-    // только Admin нельзя менять права
     var saveProtected = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Admin" };
-    // эти роли нельзя удалять
     var deleteProtected = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Admin", "User", "PremiumUser" };
 }
 
@@ -39,7 +37,6 @@
                         }
                     </div>
 
-                    @* Скрываем кнопку «Сохранить» только для Admin *@
                     @if (!saveProtected.Contains(role.Name))
                     {
                         <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
@@ -47,7 +44,6 @@
                 </form>
 
                 <div class="mt-2 text-end">
-                    @* Скрываем кнопку «Удалить» для Admin и User *@
                     @if (!deleteProtected.Contains(role.Name))
                     {
                         <form asp-action="DeleteRole" method="post"

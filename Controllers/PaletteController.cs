@@ -40,12 +40,10 @@ namespace FrontendHelper.Controllers
         {
             var userId = _auth.IsAuthenticated() ? _auth.GetUserId() : (int?)null;
 
-            // 1) Available filters
             var filters = _filterRepo.GetFiltersByCategory("Palette")
                 .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                 .ToList();
 
-            // 2) All palettes
             var palData = _paletteRepo.GetAllPalettes();
             var palVm = palData.Select(p =>
             {
@@ -70,7 +68,6 @@ namespace FrontendHelper.Controllers
             });
         }
 
-        // GET: показать форму создания
 [HasPermission(Permission.CanManagePalettes)]
 [HttpGet]
 public IActionResult CreatePalette()
@@ -88,12 +85,11 @@ public IActionResult CreatePalette()
     return View(vm);
 }
 
-        // POST: сохранить новую палитру
         [HasPermission(Permission.CanManagePalettes)]
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult CreatePalette(CreatePaletteViewModel vm)
         {
-            // 0) чистим пустые NewColors (как сделали) и ModelState по ним
+
             if (vm.NewColors != null)
             {
                 vm.NewColors = vm.NewColors
@@ -103,8 +99,6 @@ public IActionResult CreatePalette()
                     ModelState.Remove(k);
             }
 
-            // 0.1) чистим ModelState по фильтрам и полю NewFilterNames,
-            //     чтобы при return View(vm) чекбоксы и поле заполнялись из vm
             foreach (var k in ModelState.Keys
                          .Where(k =>
                              k == nameof(vm.SelectedFilterIds) ||
@@ -114,7 +108,7 @@ public IActionResult CreatePalette()
             {
                 ModelState.Remove(k);
             }
-            // ————— 0) Убираем пустые NewColors из модели и чистим ModelState —————
+
             if (vm.NewColors != null)
             {
                 vm.NewColors = vm.NewColors
@@ -128,7 +122,6 @@ public IActionResult CreatePalette()
                 }
             }
 
-            // ————— 1) Валидация —————
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepo
@@ -141,11 +134,9 @@ public IActionResult CreatePalette()
                 return View(vm);
             }
 
-            // ————— 2) Создаём новую палитру —————
             var pal = new PaletteData { Title = vm.Title };
             _paletteRepo.AddAsset(pal);
 
-            // ————— 3) Новые цвета —————
             foreach (var hex in vm.NewColors
                                .Select(nc => nc.Hex)
                                .Distinct(StringComparer.OrdinalIgnoreCase))
@@ -161,14 +152,12 @@ public IActionResult CreatePalette()
                 pal.Colors.Add(color);
             }
 
-            // ————— 4) Существующие цвета —————
             foreach (var cid in vm.SelectedColorIds.Distinct())
             {
                 pal.Colors.Add(_colorRepo.GetAsset(cid));
             }
 
-            // ————— 5) Старые + новые фильтры —————
-            // (a) уже выбранные
+
             foreach (var fid in vm.SelectedFilterIds.Distinct())
             {
                 _filterRepo.AddAssetFilter(new AssetFilter
@@ -178,7 +167,7 @@ public IActionResult CreatePalette()
                     FilterId = fid
                 });
             }
-            // (b) новые
+
             foreach (var name in (vm.NewFilterNames ?? "")
                                  .Split(',', StringSplitOptions.RemoveEmptyEntries)
                                  .Select(t => t.Trim())
@@ -199,7 +188,7 @@ public IActionResult CreatePalette()
                 });
             }
 
-            // ————— 6) Сохраняем и чистим «сиротские» цвета —————
+
             _paletteRepo.SaveTracked(pal);
             var orphanColors = _colorRepo.Query()
                 .Include(c => c.Palettes)
@@ -212,18 +201,15 @@ public IActionResult CreatePalette()
 
 
 
-        // PaletteController.cs
-
         [HttpGet]
         public IActionResult EditPalette(int id)
         {
-            var pal = _paletteRepo.GetOnePalette(id); // это tracked-entity
+            var pal = _paletteRepo.GetOnePalette(id);
             if (pal == null) return NotFound();
 
             var existFilterIds = _filterRepo.GetFiltersForAsset("Palette", id)
                                             .Select(f => f.Id).ToList();
 
-            // готовим ViewModel, включая все доступные фильтры
             var vm = new EditPaletteViewModel
             {
                 Id = pal.Id,
@@ -234,8 +220,8 @@ public IActionResult CreatePalette()
                 AvailableFilters = _filterRepo.GetFiltersByCategory("Palette")
                                               .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                                               .ToList(),
-                // подгружаем список всех существующих цветов для чекбоксов
-                AvailableColors = _colorRepo.Query()    // уберите AsNoTracking, чтобы были tracked 
+
+                AvailableColors = _colorRepo.Query()
                                         .Select(c => new SelectListItem(c.Hex, c.Id.ToString()))
                                         .ToList()
             };
@@ -244,7 +230,6 @@ public IActionResult CreatePalette()
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult EditPalette(EditPaletteViewModel vm)
         {
-            // 0) Убираем пустые NewColors и чистим ModelState по ним
             if (vm.NewColors != null)
             {
                 vm.NewColors = vm.NewColors
@@ -256,7 +241,6 @@ public IActionResult CreatePalette()
                     ModelState.Remove(key);
             }
 
-            // 0.1) Чистим ModelState по списковым полям, чтобы форма «увидела» vm.Selected*
             foreach (var key in ModelState.Keys
                          .Where(k => k == "SelectedColorIds"
                                   || k == "SelectedFilterIds"
@@ -266,10 +250,9 @@ public IActionResult CreatePalette()
                 ModelState.Remove(key);
             }
 
-            // 1) Валидация
+
             if (!ModelState.IsValid)
             {
-                // восстанавливаем списки для чекбоксов
                 vm.AvailableFilters = _filterRepo.GetFiltersByCategory("Palette")
                     .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
                     .ToList();
@@ -282,7 +265,6 @@ public IActionResult CreatePalette()
             var pal = _paletteRepo.GetOnePalette(vm.Id);
             pal.Title = vm.Title;
 
-            // =========== цвета ===========
             pal.Colors.Clear();
             foreach (var hex in vm.NewColors
                                .Where(c => !string.IsNullOrWhiteSpace(c.Hex))
@@ -300,7 +282,6 @@ public IActionResult CreatePalette()
             foreach (var cid in vm.SelectedColorIds.Distinct())
                 pal.Colors.Add(_colorRepo.GetAsset(cid));
 
-            // =========== фильтры ===========
             var currentFids = _filterRepo.GetFiltersForAsset("Palette", vm.Id).Select(f => f.Id).ToList();
             foreach (var oldFid in currentFids.Except(vm.SelectedFilterIds))
                 _filterRepo.RemoveAssetFilter("Palette", vm.Id, oldFid);
@@ -342,7 +323,6 @@ public IActionResult CreatePalette()
                 }
             }
 
-            // сохраняем все изменения
             _paletteRepo.SaveTracked(pal);
 
             return RedirectToAction(nameof(ShowPalettes));
@@ -358,7 +338,6 @@ public IActionResult CreatePalette()
             var pal = _paletteRepo.GetOnePalette(id);
             if (pal == null) return NotFound();
 
-            // удаляем связи с фильтрами
             foreach (var f in _filterRepo.GetFiltersForAsset("Palette", id))
                 _filterRepo.RemoveAssetFilter("Palette", id, f.Id);
 

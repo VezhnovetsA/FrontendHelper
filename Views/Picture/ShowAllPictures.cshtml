@@ -8,21 +8,19 @@
 
 <h2 class="mb-4">Все картинки</h2>
 
-@* Кнопка «Группы иконок» (переход обратно) *@
 <div class="mb-4">
     <a class="btn btn-sm btn-outline-primary btn-view-all"
-       asp-controller="Picture"
-       asp-action="ShowGroupsOfPicturesOnTheTopic">
+    asp-controller="Picture"
+    asp-action="ShowGroupsOfPicturesOnTheTopic">
         ← Группы картинок
     </a>
 </div>
 
-@* Кнопка «Загрузить картинку» (если есть права) *@
 @if (authService.HasPermission(Permission.CanManagePictures))
 {
     <a class="btn-create-icon mb-3"
-       asp-controller="Picture"
-       asp-action="CreatePicture">
+    asp-controller="Picture"
+    asp-action="CreatePicture">
         <i class="bi bi-plus-lg"></i> Добавить картинку
     </a>
 }
@@ -33,16 +31,16 @@
         <div class="col-sm-6 col-md-4 col-lg-3">
             <div class="card h-100 shadow-sm position-relative">
                 <img src="@Url.Content($"~/images/pictures/{pic.Img}")"
-                     alt="@pic.Name"
-                     class="card-img-top img-fluid"
-                     style="object-fit: contain; max-height:200px; width:100%; background: var(--bg-alt); padding:0.5rem;"
-                     data-bs-toggle="modal"
-                     data-bs-target="#pictureDetailModal"
-                     data-picture-id="@pic.Id"
-                     data-picture-name="@pic.Name"
-                     data-picture-topic="@pic.Topic"
-                     data-picture-img="@Url.Content($"~/images/pictures/{pic.Img}")"
-                     data-picture-favorited="@(pic.IsFavorited.ToString().ToLower())" />
+                alt="@pic.Name"
+                class="card-img-top img-fluid"
+                style="object-fit: contain; max-height:200px; width:100%; background: var(--bg-alt); padding:0.5rem;"
+                data-bs-toggle="modal"
+                data-bs-target="#pictureDetailModal"
+                data-picture-id="@pic.Id"
+                data-picture-name="@pic.Name"
+                data-picture-topic="@pic.Topic"
+                data-picture-img="@Url.Content($"~/images/pictures/{pic.Img}")"
+                data-picture-favorited="@(pic.IsFavorited.ToString().ToLower())" />
 
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title text-truncate" title="@pic.Name" style="font-size:1.1rem;">
@@ -51,35 +49,34 @@
                     <p class="card-text text-muted small mb-2">Тема: @pic.Topic</p>
                     <div class="mt-auto d-flex justify-content-between align-items-center">
                         <button class="btn btn-sm btn-outline-primary"
-                                onclick="downloadImage('@Url.Content($"~/images/pictures/{pic.Img}")')">
+                        onclick="downloadImage('@Url.Content($"~/images/pictures/{pic.Img}")')">
                             Скачать
                         </button>
                         <button class="btn btn-sm btn-outline-secondary"
-                                onclick="copyImageToClipboard('@Url.Content($"~/images/pictures/{pic.Img}")')">
+                        onclick="copyImageToClipboard('@Url.Content($"~/images/pictures/{pic.Img}")')">
                             Копировать
                         </button>
                     </div>
                 </div>
 
-                <button class="favorite-toggle-btn"
-                        data-asset-type="Picture"
-                        data-asset-id="@pic.Id"
-                        style="position:absolute; top:8px; right:8px; background:none; border:none;">
-                    @if (pic.IsFavorited)
-                    {
-                        <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
-                    }
-                    else
-                    {
-                        <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
-                    }
-                </button>
+                    <button class="favorite-toggle-btn"
+                            data-asset-type="Picture"
+                            data-asset-id="@pic.Id"
+                            style="position:absolute; top:8px; right:8px; background:none; border:none;">
+                        @if (pic.IsFavorited)
+                        {
+                            <i class="bi bi-heart-fill text-danger" title="Убрать из избранного"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-heart text-secondary" title="Добавить в избранное"></i>
+                        }
+                    </button>
             </div>
         </div>
     }
 </div>
 
-@* Модальное окно с детальным просмотром картинки *@
 <div class="modal fade" id="pictureDetailModal" tabindex="-1" aria-labelledby="pictureDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -103,9 +100,9 @@
                     <button id="modalCopyBtn" class="btn btn-outline-secondary me-2">
                         <i class="bi bi-clipboard"></i> Копировать
                     </button>
-                    <button id="modalFavBtn" class="btn btn-outline-danger">
-                        <i id="modalFavIcon" class="bi"></i> Избранное
-                    </button>
+                        <button id="modalFavBtn" class="btn btn-outline-danger">
+                            <i id="modalFavIcon" class="bi"></i> Избранное
+                        </button>
                 </div>
 
                 @if (authService.HasPermission(Permission.CanManagePictures))
@@ -134,7 +131,6 @@
 
 @section Scripts {
     <script>
-        // Скачиваем картинку
         function downloadImage(url) {
             const link = document.createElement('a');
             link.href = url;
@@ -145,31 +141,26 @@
             document.body.removeChild(link);
         }
 
-        // Копируем картинку в буфер обмена (с конвертацией в PNG через canvas)
         async function copyImageToClipboard(url) {
             try {
-                // Загружаем изображение в <img>
                 const img = new Image();
-                img.crossOrigin = "anonymous"; // обязательно, чтобы избежать tainted canvas
+                img.crossOrigin = "anonymous";
                 img.src = url;
                 await new Promise((resolve, reject) => {
                     img.onload = () => resolve();
                     img.onerror = () => reject(new Error("Не удалось загрузить изображение"));
                 });
 
-                // Рисуем его на canvas
                 const canvas = document.createElement('canvas');
                 canvas.width  = img.naturalWidth;
                 canvas.height = img.naturalHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0);
 
-                // Получаем Blob в формате PNG
                 const blob = await new Promise(resolve => {
                     canvas.toBlob(resolve, "image/png");
                 });
 
-                // Записываем в буфер обмена
                 if (!navigator.clipboard) {
                     alert('Clipboard API не поддерживается этим браузером.');
                     return;
@@ -181,13 +172,11 @@
             }
         }
 
-        // Получаем антифальсификационный токен (если нужен для других AJAX-запросов)
         function getAntiForgeryToken() {
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
             return tokenInput ? tokenInput.value : '';
         }
 
-        // Toggle «Избранное» для карточки
         document.querySelectorAll('.favorite-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const assetType = this.dataset.assetType;
@@ -219,7 +208,6 @@
             });
         });
 
-        // Обработка открытия модального окна
         const pictureDetailModal = document.getElementById('pictureDetailModal');
         pictureDetailModal.addEventListener('show.bs.modal', function (event) {
             const triggerEl = event.relatedTarget;
@@ -228,7 +216,6 @@
             const topic     = triggerEl.dataset.pictureTopic;
             const imgUrl    = triggerEl.dataset.pictureImg;
 
-            // Считываем текущее состояние «Избранного»
             const cardIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${picId}"] i`);
             const isFavCard = cardIcon && cardIcon.classList.contains('bi-heart-fill');
 
@@ -263,7 +250,6 @@
                     if (!response.ok) throw new Error('Сетевая ошибка');
                     const result = await response.json();
 
-                    // Переключаем иконку в модалке
                     if (result.favorited) {
                         favIcon.className = 'bi bi-heart-fill text-danger';
                         favBtn.title      = 'Убрать из избранного';
@@ -272,7 +258,6 @@
                         favBtn.title      = 'Добавить в избранное';
                     }
 
-                    // Переключаем иконку в карточке
                     const cardBtnIcon = document.querySelector(`.favorite-toggle-btn[data-asset-id="${picId}"] i`);
                     if (cardBtnIcon) {
                         if (result.favorited) {
@@ -290,7 +275,6 @@
                 }
             };
 
-        @* Если есть права на редактирование/удаление, настраиваем кнопки: *@
         @if (authService.HasPermission(Permission.CanManagePictures))
         {
             <text>

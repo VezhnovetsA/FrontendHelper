@@ -1,6 +1,6 @@
-﻿// FrontendHelper/Controllers/SearchController.cs
-using FHDatabase.Models;
+﻿using FHDatabase.Models;
 using FHDatabase.Repositories;
+using FhEnums;
 using FrontendHelper.Models;
 using FrontendHelper.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -58,7 +58,7 @@ namespace FrontendHelper.Controllers
             int[]? selectedFilters
         )
         {
-            // 1) Подготовка VM и ViewBag
+
             var vm = new SearchViewModel
             {
                 Query = searchQuery ?? "",
@@ -70,7 +70,6 @@ namespace FrontendHelper.Controllers
                 vm.SelectedFilterIds = selectedFilters.ToList();
             }
 
-            // 2) Загружаем доступные фильтры из БД (если задан тип ресурса)
             if (!string.IsNullOrEmpty(resourceTypeFilter))
             {
                 var filtersFromDb = _filterRepo.GetFiltersByCategory(resourceTypeFilter);
@@ -83,19 +82,16 @@ namespace FrontendHelper.Controllers
                 vm.AvailableFilters = new List<FilterViewModel>();
             }
 
-            // Кладём во ViewBag, чтобы Layout мог отрисовать панель фильтров
             ViewBag.AvailableFilters = vm.AvailableFilters;
             ViewBag.SelectedFilterIds = vm.SelectedFilterIds;
             ViewBag.CurrentQuery = vm.Query;
             ViewBag.CurrentResourceType = vm.ResourceType ?? "";
 
-            // 3) Основной поиск: если есть текст OR выбран хотя бы один фильтр
             if (!string.IsNullOrWhiteSpace(vm.Query) || vm.SelectedFilterIds.Any())
             {
                 var allResults = new List<SearchResultItem>();
 
-                // Иконки
-                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Icon")
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Icon" && _authService.HasPermission(Permission.CanViewIcons))
                 {
                     allResults.AddRange(
                         PerformSearchWithFilters(
@@ -110,8 +106,7 @@ namespace FrontendHelper.Controllers
                     );
                 }
 
-                // Картинки
-                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Picture")
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Picture" && _authService.HasPermission(Permission.CanViewPictures))
                 {
                     allResults.AddRange(
                         PerformSearchWithFilters(
@@ -126,8 +121,7 @@ namespace FrontendHelper.Controllers
                     );
                 }
 
-                // Анимированные
-                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "AnimatedElement")
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "AnimatedElement" && _authService.HasPermission(Permission.CanViewAnimatedElements))
                 {
                     allResults.AddRange(
                         PerformSearchWithFilters(
@@ -142,9 +136,7 @@ namespace FrontendHelper.Controllers
                     );
                 }
 
-                // Кнопки
-                // Кнопки (fix: заполняем и PreviewUrl, и DownloadUrl)
-                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Button")
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Button" && _authService.HasPermission(Permission.CanViewButtons))
                 {
                     allResults.AddRange(
                         PerformSearchWithFilters(
@@ -152,15 +144,14 @@ namespace FrontendHelper.Controllers
                             "Button",
                             b => b.Name,
                             _ => (string?)null,
-                            _ => string.Empty,   // PreviewUrl пока заполним ниже вручную
+                            _ => string.Empty, 
                             vm.Query,
                             vm.SelectedFilterIds
                         )
                         .Select(item =>
                         {
-                            // Возьмём из репозитория сам объект ButtonData, чтобы получить ButtonCode:
+
                             var buttonEntity = _buttonRepo.GetAsset(item.Id);
-                            // Сформируем URL, который будет открыт в iframe:
                             var url = Url.Content($"~/buttons/{buttonEntity.ButtonCode}");
                             item.PreviewUrl = url;
                             item.DownloadUrl = url;
@@ -170,9 +161,7 @@ namespace FrontendHelper.Controllers
                     );
                 }
 
-
-                // Шаблоны
-                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Template")
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Template" && _authService.HasPermission(Permission.CanViewTemplates))
                 {
                     allResults.AddRange(
                         PerformSearchWithFilters(
@@ -186,7 +175,6 @@ namespace FrontendHelper.Controllers
                         )
                         .Select(item =>
                         {
-                            // Заполняем DownloadUrl (имя файла TemplateCode из БД)
                             var tpl = _tplRepo.GetAsset(item.Id);
                             item.PreviewUrl = Url.Content($"~/templates/{tpl.TemplateCode}");
                             item.DownloadUrl = Url.Content($"~/templates/{tpl.TemplateCode}");
@@ -196,8 +184,8 @@ namespace FrontendHelper.Controllers
                     );
                 }
 
-                // Формы
-                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Form")
+
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Form" && _authService.HasPermission(Permission.CanViewForms))
                 {
                     allResults.AddRange(
                         PerformSearchWithFilters(
@@ -211,7 +199,6 @@ namespace FrontendHelper.Controllers
                         )
                         .Select(item =>
                         {
-                            // Заполняем DownloadUrl (имя файла FormCode из БД)
                             var form = _formRepo.GetAsset(item.Id);
                             item.PreviewUrl = Url.Content($"~/forms/{form.FormCode}");
                             item.DownloadUrl = Url.Content($"~/forms/{form.FormCode}");
@@ -221,8 +208,7 @@ namespace FrontendHelper.Controllers
                     );
                 }
 
-                // Шрифты
-                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Font")
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Font" && _authService.HasPermission(Permission.CanViewFonts))
                 {
                     allResults.AddRange(
                         PerformSearchWithFilters(
@@ -236,7 +222,6 @@ namespace FrontendHelper.Controllers
                         )
                         .Select(item =>
                         {
-                            // Заполняем FontFamily (из БД) — чтобы в представлении отобразился пример текста
                             var font = _fontRepo.GetAsset(item.Id);
                             item.FontFamily = font.FontFamily;
                             return item;
@@ -245,8 +230,7 @@ namespace FrontendHelper.Controllers
                     );
                 }
 
-                // Палитры
-                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Palette")
+                if (string.IsNullOrEmpty(resourceTypeFilter) || resourceTypeFilter == "Palette" && _authService.HasPermission(Permission.CanViewPalettes))
                 {
                     allResults.AddRange(
                         PerformSearchWithFilters(
@@ -266,14 +250,12 @@ namespace FrontendHelper.Controllers
                     .ThenBy(r => r.Name)
                     .ToList();
 
-                //  Получаем текущего пользователя
                 int userId = 0;
                 if (_authService.IsAuthenticated())
                 {
                     userId = _authService.GetUserId();
                 }
 
-                //  Проставляем флаг IsFavorited
                 foreach (var item in vm.Results)
                 {
                     item.IsFavorited = (userId > 0)
@@ -281,11 +263,9 @@ namespace FrontendHelper.Controllers
                         : false;
                 }
 
-                // ** 4) После формирования vm.Results, для каждого элемента "Palette" 
-                // загружаем цвета из БД и заполняем PaletteColors **
                 foreach (var item in vm.Results.Where(r => r.ResourceType == "Palette"))
                 {
-                    // Берём саму сущность PaletteData с включённым navigation property Colors
+
                     var paletteEntity = _paletteRepo.GetOnePalette(item.Id);
                     if (paletteEntity != null && paletteEntity.Colors != null)
                     {
@@ -298,19 +278,14 @@ namespace FrontendHelper.Controllers
                         item.PaletteColors = new List<SearchColorViewModel>();
                     }
 
-                    // Также, если надо, можно задать DownloadUrl (например, файл-JSON или какая-то ссылка).
-                    // Мы не делаем ссылку для палитры, т.к. копирование цвета выполняется по клику на свотч.
+
                 }
             }
 
             return View(vm);
         }
 
-        /// <summary>
-        /// Общая функция поиска (по тексту + фильтрам). 
-        /// Если searchQuery пуст, возвращает сразу все записи данного типа, 
-        /// после чего применяется фильтрация по selectedFilterIds.
-        /// </summary>
+ 
         private List<SearchResultItem> PerformSearchWithFilters<TData>(
             BaseRepository<TData> repository,
             string resourceTypeName,
@@ -323,7 +298,7 @@ namespace FrontendHelper.Controllers
         {
             IQueryable<TData> query = repository.Query();
 
-            // 1) Если задан текст поиска → накладываем LIKE; иначе оставляем всю коллекцию
+
             if (!string.IsNullOrWhiteSpace(searchQuery))
             {
                 string likePattern = $"%{searchQuery}%";
@@ -338,7 +313,7 @@ namespace FrontendHelper.Controllers
                 );
             }
 
-            // 2) Если выбраны какие-то фильтры → накладываем условие, что AssetFilter показывает все выбранные фильтры
+
             if (selectedFilterIds != null && selectedFilterIds.Count > 0)
             {
                 query = query.Where(entity =>
@@ -355,17 +330,15 @@ namespace FrontendHelper.Controllers
                 );
             }
 
-            // 3) Проекция в SearchResultItem (дошла очередь ставить PreviewUrl, остальное заполнится позже)
+
             return query
                 .Select(entity => new SearchResultItem
                 {
                     ResourceType = resourceTypeName,
                     Id = entity.Id,
                     Name = nameSelector.Compile()(entity),
-                    // Topic селектируется только для тех сущностей, у кого есть topicSelector
                     Topic = topicSelector != null ? topicSelector.Compile()(entity) : null,
                     PreviewUrl = previewUrlSelector(entity),
-                    // Остальное (DownloadUrl, FontFamily, PaletteColors) будет заполнено уже в Index-процессе
                 })
                 .ToList();
         }

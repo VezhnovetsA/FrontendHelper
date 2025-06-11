@@ -1,5 +1,4 @@
-﻿// FrontendHelper/Controllers/UserAssetsController.cs
-using FHDatabase.Repositories;
+﻿using FHDatabase.Repositories;
 using FrontendHelper.Models;
 using FrontendHelper.Services;
 using FrontendHelper.Services.Interfaces;
@@ -48,7 +47,6 @@ public class UserAssetsController : Controller
     {
         if (!ModelState.IsValid) return View(m);
 
-        // сохраняем файл в wwwroot/uploads
         var filename = await _files.SaveFileAsync(m.File, "uploads");
 
         _assets.AddAsset(new FHDatabase.Models.UserAssetData
@@ -59,6 +57,22 @@ public class UserAssetsController : Controller
             ResourceType = m.ResourceType,
             FilePath = filename
         });
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public IActionResult Delete(int id)
+    {
+        var asset = _assets.GetById(id);
+        if (asset == null || asset.UserId != _auth.GetUserId())
+            return Forbid();
+
+        // удаляем файл из wwwroot/uploads
+        _files.DeleteFile(asset.FilePath, "uploads");
+
+        // удаляем запись
+        _assets.RemoveAsset(id);
+
         return RedirectToAction(nameof(Index));
     }
 }

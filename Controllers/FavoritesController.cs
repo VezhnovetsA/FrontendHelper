@@ -1,6 +1,7 @@
 ﻿using FHDatabase.Repositories;
 using FrontendHelper.Models;
 using FrontendHelper.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,6 +52,9 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Toggle([FromBody] FavoriteToggleModel model)
         {
+
+            if (!_authService.IsAuthenticated())
+                return Unauthorized(); 
 
             var userId = _authService.GetUserId();
 
@@ -191,7 +195,7 @@ namespace FrontendHelper.Controllers
     .Where(f => f.AssetType == "Palette")
     .Select(f => _paletteRepo
         .Query()
-        .Include(p => p.Colors)              // <-- вот это
+        .Include(p => p.Colors) 
         .FirstOrDefault(x => x.Id == f.AssetId))
     .Where(x => x != null)
     .Select(x => new SearchResultItem

@@ -14,16 +14,12 @@ builder.Services
         config.AccessDeniedPath = "/Authentication/AccessDeniedPage";
     });
 
-////подключение к бд
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<FhDbContext>(options =>
     options.UseSqlServer(FhDbContext.CONNECTION_STRING));
 
-// службы мвс
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
-// регистрация репозиториев
 builder.Services.AddScoped<IconRepository>();
 builder.Services.AddScoped<PictureRepository>();
 builder.Services.AddScoped<AnimatedElementRepository>();
@@ -40,22 +36,10 @@ builder.Services.AddScoped<FavoriteRepository>();
 builder.Services.AddScoped<UserAssetRepository>();
 
 
-
-//регистрация сервисов
 builder.Services.AddSingleton<QrCodeService>();
 builder.Services.AddScoped<AuthService>();
-//builder.Services.AddScoped<ITemplateConverter, TemplateConverter>();
 builder.Services.AddScoped<IFileService, FileService>();
-
 builder.Services.AddHttpContextAccessor();
-
-
-//builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-//    .AddEntityFrameworkStores<ApplicationDbContext>()
-//    .AddDefaultTokenProviders();
-
-
-// рейзор для интерфейса авторизации
 builder.Services.AddRazorPages();
 
 
@@ -65,10 +49,6 @@ var app = builder.Build();
 
 FHDatabase.Seed.CheckAndFillWithDefaultEntytiesDatabase(app.Services);
 
-
-
-
-// middleware
 
 if (!app.Environment.IsDevelopment())
 {
@@ -82,10 +62,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 
 app.MapControllerRoute(

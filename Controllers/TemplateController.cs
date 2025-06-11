@@ -1,5 +1,4 @@
-﻿// FrontendHelper/Controllers/TemplateController.cs
-using FHDatabase.Models;
+﻿using FHDatabase.Models;
 using FHDatabase.Repositories;
 using FhEnums;
 using FrontendHelper.Controllers.AuthorizationAttributes;
@@ -37,9 +36,6 @@ namespace FrontendHelper.Controllers
             _authService = authService;
         }
 
-        // ===========================
-        // ПРОСМОТР ВСЕХ ШАБЛОНОВ
-        // ===========================
 
         [HasPermission(Permission.CanViewTemplates)]
         public IActionResult ShowAllTemplates()
@@ -92,9 +88,6 @@ namespace FrontendHelper.Controllers
             return View(vmGroups);
         }
 
-        // ===========================
-        // СОЗДАНИЕ (CanManageTemplates)
-        // ===========================
 
         [HasPermission(Permission.CanManageTemplates)]
         [HttpGet]
@@ -115,7 +108,6 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTemplate(CreateTemplateViewModel vm)
         {
-            // 1) Базовая валидация
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -125,7 +117,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // 2) Проверка дубликата (имя + тема)
             if (_templateRepository.CheckTemplateDuplicate(vm.Name, vm.Topic))
             {
                 ModelState.AddModelError(nameof(vm.Name), "Шаблон с таким именем и темой уже существует.");
@@ -136,7 +127,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // 3) Сохраняем HTML-файл через IFileService
             var savedFileName = await _fileService.SaveFileAsync(vm.HtmlFile, "templates");
 
             var newTemplate = new TemplateData
@@ -147,7 +137,7 @@ namespace FrontendHelper.Controllers
             };
             _templateRepository.AddAsset(newTemplate);
 
-            // 4) Обрабатываем «новые фильтры»
+
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -173,7 +163,7 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // 5) Составляем итоговый список фильтров (чекбоксы + вновь созданные)
+
             var toBindFilterIds = vm.SelectedFilterIds
                                   .Concat(createdFilterIds)
                                   .Distinct()
@@ -189,7 +179,7 @@ namespace FrontendHelper.Controllers
                 });
             }
 
-            // 6) Редирект на ShowAllTemplatesOnTheTopic
+
             return RedirectToAction(
                 actionName: nameof(ShowAllTemplatesOnTheTopic),
                 controllerName: "Template",
@@ -197,9 +187,6 @@ namespace FrontendHelper.Controllers
             );
         }
 
-        // ===========================
-        // РЕДАКТИРОВАНИЕ (CanManageTemplates)
-        // ===========================
 
         [HasPermission(Permission.CanManageTemplates)]
         [HttpGet]
@@ -234,10 +221,8 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditTemplate(EditTemplateViewModel vm)
         {
-            // 1) Убираем из ModelState ExistingCode, чтобы не ругалось
             ModelState.Remove(nameof(vm.ExistingCode));
 
-            // 2) Если модель невалидна — возвращаем AvailableFilters и обратно в форму
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -250,14 +235,11 @@ namespace FrontendHelper.Controllers
             var data = _templateRepository.GetTemplateById(vm.Id);
             if (data == null) return NotFound();
 
-            // 3) Сохраняем старое имя файла, чтобы вернуть в форму в случае ошибки
             vm.ExistingCode = data.TemplateCode;
 
-            // 4) Обновляем Name и Topic
             data.Name = vm.Name;
             data.Topic = vm.Topic;
 
-            // 5) Если пришёл новый файл — проверяем расширение и заменяем
             if (vm.HtmlFile != null)
             {
                 var ext = Path.GetExtension(vm.HtmlFile.FileName)?.ToLowerInvariant();
@@ -271,18 +253,13 @@ namespace FrontendHelper.Controllers
                     return View(vm);
                 }
 
-                // удаляем старый и сохраняем новый через IFileService
                 _fileService.DeleteFile(data.TemplateCode, "templates");
                 var newFileName = await _fileService.SaveFileAsync(vm.HtmlFile, "templates");
                 data.TemplateCode = newFileName;
             }
-            // Если vm.HtmlFile == null, TemplateCode остаётся прежним
 
             _templateRepository.UpdateAsset(data);
 
-            // ============================
-            // Дальше обрабатываем фильтры (аналогично Create)
-            // ============================
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -308,7 +285,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Удаляем связи, которые пользователь снял
             var currentFilterIds = _filterRepository
                 .GetFiltersForAsset("Template", vm.Id)
                 .Select(f => f.Id)
@@ -322,7 +298,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // Собираем итоговый список (выбранные + новые) и добавляем те, которых не было
             var finalFilterIds = vm.SelectedFilterIds
                                  .Concat(createdFilterIds)
                                  .Distinct()
@@ -344,9 +319,7 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowGroupsOfTemplates));
         }
 
-        // ===========================
-        // УДАЛЕНИЕ (CanManageTemplates)
-        // ===========================
+
         [HasPermission(Permission.CanManageTemplates)]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -355,10 +328,8 @@ namespace FrontendHelper.Controllers
             var data = _templateRepository.GetTemplateById(id);
             if (data == null) return NotFound();
 
-            // Удаляем физический файл
             _fileService.DeleteFile(data.TemplateCode, "templates");
 
-            // Снимаем связи с фильтрами
             var filterIds = _filterRepository
                 .GetFiltersForAsset("Template", id)
                 .Select(f => f.Id)
@@ -368,14 +339,10 @@ namespace FrontendHelper.Controllers
                 _filterRepository.RemoveAssetFilter("Template", id, fid);
             }
 
-            // Удаляем запись
             _templateRepository.RemoveAsset(id);
             return RedirectToAction(nameof(ShowGroupsOfTemplates));
         }
 
-        // ===========================
-        // СКАЧАТЬ КОД (CanManageTemplates)
-        // ===========================
         [HasPermission(Permission.CanManageTemplates)]
         [HttpGet]
         public IActionResult DownloadCode(int id)
@@ -390,9 +357,7 @@ namespace FrontendHelper.Controllers
             return File(bytes, "text/html; charset=utf-8", fileName);
         }
 
-        // ===========================
-        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        // ===========================
+
         private TemplateViewModel ToViewModel(TemplateData d, int? userId)
         {
             bool isFav = false;
@@ -403,7 +368,6 @@ namespace FrontendHelper.Controllers
                     .Any(f => f.AssetType == "Template" && f.AssetId == d.Id);
             }
 
-            // Собираем все связанные фильтры и склеиваем в CSV через запятую
             var filterIds = _filterRepository
                 .GetFiltersForAsset("Template", d.Id)
                 .Select(f => f.Id)

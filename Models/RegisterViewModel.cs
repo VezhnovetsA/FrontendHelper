@@ -9,7 +9,7 @@ namespace FrontendHelper.Models
         public string Login { get; set; } = "";
 
         [Required, DataType(DataType.Password)]
-        [StrongPassword]        // ↓ свой атрибут
+        [StrongPassword]
         public string Password { get; set; } = "";
 
         [Compare(nameof(Password)), DataType(DataType.Password)]

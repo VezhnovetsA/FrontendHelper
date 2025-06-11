@@ -35,15 +35,11 @@ namespace FrontendHelper.Controllers
             _authService = authService;
         }
 
-        // ===========================
-        // ПРОСМОТР (CanViewPictures)
-        // ===========================
 
 
         [HasPermission(Permission.CanViewPictures)]
         public IActionResult ShowGroupsOfPicturesOnTheTopic(int numberOfPictures = 8)
         {
-            // получаем список всех тем картинок
             var topics = _pictureRepository
                 .GetPictureTopics()
                 .Where(t => !string.IsNullOrEmpty(t))
@@ -55,7 +51,6 @@ namespace FrontendHelper.Controllers
 
             var vm = topics.Select(topic =>
             {
-                // для каждой темы берём до numberOfPictures картинок
                 var listOfPictures = _pictureRepository
                     .GetAllPicturesByTopic(topic)
                     .OrderBy(p => p.Id)
@@ -102,9 +97,6 @@ namespace FrontendHelper.Controllers
             return View(vms);
         }
 
-        // ===========================
-        // СОЗДАНИЕ (CanManagePictures)
-        // ===========================
 
         [HasPermission(Permission.CanManagePictures)]
         [HttpGet]
@@ -125,7 +117,6 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePicture(CreatePictureViewModel vm)
         {
-            // 1) Общая валидация полей
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -135,7 +126,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // 2) Достаем расширение загруженного файла и проверяем его “вручную”
             var extension = Path.GetExtension(vm.ImgFile.FileName).ToLowerInvariant();
             var allowed = new[] { ".jpg", ".jpeg", ".png" };
             if (!allowed.Contains(extension))
@@ -149,7 +139,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // 3) Сохраняем файл
             var savedFileName = await _fileService.SaveFileAsync(vm.ImgFile, "images/pictures");
             var pictureData = new PictureData
             {
@@ -159,7 +148,6 @@ namespace FrontendHelper.Controllers
             };
             _pictureRepository.AddAsset(pictureData);
 
-            // 4) Обработка новых фильтров (если есть)
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -185,7 +173,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // 5) Собираем все выбранные фильтры (существующие + вновь созданные)
             var toBindFilterIds = vm.SelectedFilterIds
                                   .Concat(createdFilterIds)
                                   .Distinct()
@@ -203,10 +190,6 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowAllPicturesOnTheTopic), new { topic = vm.Topic });
         }
 
-
-        // ===========================
-        // РЕДАКТИРОВАНИЕ (CanManagePictures)
-        // ===========================
 
         [HasPermission(Permission.CanManagePictures)]
         [HttpGet]
@@ -241,7 +224,6 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditPicture(EditPictureViewModel vm)
         {
-            // Если изначально модель не прошла валидацию атрибутами (Name, Topic и т.п.), возвращаем форму
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -251,12 +233,10 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // Получаем сущность из БД
             var data = _pictureRepository.GetAsset(vm.Id);
             if (data == null)
                 return NotFound();
 
-            // Если пользователь загрузил новый файл, проверяем его расширение
             if (vm.ImgFile != null)
             {
                 var extension = Path.GetExtension(vm.ImgFile.FileName).ToLowerInvariant();
@@ -265,7 +245,6 @@ namespace FrontendHelper.Controllers
                 {
                     ModelState.AddModelError(nameof(vm.ImgFile),
                         "Поддерживаются только файлы .jpg, .jpeg, .png");
-                    // Возвращаем AvailableFilters, чтобы форма корректно отобразилась
                     vm.AvailableFilters = _filterRepository
                         .GetFiltersByCategory("Picture")
                         .Select(f => new SelectListItem(f.Name, f.Id.ToString()))
@@ -273,20 +252,16 @@ namespace FrontendHelper.Controllers
                     return View(vm);
                 }
 
-                // Удаляем старый файл и сохраняем новый
                 _fileService.DeleteFile(data.Img, "images/pictures");
                 var newFileName = await _fileService.SaveFileAsync(vm.ImgFile, "images/pictures");
                 data.Img = newFileName;
             }
-            // Если vm.ImgFile == null, оставляем data.Img без изменения
 
-            // Обновляем остальные свойства
             data.Name = vm.Name;
             data.Topic = vm.Topic;
 
             _pictureRepository.UpdateAsset(data);
 
-            // --- Обработка новых фильтров (если есть) ---
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -312,7 +287,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // --- Удаляем связи, которые пользователь снял в чекбоксах ---
             var currentFilterIds = _filterRepository
                 .GetFiltersForAsset("Picture", vm.Id)
                 .Select(f => f.Id)
@@ -326,7 +300,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // --- Добавляем связи для новых и оставшихся отмеченных фильтров ---
             var finalFilterIds = vm.SelectedFilterIds
                                  .Concat(createdFilterIds)
                                  .Distinct()
@@ -349,10 +322,6 @@ namespace FrontendHelper.Controllers
         }
 
 
-        // ===========================
-        // УДАЛЕНИЕ (CanManagePictures)
-        // ===========================
-
         [HasPermission(Permission.CanManagePictures)]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -361,10 +330,8 @@ namespace FrontendHelper.Controllers
             var data = _pictureRepository.GetAsset(id);
             if (data == null) return NotFound();
 
-            // Удаляем сам файл
             _fileService.DeleteFile(data.Img, "images/pictures");
 
-            // Удаляем связи с фильтрами
             var filterIds = _filterRepository
                 .GetFiltersForAsset("Picture", id)
                 .Select(f => f.Id)
@@ -379,9 +346,6 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowGroupsOfPicturesOnTheTopic));
         }
 
-        // ===========================
-        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        // ===========================
 
         private PictureViewModel PassDataToViewModel(PictureData d, int? userId)
         {

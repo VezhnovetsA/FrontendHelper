@@ -3,7 +3,6 @@
 @inject FrontendHelper.Services.AuthService authService
 
 @{
-    // Русские названия для групп по ResourceType, если потребуется
     var typeNames = new Dictionary<string, string>
             {
                 ["Icon"] = "Иконки",
@@ -16,7 +15,6 @@
                 ["Palette"] = "Палитры"
             };
 
-    // Здесь всё в одну группу — либо по типам, если хочется разделить
     var grouped = Model.Items
         .GroupBy(r => r.ResourceType)
         .OrderBy(g => g.Key);
@@ -42,7 +40,6 @@ else
             {
                 <div class="col-sm-6 col-md-4 col-lg-3">
                     <div class="card h-100 shadow-sm position-relative">
-                        @* Превью *@
                         @switch (item.ResourceType)
                         {
                             case "Icon":
@@ -64,7 +61,6 @@ else
                                 break;
                         }
 
-                        @* Кнопка удалить *@
                         <form asp-action="Delete" asp-controller="UserAssets" asp-route-id="@item.Id"
                               method="post" class="position-absolute top-0 end-0 m-2"
                               onsubmit="return confirm('Удалить ресурс «@item.Name»?');">

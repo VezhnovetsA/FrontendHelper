@@ -1,5 +1,4 @@
-﻿// FrontendHelper/Models/PictureViewModel.cs
-namespace FrontendHelper.Models
+﻿namespace FrontendHelper.Models
 {
     public class PictureViewModel
     {

@@ -16,17 +16,15 @@ namespace FrontendHelper.Controllers.AuthorizationAttributes
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            // Получаем AuthService из DI
+
             var authService = context.HttpContext.RequestServices.GetRequiredService<AuthService>();
 
-            // Если пользователь — “admin” (AuthService.IsAdmin()), пропускаем
             if (authService.IsAdmin())
             {
                 base.OnActionExecuting(context);
                 return;
             }
 
-            // Иначе проверяем флаг в токене/клеймах
             if (!authService.HasPermission(_requiredPermission))
             {
                 context.Result = new ForbidResult();

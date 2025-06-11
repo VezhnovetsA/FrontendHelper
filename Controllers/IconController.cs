@@ -35,14 +35,10 @@ namespace FrontendHelper.Controllers
             _authService = authService;
         }
 
-        // ===========================
-        // ПРОСМОТР (CanViewIcons)
-        // ===========================
 
         [HasPermission(Permission.CanViewIcons)]
         public IActionResult ShowAllIcons()
         {
-            // (Не используется в данном запросе, но для единообразия можно сделать так же, как ShowAllIconsOnTheTopic)
             var all = _iconRepository.GetAssets();
             var userId = _authService.IsAuthenticated()
                 ? _authService.GetUserId()
@@ -91,9 +87,7 @@ namespace FrontendHelper.Controllers
             return View(vm);
         }
 
-        // ===========================
-        // СОЗДАНИЕ (CanManageIcons)
-        // ===========================
+
 
         [HasPermission(Permission.CanManageIcons)]
         [HttpGet]
@@ -123,7 +117,6 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // Проверка на дубли...
             if (_iconRepository.CheckIconDuplicate(vm.Name, vm.Topic))
             {
                 ModelState.AddModelError(nameof(vm.Name), "Иконка с таким именем уже существует в этой теме");
@@ -134,12 +127,10 @@ namespace FrontendHelper.Controllers
                 return View(vm);
             }
 
-            // Сохраняем файл
             var savedFileName = await _fileService.SaveFileAsync(vm.ImgFile, "images/icons");
             var newIcon = new IconData { Name = vm.Name, Topic = vm.Topic, Img = savedFileName };
             _iconRepository.AddAsset(newIcon);
 
-            // 1) Найдём все новые имена из vm.NewFilterNames (если строка НЕ пустая)
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -150,7 +141,6 @@ namespace FrontendHelper.Controllers
             var createdFilterIds = new List<int>();
             foreach (var fname in allNewFilterNames)
             {
-                // проверим, нет ли уже такого фильтра
                 var already = _filterRepository
                     .GetFiltersByCategory("Icon")
                     .FirstOrDefault(f => f.Name.Equals(fname, StringComparison.OrdinalIgnoreCase));
@@ -167,7 +157,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // 2) Соберём все фильтры: уже выбранные + только что созданные
             var toBindFilterIds = vm.SelectedFilterIds
                                   .Concat(createdFilterIds)
                                   .Distinct()
@@ -186,10 +175,6 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowAllIconsOnTheTopic), new { topic = vm.Topic });
         }
 
-
-        // ===========================
-        // РЕДАКТИРОВАНИЕ (CanManageIcons)
-        // ===========================
 
         [HasPermission(Permission.CanManageIcons)]
         [HttpGet]
@@ -226,8 +211,7 @@ namespace FrontendHelper.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditIcon(EditIconViewModel vm)
         {
-            // Если модель не прошла валидацию, надо восстановить AvailableFilters
-            // (и ExistingImg уже придёт из скрытого поля)
+
             if (!ModelState.IsValid)
             {
                 vm.AvailableFilters = _filterRepository
@@ -241,24 +225,20 @@ namespace FrontendHelper.Controllers
             if (icon == null)
                 return NotFound();
 
-            // Обновляем Name и Topic
             icon.Name = vm.Name;
             icon.Topic = vm.Topic;
 
-            // Если пришёл новый файл, то заменяем старый
             if (vm.ImgFile != null)
             {
-                // Удаляем физически старый и сохраняем новый
                 _fileService.DeleteFile(icon.Img, "images/icons");
                 var newFileName = await _fileService.SaveFileAsync(vm.ImgFile, "images/icons");
                 icon.Img = newFileName;
             }
-            // Если vm.ImgFile == null, то icon.Img остаётся прежним, а vm.ExistingImg в форме
-            // просто дублирует старое значение.
+
 
             _iconRepository.UpdateAsset(icon);
 
-            // Обработка новых фильтров (как в CreateIcon)
+
             var allNewFilterNames = (vm.NewFilterNames ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
@@ -284,7 +264,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // 1) Удаляем те связи, которые пользователь снял в чекбоксах
             var currentFilterIds = _filterRepository
                 .GetFiltersForAsset("Icon", vm.Id)
                 .Select(f => f.Id)
@@ -298,7 +277,6 @@ namespace FrontendHelper.Controllers
                 }
             }
 
-            // 2) Собираем окончательный список: уже выбранные + вновь созданные
             var finalFilterIds = vm.SelectedFilterIds
                                  .Concat(createdFilterIds)
                                  .Distinct()
@@ -320,11 +298,6 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowAllIconsOnTheTopic), new { topic = icon.Topic });
         }
 
-
-
-        // ===========================
-        // УДАЛЕНИЕ (CanManageIcons)
-        // ===========================
 
         [HasPermission(Permission.CanManageIcons)]
         [HttpPost]
@@ -350,13 +323,7 @@ namespace FrontendHelper.Controllers
             return RedirectToAction(nameof(ShowGroupsOfIconsOnTheTopic));
         }
 
-        // ===========================
-        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-        // ===========================
 
-        /// <summary>
-        /// Конструирует IconViewModel и сразу проставляет флаг IsFavorited для текущего пользователя
-        /// </summary>
         private IconViewModel ToViewModel(IconData d, int? userId)
         {
             bool isFav = false;

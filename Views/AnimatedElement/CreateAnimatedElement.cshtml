@@ -33,7 +33,6 @@
                 <span asp-validation-for="ImgFile" class="text-danger small"></span>
             </div>
 
-            @* Чекбоксы для выбора уже существующих фильтров *@
             @if (Model.AvailableFilters.Any())
             {
                 <div class="mb-3">
@@ -55,7 +54,6 @@
                 </div>
             }
 
-            @* Новые фильтры (через запятую) *@
             <div class="mb-3">
                 <label asp-for="NewFilterNames" class="form-label">
                     Новые фильтры (через запятую)
