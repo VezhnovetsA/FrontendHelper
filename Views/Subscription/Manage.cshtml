@@ -29,9 +29,9 @@
                 <div class="mb-3">
                     <label asp-for="Purchase.CardNumber" class="form-label">Номер карты</label>
                     <input asp-for="Purchase.CardNumber"
+                           id="cardNumberInput"
                            class="form-control"
                            maxlength="19"
-                           pattern="\d{13,19}"
                            placeholder="0000 0000 0000 0000"
                            title="Введите 13–19 цифр" />
                     <span asp-validation-for="Purchase.CardNumber" class="text-danger"></span>
@@ -41,9 +41,9 @@
                     <div class="col">
                         <label asp-for="Purchase.Expiry" class="form-label">ММ/ГГ</label>
                         <input asp-for="Purchase.Expiry"
+                               id="expiryInput"
                                class="form-control"
                                maxlength="5"
-                               pattern="(0[1-9]|1[0-2])\/\d\d"
                                placeholder="MM/YY"
                                title="Формат MM/YY" />
                         <span asp-validation-for="Purchase.Expiry" class="text-danger"></span>
@@ -51,11 +51,11 @@
                     <div class="col">
                         <label asp-for="Purchase.Cvv" class="form-label">CVV</label>
                         <input asp-for="Purchase.Cvv"
+                               id="cvvInput"
                                class="form-control"
-                               maxlength="4"
-                               pattern="\d{3,4}"
+                               maxlength="3"
                                placeholder="123"
-                               title="3–4 цифры" />
+                               title="3 цифры" />
                         <span asp-validation-for="Purchase.Cvv" class="text-danger"></span>
                     </div>
                 </div>
@@ -68,4 +68,29 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardInput = document.getElementById('cardNumberInput');
+            cardInput.addEventListener('input', () => {
+                let v = cardInput.value.replace(/\D/g, '').slice(0, 16);
+                const parts = v.match(/.{1,4}/g);
+                cardInput.value = parts ? parts.join(' ') : v;
+            });
+
+            const expiryInput = document.getElementById('expiryInput');
+            expiryInput.addEventListener('input', () => {
+                let v = expiryInput.value.replace(/\D/g, '').slice(0,4);
+                if (v.length > 2) {
+                    v = v.slice(0,2) + '/' + v.slice(2);
+                }
+                expiryInput.value = v;
+            });
+
+            const cvvInput = document.getElementById('cvvInput');
+            cvvInput.addEventListener('input', () => {
+                cvvInput.value = cvvInput.value.replace(/\D/g, '').slice(0,3);
+            });
+        });
+    </script>
 }

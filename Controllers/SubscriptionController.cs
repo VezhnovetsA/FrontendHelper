@@ -53,31 +53,28 @@ public class SubscriptionController : Controller
 
         await ReSignInCurrentUserAsync();
 
-        TempData["Msg"] = "Подписка отменена, вы снова User.";
+        TempData["Msg"] = "Подписка отменена";
         return RedirectToAction(nameof(Manage));
     }
 
 
     private async Task ReSignInCurrentUserAsync()
     {
-        // Получаем пользователя с ролью из БД
+
         var user = _users.WithRoles()
                          .First(u => u.Id == _auth.GetUserId());
 
-        // Собираем клеймы: Id, Name, Permission и Role
         var claims = new List<Claim>
     {
         new Claim(AuthService.CLAIM_KEY_ID, user.Id.ToString()),
         new Claim(AuthService.CLAIM_KEY_NAME, user.UserName),
         new Claim(AuthService.CLAIM_KEY_PERMISSION, ((int?)user.Role?.Permission ?? 0).ToString()),
-        new Claim(ClaimTypes.Role, user.Role?.RoleName ?? ""),        // ← здесь добавляем роль
+        new Claim(ClaimTypes.Role, user.Role?.RoleName ?? ""), 
         new Claim(ClaimTypes.AuthenticationMethod, AuthService.AUTH_TYPE)
     };
 
         var identity = new ClaimsIdentity(claims, AuthService.AUTH_TYPE);
         var principal = new ClaimsPrincipal(identity);
-
-        // Выходим из текущей схемы и сразу же входим обратно в ту же схему
         await HttpContext.SignOutAsync(AuthService.AUTH_TYPE);
         await HttpContext.SignInAsync(AuthService.AUTH_TYPE, principal);
     }
